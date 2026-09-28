@@ -1,32 +1,27 @@
 ﻿from pathlib import Path
 import os
-
-# 1. Lê o.env MANUALMENTE - sem dotenv, sem frescura
-ENV_PATH = Path(__file__).resolve().parents[2] / ".env"
-
-print(f"[DEBUG] Tentando ler: {ENV_PATH} - existe? {ENV_PATH.exists()}")
-
-if ENV_PATH.exists():
-    text = ENV_PATH.read_text(encoding="utf-8-sig") # utf-8-sig remove BOM do Windows
-    for line in text.splitlines():
-        line = line.strip()
-        if not line or line.startswith("#"):
-            continue
-        if "=" not in line:
-            continue
-        key, val = line.split("=", 1)
-        key = key.strip()
-        val = val.strip().strip('"').strip("'")
-        if key and key not in os.environ:
-            os.environ[key] = val
-            if key == "DATABASE_URL":
-                print(f"[DEBUG] DATABASE_URL carregada: {val[:60]}...")
-
-# 2. Agora importa o resto
 from typing import List
 import json
 from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+ENV_PATH = Path(__file__).resolve().parents[2] / ".env"
+
+# Lê.env só se existir localmente (no Render vem das env vars)
+if ENV_PATH.exists():
+    try:
+        text = ENV_PATH.read_text(encoding="utf-8-sig")
+        for line in text.splitlines():
+            line = line.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            k, v = line.split("=", 1)
+            k = k.strip()
+            v = v.strip().strip('"').strip("'")
+            if k and k not in os.environ:
+                os.environ[k] = v
+    except Exception:
+        pass
 
 class Settings(BaseSettings):
     PORT: int = 10000
@@ -55,7 +50,7 @@ class Settings(BaseSettings):
         if not v:
             v = os.getenv("DATABASE_URL", "")
         if not v:
-            raise ValueError(f"DATABASE_URL vazia mesmo após ler {ENV_PATH}. Conteúdo: {ENV_PATH.read_text()[:100] if ENV_PATH.exists() else 'SEM ARQUIVO'}")
+            raise ValueError(f"DATABASE_URL vazia. Defina no.env ou no Render Dashboard")
         v = v.replace("postgresql+asyncpg://", "postgresql://")
         if "psycopg2" not in v and "postgresql://" in v:
             v = v.replace("postgresql://", "postgresql+psycopg2://", 1)
