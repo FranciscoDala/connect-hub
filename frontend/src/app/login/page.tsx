@@ -43,7 +43,7 @@ export default function Login() {
                 {/* Header igual FT-Xpress */}
                 <div className="relative h-18 px-5 pt-5 flex justify-between items-start bg-blue-50">
                     <div className="w-9 h-9 rounded-full bg-white border shadow-sm flex items-center justify-center overflow-hidden">
-                        <Image src="/logo.png" alt="Connect.ao" width={28} height={28} className="object-contain" />
+                        <Image src="/connect.png" alt="Connect.ao" width={28} height={28} className="object-contain" />
                     </div>
                     <div className="h-7 px-3 rounded-full bg-white border border-blue-200 shadow-sm flex items-center gap-1.5">
                         <div className="w-2 h-2 rounded-full bg-blue-600 animate-pulse" />
