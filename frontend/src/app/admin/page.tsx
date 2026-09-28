@@ -245,19 +245,18 @@ export default function AdminPage() {
                                         <div className="min-w-0 flex-1">
                                             <p className="text-[13.5px] font-semibold line-clamp-2 leading-tight">{p.titulo}</p>
                                             <p className="text-[11px] text-zinc-500 mt-1">{p.tipo} • {new Date(p.created_at).toLocaleDateString()}</p>
-                                            {/* MOBILE: mostra tudo aqui */}
                                             <div className="flex md:hidden flex-wrap items-center gap-1.5 mt-2.5">
                                                 <span className="text-[10px] px-2.5 py-1 rounded-full bg-violet-50 text-violet-700 border border-violet-100 font-medium">{catName}</span>
                                                 <span className={`text-[10px] px-2.5 py-1 rounded-full border font-medium ${p.status === 'published'? 'bg-green-50 text-green-700 border-green-200' : 'bg-zinc-100 text-zinc-600 border-zinc-200'}`}>{p.status}</span>
                                             </div>
-                                            <div className="flex md:hidden flex-wrap items-center gap-1.5 mt-2">
-                                                <span className="flex items-center gap-1 bg-zinc-50 border border-zinc-200 px-2.5 py-1 rounded-full text-[11px]">👁 {views}</span>
-                                                <span className="flex items-center gap-1 bg-zinc-50 border border-zinc-200 px-2.5 py-1 rounded-full text-[11px]">💬 {comments}</span>
-                                                <span className="flex items-center gap-1 bg-zinc-50 border border-zinc-200 px-2.5 py-1 rounded-full text-[11px]">↗ {shares}</span>
+                                            {/* MOBILE: MESMA LARGURA E FULL WIDTH */}
+                                            <div className="grid grid-cols-3 gap-1.5 mt-2.5 md:hidden w-full">
+                                                <span className="flex items-center justify-center gap-1 bg-zinc-50 border border-zinc-200 px-2 py-2.5 rounded-full text-[11px] font-medium w-full">👁 {views}</span>
+                                                <span className="flex items-center justify-center gap-1 bg-zinc-50 border border-zinc-200 px-2 py-2.5 rounded-full text-[11px] font-medium w-full">💬 {comments}</span>
+                                                <span className="flex items-center justify-center gap-1 bg-zinc-50 border border-zinc-200 px-2 py-2.5 rounded-full text-[11px] font-medium w-full">↗ {shares}</span>
                                             </div>
                                         </div>
                                     </div>
-                                    {/* DESKTOP */}
                                     <div className="hidden md:block col-span-2"><span className="text-[11px] px-2.5 py-1 rounded-full bg-violet-50 text-violet-700 border border-violet-100 font-medium">{catName}</span></div>
                                     <div className="hidden md:flex col-span-1"><span className={`text-[10px] px-2.5 py-1 rounded-full border font-medium ${p.status === 'published'? 'bg-green-50 text-green-700 border-green-200' : 'bg-zinc-100 text-zinc-600'}`}>{p.status}</span></div>
                                     <div className="hidden md:flex col-span-2 items-center gap-1.5 text-[11px] text-zinc-600">
@@ -294,8 +293,10 @@ export default function AdminPage() {
                                         <div className="flex md:hidden flex-wrap gap-1.5 mt-2">
                                             <span className="text-[10px] px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-100 font-medium">{POSICOES.find(p => p.value === b.posicao)?.label || b.posicao}</span>
                                             <span className={`text-[10px] px-2.5 py-1 rounded-full border font-medium ${b.ativo? 'bg-green-50 text-green-700 border-green-200' : 'bg-zinc-100'}`}>{b.ativo? 'ATIVO' : 'OFF'}</span>
-                                            <span className="bg-zinc-50 border px-2 py-1 rounded-full text-[11px]">👁 {b.views || 0}</span>
-                                            <span className="bg-zinc-50 border px-2 py-1 rounded-full text-[11px]">↗ {b.clicks || 0}</span>
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-1.5 mt-2 md:hidden w-full">
+                                            <span className="bg-zinc-50 border border-zinc-200 px-2 py-2.5 rounded-full text-[11px] font-medium flex items-center justify-center w-full">👁 {b.views || 0}</span>
+                                            <span className="bg-zinc-50 border border-zinc-200 px-2 py-2.5 rounded-full text-[11px] font-medium flex items-center justify-center w-full">↗ {b.clicks || 0}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -315,11 +316,10 @@ export default function AdminPage() {
                     </div>
                 )}
             </div>
-
             {showPostModal && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={(e) => e.stopPropagation()} />
-                    <div className="relative bg-white rounded-[24px] w-full max-w-[560px] overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.25)] max-h-[90vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
+                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+                    <div className="relative bg-white rounded-[24px] w-full max-w-[560px] overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.25)] max-h-[90vh] flex flex-col">
                         <div className="relative h-[72px] px-5 pt-5 flex justify-between items-start bg-blue-50 shrink-0">
                             <div className="w-9 h-9 rounded-full bg-white border shadow-sm flex items-center justify-center text-sm">📄</div>
                             <button onClick={() => setShowPostModal(false)} className="w-8 h-8 rounded-full bg-white border shadow-sm flex items-center justify-center hover:bg-gray-50">×</button>
@@ -378,11 +378,10 @@ export default function AdminPage() {
                     </div>
                 </div>
             )}
-
             {showCatModal && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={(e) => e.stopPropagation()} />
-                    <div className="relative bg-white rounded-[24px] w-full max-w-[400px] overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.25)] max-h-[90vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
+                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+                    <div className="relative bg-white rounded-[24px] w-full max-w-[400px] overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.25)] max-h-[90vh] flex flex-col">
                         <div className="relative h-[72px] px-5 pt-5 flex justify-between items-start bg-violet-50 shrink-0">
                             <div className="w-9 h-9 rounded-full bg-white border shadow-sm flex items-center justify-center text-sm">🏷️</div>
                             <button onClick={() => setShowCatModal(false)} className="w-8 h-8 rounded-full bg-white border shadow-sm flex items-center justify-center">×</button>
@@ -403,11 +402,10 @@ export default function AdminPage() {
                     </div>
                 </div>
             )}
-
             {showBannerModal && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={(e) => e.stopPropagation()} />
-                    <div className="relative bg-white rounded-[24px] w-full max-w-[460px] overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.25)] max-h-[90vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
+                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+                    <div className="relative bg-white rounded-[24px] w-full max-w-[460px] overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.25)] max-h-[90vh] flex flex-col">
                         <div className="relative h-[72px] px-5 pt-5 flex justify-between items-start bg-amber-50 shrink-0">
                             <div className="w-9 h-9 rounded-full bg-white border shadow-sm flex items-center justify-center text-sm">📢</div>
                             <button onClick={() => setShowBannerModal(false)} className="w-8 h-8 rounded-full bg-white border shadow-sm flex items-center justify-center">×</button>
