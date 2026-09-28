@@ -6,9 +6,20 @@ export default async function Home() {
 
     return (
         <main className="min-h-screen bg-zinc-950 text-white p-8">
-            <header className="max-w-6xl mx-auto flex justify-between items-center mb-12">
-                <h1 className="text-3xl font-black tracking-tighter">CONNECT<span className="text-violet-500">.AO</span></h1>
-                <span className="text-xs px-3 py-1 bg-green-500/20 text-green-400 rounded-full">API: ONLINE</span>
+            <header className="max-w-6xl mx-auto flex justify-between items-center mb-12 bg-black border border-zinc-900 rounded-full px-6 py-3">
+                <div className="flex items-center">
+                    <img src="/connect.png" alt="CONNECT" className="h-7 w-auto object-contain" />
+                </div>
+                <nav className="hidden md:flex items-center gap-6 text-[11px] uppercase tracking-widest text-zinc-300">
+                    <span className="hover:text-white cursor-pointer transition">IMPULSO</span>
+                    <span className="hover:text-white cursor-pointer transition">PROOF SYSTEM</span>
+                    <span className="hover:text-white cursor-pointer transition">USE CASES</span>
+                    <span className="hover:text-white cursor-pointer transition">SUCCESS CASES</span>
+                    <span className="hover:text-white cursor-pointer transition">PARA PROFISSIONAIS</span>
+                </nav>
+                <button className="px-7 py-2 rounded-full bg-zinc-900 border border-violet-500/30 text-xs font-bold tracking-widest hover:bg-zinc-800 transition">
+                    LOGIN
+                </button>
             </header>
             <div className="max-w-6xl mx-auto grid grid-cols-12 gap-8">
                 <div className="col-span-8">
