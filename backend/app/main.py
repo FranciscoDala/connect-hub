@@ -11,8 +11,10 @@ from app.modules.auth.router import router as auth_router
 from app.modules.posts.routes import router as posts_router
 from app.modules.upload.router import router as upload_router
 
-# importa models pro alembic
-import app.modules.auth.models
+# importa models pro alembic / create_all
+from app.db.base import Base
+import app.modules.users.models
+import app.modules.categories.models
 import app.modules.posts.models
 
 ENV = os.getenv("ENV", "production")
@@ -22,9 +24,9 @@ app = FastAPI(
     title="Connect Hub API",
     version="1.0.0",
     description="API Enterprise da Connect",
-    docs_url=None if IS_PROD else "/docs",
-    redoc_url=None if IS_PROD else "/redoc",
-    openapi_url="/openapi.json" if not IS_PROD else None,
+    docs_url="/docs",
+    redoc_url="/redoc",
+    openapi_url="/openapi.json",
 )
 
 # --- MIDDLEWARES DE SEGURANÇA ---
@@ -41,8 +43,8 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allow_headers=["Authorization", "Content-Type"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+    allow_headers=["*"],
     max_age=600,
 )
 
@@ -57,8 +59,9 @@ async def add_security_headers(request: Request, call_next):
     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
     if IS_PROD:
         response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
-    # remove header que entrega stack
-    response.headers.pop("server", None)
+    # remove header que entrega stack - FIX: MutableHeaders não tem pop
+    if "server" in response.headers:
+        del response.headers["server"]
     # log lento
     process_time = time.time() - start
     response.headers["X-Process-Time"] = str(process_time)
@@ -74,17 +77,19 @@ async def http_exception_handler(request: Request, exc: StarletteHTTPException):
 
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
-    return JSONResponse(status_code=422, content={"detail": "Dados inválidos"})
+    return JSONResponse(status_code=422, content={"detail": "Dados inválidos", "errors": exc.errors() if not IS_PROD else []})
 
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
     print(f"ERRO CRÍTICO: {exc}")
+    import traceback
+    traceback.print_exc()
     return JSONResponse(status_code=500, content={"detail": "Erro interno no servidor"})
 
 # --- ROTAS ---
 @app.get("/", include_in_schema=False)
 def root():
-    return RedirectResponse(url="/docs" if not IS_PROD else "/health")
+    return {"status": "online", "docs": "/docs", "health": "/health"}
 
 @app.get("/health")
 def health():
