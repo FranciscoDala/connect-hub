@@ -35,53 +35,76 @@ export default function Login() {
         }
     }
 
-    return (
-        <div className="min-h-screen flex bg-zinc-950 text-white">
-            <div className="hidden lg:flex w-1/2 bg-linear-to-br from-violet-600 to-indigo-700 p-12 flex-col justify-between relative overflow-hidden">
-                <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-white rounded-xl grid place-items-center overflow-hidden">
-                        <Image src="/logo.png" alt="Connect" width={40} height={40} className="object-contain" />
-                    </div>
-                    <span className="text-xl font-bold tracking-widest">CONNECT.AO</span>
-                </div>
-                <div>
-                    <h1 className="text-5xl font-bold leading-tight mb-4">Conecte<br />Angola ao<br />futuro.</h1>
-                    <p className="text-white/70 text-lg">Hub central de notícias, empresas e oportunidades.</p>
-                </div>
-                <div className="text-sm text-white/50">© 2026 Connect.ao</div>
-            </div>
+    const inputClass = "w-full h-11 bg-white border border-gray-200 rounded-xl px-3 text-sm text-black placeholder:text-black/40 focus:outline-none focus:border-black focus:ring-1 focus:ring-black/10 transition";
 
-            <div className="flex-1 flex items-center justify-center p-6 bg-white text-zinc-900 lg:bg-zinc-950 lg:text-white">
-                <form onSubmit={handleLogin} className="w-full max-w-sm space-y-6">
-                    <div className="lg:hidden flex items-center gap-3 mb-8">
-                        <Image src="/logo.png" alt="Connect" width={40} height={40} className="rounded-xl" />
-                        <span className="text-xl font-bold">CONNECT.AO</span>
+    return (
+        <div className="min-h-screen flex items-center justify-center p-4 bg-slate-50">
+            <div className="relative w-full max-w-100 bg-white rounded-3xl overflow-hidden shadow-2xl border border-gray-100">
+                {/* Header igual FT-Xpress */}
+                <div className="relative h-18 px-5 pt-5 flex justify-between items-start bg-blue-50">
+                    <div className="w-9 h-9 rounded-full bg-white border shadow-sm flex items-center justify-center overflow-hidden">
+                        <Image src="/logo.png" alt="Connect.ao" width={28} height={28} className="object-contain" />
                     </div>
-                    <div>
-                        <h2 className="text-3xl font-bold">Bem-vindo de volta</h2>
-                        <p className="text-zinc-500 lg:text-zinc-400 mt-2">Entre com sua conta admin</p>
+                    <div className="h-7 px-3 rounded-full bg-white border border-blue-200 shadow-sm flex items-center gap-1.5">
+                        <div className="w-2 h-2 rounded-full bg-blue-600 animate-pulse" />
+                        <span className="text-xs font-semibold text-blue-600 tracking-wide">Login</span>
                     </div>
-                    {error && (
-                        <div className="bg-red-500/10 border border-red-500/20 text-red-500 px-4 py-3 rounded-xl text-sm">
-                            {error}
-                        </div>
-                    )}
-                    <div className="space-y-4">
-                        <div>
-                            <label className="text-sm text-zinc-500">Email</label>
-                            <input value={email} onChange={e => setEmail(e.target.value)} type="email" placeholder="admin@connect.ao" className="mt-1.5 w-full bg-zinc-50 lg:bg-zinc-900 border border-zinc-200 lg:border-zinc-800 rounded-xl px-4 py-3.5 outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20 transition" required />
-                        </div>
-                        <div>
-                            <label className="text-sm text-zinc-500">Senha</label>
-                            <div className="mt-1.5 relative">
-                                <input value={password} onChange={e => setPassword(e.target.value)} type={show ? "text" : "password"} placeholder="••••••••" className="w-full bg-zinc-50 lg:bg-zinc-900 border border-zinc-200 lg:border-zinc-800 rounded-xl px-4 py-3.5 pr-12 outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20 transition" required />
-                                <button type="button" onClick={() => setShow(!show)} className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-900 lg:hover:text-white text-sm">{show ? "Esconder" : "Ver"}</button>
-                            </div>
+                </div>
+
+                <div className="px-6 pt-4">
+                    <h1 className="text-lg font-bold text-gray-900">Connect.ao</h1>
+                    <p className="text-sm text-gray-500 mt-1">Acesso administrativo</p>
+                </div>
+
+                {error && (
+                    <div className="mx-6 mt-3 p-3 rounded-xl bg-red-50 border border-red-200 flex gap-2.5 items-start">
+                        <span className="text-red-600 text-sm">⚠</span>
+                        <div className="flex-1">
+                            <p className="text-sm font-semibold text-red-800">Erro no login</p>
+                            <p className="text-xs text-red-700 mt-1">{error}</p>
                         </div>
                     </div>
-                    <button disabled={loading} className="w-full bg-zinc-900 lg:bg-white text-white lg:text-black font-semibold rounded-xl py-3.5 hover:bg-black lg:hover:bg-zinc-200 disabled:opacity-50 transition flex justify-center items-center gap-2">
-                        {loading ? <span className="w-5 h-5 border-2 border-white/30 border-t-white lg:border-black/30 lg:border-t-black rounded-full animate-spin" /> : "Entrar"}
-                    </button>
+                )}
+
+                <form onSubmit={handleLogin} className="px-6 pb-6 pt-4 flex flex-col gap-2">
+                    <div className="relative">
+                        <input
+                            type="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            required
+                            className={`${inputClass} pl-10`}
+                            placeholder="admin@connect.ao"
+                            disabled={loading}
+                        />
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">@</span>
+                    </div>
+
+                    <div className="relative">
+                        <input
+                            type={show ? "text" : "password"}
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                            className={`${inputClass} pl-10 pr-10`}
+                            placeholder="Senha"
+                            disabled={loading}
+                        />
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">🔒</span>
+                        <button type="button" onClick={() => setShow(!show)} className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-gray-100 text-xs text-gray-500">
+                            {show ? "🙈" : "👁️"}
+                        </button>
+                    </div>
+
+                    <div className="mt-2">
+                        <button type="submit" disabled={loading} className="w-full h-11 rounded-full bg-black text-white font-semibold hover:bg-zinc-800 flex items-center justify-center disabled:opacity-50 transition">
+                            {loading ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <span className="flex items-center gap-1">Entrar <span>→</span></span>}
+                        </button>
+                    </div>
+
+                    <p className="text-center text-xs text-gray-400 mt-3">
+                        © 2026 Connect.ao • Admin
+                    </p>
                 </form>
             </div>
         </div>
