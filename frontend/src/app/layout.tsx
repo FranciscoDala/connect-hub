@@ -19,7 +19,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             lang="pt"
             className={`${jost.variable} h-full antialiased`}
         >
-            <body className="min-h-full flex flex-col font-[var(--font-jost)]" style={{ fontFamily: 'var(--font-jost), "Jost", sans-serif' }}>
+            <body className="min-h-full flex flex-col font-(--font-jost)">
                 {children}
             </body>
         </html>
