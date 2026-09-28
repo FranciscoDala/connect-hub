@@ -46,7 +46,7 @@ function CustomSelect({ value, options, onChange, placeholder }: { value: string
                 <span className={`text-gray-400 transition-transform shrink-0 text-xs ${open? 'rotate-180' : ''}`}>▼</span>
             </button>
             {open && (
-                <div className="absolute z-60 top-12 left-0 w-full bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden p-1.5 max-h-[220px] overflow-y-auto scrollbar-none">
+                <div className="absolute z-[70] top-12 left-0 w-full bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden p-1.5 max-h-[220px] overflow-y-auto scrollbar-none">
                     {options.map(o => (
                         <button key={o.value} type="button" onClick={() => { onChange(o.value); setOpen(false) }} className={`w-full text-left px-3 py-2.5 rounded-xl text-sm flex items-center justify-between transition ${value === o.value? 'bg-blue-50 font-semibold text-black' : 'hover:bg-gray-50 text-gray-700'}`}>
                             {o.label} {value === o.value && <span>✓</span>}
@@ -80,18 +80,31 @@ export default function AdminPage() {
     const [bannerFile, setBannerFile] = useState<FileList | null>(null);
 
     useEffect(() => { if (!getToken()) { router.replace("/login"); return; } loadAll(); }, []);
+
     async function loadAll() {
         try {
-            const [pRes, cRes, bRes] = await Promise.all([
+            const [pRes, cRes] = await Promise.all([
                 fetch(`${API_URL}/api/v1/posts`, { headers: authHeader() as any }),
-                fetch(`${API_URL}/api/v1/categories`, { headers: authHeader() as any }),
-                fetch(`${API_URL}/api/v1/banners`, { headers: authHeader() as any }).catch(()=>({ json: async()=>[] } as any))
+                fetch(`${API_URL}/api/v1/categories`, { headers: authHeader() as any })
             ]);
             if (pRes.status === 401 || cRes.status === 401) throw new Error("401");
-            setPosts(await pRes.json());
-            setCats(await cRes.json());
-            try{ setBanners(await (bRes as any).json()); }catch{ setBanners([]); }
-        } catch { clearAuth(); router.replace("/login"); }
+            const pData = await pRes.json();
+            const cData = await cRes.json();
+            setPosts(Array.isArray(pData)? pData : []);
+            setCats(Array.isArray(cData)? cData : []);
+
+            // banners separado pra não quebrar se não existir
+            try {
+                const bRes = await fetch(`${API_URL}/api/v1/banners`, { headers: authHeader() as any });
+                if (bRes.ok) {
+                    const bData = await bRes.json();
+                    setBanners(Array.isArray(bData)? bData : []);
+                }
+            } catch {}
+
+        } catch (e) {
+            clearAuth(); router.replace("/login");
+        }
     }
 
     function openNewPost() { setEditingPost(null); setForm({ titulo: "", slug: "", tipo: "noticia", descricao: "", conteudo: "", category_id: "", status: "published", destaque: false, tags: "", media_url: "", thumbnail_url: "" }); setFiles(null); setTab('conteudo'); setShowPostModal(true); }
@@ -119,7 +132,6 @@ export default function AdminPage() {
     async function saveCat() { const method = editingCat? "PUT" : "POST"; const url = editingCat? `${API_URL}/api/v1/categories/${editingCat.id}` : `${API_URL}/api/v1/categories`; const res = await fetch(url, { method, body: JSON.stringify({...catForm, slug: catForm.slug || catForm.nome.toLowerCase().replace(/\s+/g, "-") }), headers: { "Content-Type": "application/json",...authHeader() } as any }); if (!res.ok) return toast.error("Erro categoria"); setShowCatModal(false); loadAll(); toast.success("Categoria salva!"); }
     async function deleteCat(id: string) { if (!confirm("Apagar categoria?")) return; await fetch(`${API_URL}/api/v1/categories/${id}`, { method: "DELETE", headers: authHeader() as any }); loadAll(); }
 
-    // BANNERS CRUD
     function openNewBanner(){ setEditingBanner(null); setBannerForm({ titulo:"", imagem_url:"", link_url:"", posicao:"home_topo", ativo:true, data_inicio:"", data_fim:"" }); setBannerFile(null); setShowBannerModal(true); }
     function openEditBanner(b: Banner){ setEditingBanner(b); setBannerForm({ titulo:b.titulo, imagem_url:b.imagem_url, link_url:b.link_url||"", posicao:b.posicao, ativo:b.ativo, data_inicio:b.data_inicio||"", data_fim:b.data_fim||"" }); setShowBannerModal(true); }
     async function saveBanner(){
@@ -154,14 +166,12 @@ export default function AdminPage() {
         <main className="min-h-screen bg-[#fcfcfc] text-zinc-900 font-sans">
             <Toaster richColors position="top-center" />
             <style>{`.scrollbar-none::-webkit-scrollbar{display:none}.scrollbar-none{-ms-overflow-style:none;scrollbar-width:none}`}</style>
-
             <header className="sticky top-0 z-20 bg-white border-b border-zinc-200">
                 <div className="max-w-7xl mx-auto flex justify-between items-center py-4 px-4 md:px-6">
                     <h1 className="text-[11px] font-bold tracking-[0.2em]">ADMIN • CONNECT.AO</h1>
                     <button onClick={() => { clearAuth(); router.replace("/login"); }} className="text-xs px-3 py-2 rounded-full bg-zinc-100 hover:bg-zinc-200 transition">SAIR</button>
                 </div>
             </header>
-
             <div className="max-w-7xl mx-auto px-4 md:px-6 py-6 md:py-8">
                 {cats.length > 0 && (
                     <div className="flex gap-2 mb-6 overflow-x-auto scrollbar-none pb-2">
@@ -177,13 +187,10 @@ export default function AdminPage() {
                         ))}
                     </div>
                 )}
-
-                {/* TABS PRINCIPAIS */}
                 <div className="flex gap-2 mb-6">
                     <button onClick={()=>setMainTab('posts')} className={`h-9 px-5 rounded-full text-xs font-semibold border transition ${mainTab==='posts'?'bg-black text-white border-black':'bg-white border-zinc-200 hover:bg-zinc-50'}`}>POSTS • {posts.length}</button>
                     <button onClick={()=>setMainTab('banners')} className={`h-9 px-5 rounded-full text-xs font-semibold border transition ${mainTab==='banners'?'bg-black text-white border-black':'bg-white border-zinc-200 hover:bg-zinc-50'}`}>BANNERS • {banners.length}</button>
                 </div>
-
                 <div className="flex flex-col gap-4 mb-6">
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                         <h2 className="text-sm font-semibold tracking-wide">{mainTab==='posts'?`Posts • ${filtered.length}`:`Banners • ${filteredBanners.length}`}</h2>
@@ -208,11 +215,7 @@ export default function AdminPage() {
                 {mainTab==='posts'?(
                 <div className="bg-white border border-zinc-200 rounded-[20px] overflow-hidden shadow-sm">
                     <div className="hidden md:grid grid-cols-12 text-[10px] tracking-widest text-zinc-400 px-6 py-3 border-b bg-zinc-50/50">
-                        <div className="col-span-5">TÍTULO</div>
-                        <div className="col-span-2">CATEGORIA</div>
-                        <div className="col-span-1">STATUS</div>
-                        <div className="col-span-2">MÉTRICAS</div>
-                        <div className="col-span-2 text-right">AÇÕES</div>
+                        <div className="col-span-5">TÍTULO</div><div className="col-span-2">CATEGORIA</div><div className="col-span-1">STATUS</div><div className="col-span-2">MÉTRICAS</div><div className="col-span-2 text-right">AÇÕES</div>
                     </div>
                     {filtered.map(p => {
                         const views = p.views?? p.views_count?? 0;
@@ -227,11 +230,6 @@ export default function AdminPage() {
                                 <div className="min-w-0 flex-1">
                                     <p className="text-[13.5px] font-semibold line-clamp-1 leading-tight">{p.titulo}</p>
                                     <p className="text-[11px] text-zinc-500 mt-0.5">{p.tipo} • {new Date(p.created_at).toLocaleDateString()}</p>
-                                    <div className="flex items-center gap-2 mt-2 md:hidden">
-                                        <span className="flex items-center gap-1 text-[11px] bg-zinc-50 border px-2 py-0.5 rounded-full">👁 {views}</span>
-                                        <span className="flex items-center gap-1 text-[11px] bg-zinc-50 border px-2 py-0.5 rounded-full">💬 {comments}</span>
-                                        <span className="flex items-center gap-1 text-[11px] bg-zinc-50 border px-2 py-0.5 rounded-full">↗ {shares}</span>
-                                    </div>
                                 </div>
                             </div>
                             <div className="hidden md:block col-span-2"><span className="text-[11px] px-2.5 py-1 rounded-full bg-violet-50 text-violet-700 border border-violet-100 font-medium">{cats.find(c => c.id === p.category_id)?.nome || "—"}</span></div>
@@ -252,11 +250,7 @@ export default function AdminPage() {
                 ):(
                 <div className="bg-white border border-zinc-200 rounded-[20px] overflow-hidden shadow-sm">
                     <div className="hidden md:grid grid-cols-12 text-[10px] tracking-widest text-zinc-400 px-6 py-3 border-b bg-zinc-50/50">
-                        <div className="col-span-5">BANNER</div>
-                        <div className="col-span-2">POSIÇÃO</div>
-                        <div className="col-span-1">STATUS</div>
-                        <div className="col-span-2">MÉTRICAS</div>
-                        <div className="col-span-2 text-right">AÇÕES</div>
+                        <div className="col-span-5">BANNER</div><div className="col-span-2">POSIÇÃO</div><div className="col-span-1">STATUS</div><div className="col-span-2">MÉTRICAS</div><div className="col-span-2 text-right">AÇÕES</div>
                     </div>
                     {filteredBanners.map(b=>(
                         <div key={b.id} className="group border-b last:border-0 hover:bg-zinc-50/70 transition p-4 md:px-6 md:py-4 md:grid md:grid-cols-12 md:items-center gap-3">
@@ -278,7 +272,7 @@ export default function AdminPage() {
                             </div>
                         </div>
                     ))}
-                    {filteredBanners.length===0 && <div className="p-12 text-center text-sm text-zinc-400">Nenhum banner. Clica em + NOVO BANNER</div>}
+                    {filteredBanners.length===0 && <div className="p-12 text-center text-sm text-zinc-400">Nenhum banner. Clica em + NOVO BANNER<br/><span className="text-[11px]">Se o backend ainda não tem rota de banners, vai ficar 0 até criar</span></div>}
                 </div>
                 )}
             </div>
