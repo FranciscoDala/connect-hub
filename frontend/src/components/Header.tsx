@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import Link from "next/link";
 
 const submenuItems = [
     { label: "Item", href: "#" },
@@ -70,23 +71,25 @@ export default function Header() {
             <div className="fixed top-0 left-0 right-0 z-50 px-4 sm:px-6 lg:px-8 pt-4 md:pt-5 pointer-events-none">
                 <header className="pointer-events-auto max-w-6xl mx-auto flex justify-between items-center bg-white border border-zinc-200 rounded-full px-5 md:px-7 py-2.5 shadow-sm">
                     <div className="flex items-center shrink-0">
-                        <img src="/connect.png" alt="CONNECT" className="h-5 md:h-6 w-auto object-contain" />
+                        <Link href="/">
+                            <img src="/connect.png" alt="CONNECT" className="h-5 md:h-6 w-auto object-contain" />
+                        </Link>
                     </div>
 
-                    {/* DESKTOP - TEXTO PEQUENO IGUAL A IMAGEM */}
-                    <nav className="hidden lg:flex items-center gap-6 text-[11px] capitalize tracking-[0.18em] font-medium text-zinc-500">
-                        <a href="#" className="hover:text-black transition">PÁGINA INICIAL</a>
-                        <a href="#" className="hover:text-black transition">CONNECT-TICS</a>
-                        <SubMenu label="NOTÍCIAS" />
-                        <SubMenu label="SERVIÇOS" />
-                        <a href="#" className="hover:text-black transition">APP</a>
-                        <a href="#" className="hover:text-black transition">PROJECTOS</a>
+                    {/* DESKTOP - NOMES PEQUENOS */}
+                    <nav className="hidden lg:flex items-center gap-6 text-[11px] capitalize tracking-[0.12em] font-medium text-zinc-500">
+                        <Link href="/" className="hover:text-black transition">Página inicial</Link>
+                        <Link href="#" className="hover:text-black transition">Connect-tics</Link>
+                        <SubMenu label="Notícias" />
+                        <SubMenu label="Serviços" />
+                        <Link href="#" className="hover:text-black transition">App</Link>
+                        <Link href="#" className="hover:text-black transition">Projectos</Link>
                     </nav>
 
                     <div className="flex items-center gap-2">
-                        <button className="hidden md:block px-6 py-2 rounded-full bg-zinc-900 text-white text-[10px] font-bold tracking-widest hover:bg-black transition">
+                        <Link href="/login" className="hidden md:block px-6 py-2 rounded-full bg-zinc-900 text-white text-[10px] font-bold tracking-widest hover:bg-black transition">
                             LOGIN
-                        </button>
+                        </Link>
                         <button onClick={() => setMobileOpen(!mobileOpen)} className="lg:hidden w-8 h-8 rounded-full bg-zinc-900 text-white grid place-items-center">
                             <span className="text-[12px]">{mobileOpen ? "✕" : "☰"}</span>
                         </button>
@@ -94,20 +97,20 @@ export default function Header() {
                 </header>
             </div>
 
-            {/* Espaçador pra não ficar conteúdo por baixo do header fixo */}
+            {/* Espaçador */}
             <div className="h-20 md:h-24" />
 
             {/* MENU MOBILE */}
             {mobileOpen && (
                 <div className="lg:hidden fixed inset-0 z-40 bg-white pt-24 px-6 overflow-y-auto">
                     <nav className="flex flex-col divide-y divide-zinc-100">
-                        <a href="#" className="py-3.5 text-[10px] uppercase tracking-[0.18em] text-zinc-600">PÁGINA INICIAL</a>
-                        <a href="#" className="py-3.5 text-[10px] uppercase tracking-[0.18em] text-zinc-600">CONNECT-TICS</a>
+                        <Link href="/" className="py-3.5 text-[10px] uppercase tracking-[0.18em] text-zinc-600">PÁGINA INICIAL</Link>
+                        <Link href="#" className="py-3.5 text-[10px] uppercase tracking-[0.18em] text-zinc-600">CONNECT-TICS</Link>
                         <SubMenu label="NOTÍCIAS" mobile />
                         <SubMenu label="SERVIÇOS" mobile />
-                        <a href="#" className="py-3.5 text-[10px] uppercase tracking-[0.18em] text-zinc-600">APP</a>
-                        <a href="#" className="py-3.5 text-[10px] uppercase tracking-[0.18em] text-zinc-600">PROJECTOS</a>
-                        <button className="mt-8 w-full py-3.5 rounded-full bg-zinc-900 text-white text-[11px] font-bold tracking-widest">LOGIN</button>
+                        <Link href="#" className="py-3.5 text-[10px] uppercase tracking-[0.18em] text-zinc-600">APP</Link>
+                        <Link href="#" className="py-3.5 text-[10px] uppercase tracking-[0.18em] text-zinc-600">PROJECTOS</Link>
+                        <Link href="/login" className="mt-8 w-full py-3.5 rounded-full bg-zinc-900 text-white text-[11px] font-bold tracking-widest text-center">LOGIN</Link>
                     </nav>
                 </div>
             )}
