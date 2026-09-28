@@ -11,11 +11,12 @@ export default async function Home() {
                     <img src="/connect.png" alt="CONNECT" className="h-7 w-auto object-contain" />
                 </div>
                 <nav className="hidden md:flex items-center gap-6 text-[11px] uppercase tracking-widest text-zinc-600">
-                    <span className="hover:text-black cursor-pointer transition">IMPULSO</span>
-                    <span className="hover:text-black cursor-pointer transition">PROOF SYSTEM</span>
-                    <span className="hover:text-black cursor-pointer transition">USE CASES</span>
-                    <span className="hover:text-black cursor-pointer transition">SUCCESS CASES</span>
-                    <span className="hover:text-black cursor-pointer transition">PARA PROFISSIONAIS</span>
+                    <span className="hover:text-black cursor-pointer transition">Página Inical</span>
+                    <span className="hover:text-black cursor-pointer transition">Connect-Tics</span>
+                    <span className="hover:text-black cursor-pointer transition">Nóticias</span>
+                    <span className="hover:text-black cursor-pointer transition">Serviços</span>
+                    <span className="hover:text-black cursor-pointer transition">App</span>
+                    <span className="hover:text-black cursor-pointer transition">Projectos</span>
                 </nav>
                 <button className="px-7 py-2 rounded-full bg-zinc-900 text-white text-xs font-bold tracking-widest hover:bg-black transition">
                     LOGIN
