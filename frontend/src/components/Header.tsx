@@ -74,7 +74,7 @@ export default function Header() {
                     </div>
 
                     {/* DESKTOP - TEXTO PEQUENO IGUAL A IMAGEM */}
-                    <nav className="hidden lg:flex items-center gap-6 text-[12px] capitalize tracking-[0.18em] font-medium text-zinc-500">
+                    <nav className="hidden lg:flex items-center gap-6 text-[11px] capitalize tracking-[0.18em] font-medium text-zinc-500">
                         <a href="#" className="hover:text-black transition">PÁGINA INICIAL</a>
                         <a href="#" className="hover:text-black transition">CONNECT-TICS</a>
                         <SubMenu label="NOTÍCIAS" />
