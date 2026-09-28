@@ -1,6 +1,7 @@
 ﻿import { getPosts, getApps } from '@/lib/api'
 import Header from '@/components/Header'
 import Link from 'next/link'
+import { ConnectPlayer } from '@/components/ConnectPlayer'
 
 type Category = { id: string; nome: string; slug: string; cor?: string }
 type Post = {
@@ -18,7 +19,6 @@ async function getCategories(): Promise<Category[]> {
     return await res.json()
   } catch { return [] }
 }
-
 async function getBanners(): Promise<Banner[]> {
   try {
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/banners?ativo=true`, { next: { revalidate: 60 } })
@@ -27,21 +27,47 @@ async function getBanners(): Promise<Banner[]> {
   } catch { return [] }
 }
 
+function isVideoPost(post: Post){
+  const url = (post.media_url || '').toLowerCase()
+  return post.tipo === 'video' || url.includes('.mp4') || url.includes('.mov') || url.includes('.webm') || url.includes('video/upload')
+}
+function isAudioPost(post: Post){
+  const url = (post.media_url || '').toLowerCase()
+  return post.tipo === 'audio' || post.tipo === 'musica' || url.includes('.mp3') || url.includes('.m4a')
+}
+
 function PostCard({ post, cat }: { post: Post, cat?: Category }) {
   const views = (post as any).views?? (post as any).views_count?? 0
   const comments = (post as any).comments_count?? 0
   const shares = (post as any).shares_count?? 0
+  const isVideo = isVideoPost(post)
+  const isAudio = isAudioPost(post)
+  const hasMediaPlayer = (isVideo || isAudio) &&!!post.media_url
+
   return (
-    <Link href={`/post/${post.slug || post.id}`} className="group block bg-white border border-zinc-200 rounded-[20px] overflow-hidden hover:shadow-lg hover:border-zinc-300 transition-all">
+    <div className="group bg-white border border-zinc-200 rounded-[20px] overflow-hidden hover:shadow-lg hover:border-zinc-300 transition-all">
       <div className="aspect-[16/10] bg-zinc-100 overflow-hidden relative">
-        {post.thumbnail_url || post.media_url? (
-          <img src={post.thumbnail_url || post.media_url} alt={post.titulo} className="w-full h-full object-cover group-hover:scale-[1.03] transition duration-500" />
+        {hasMediaPlayer? (
+          <ConnectPlayer src={post.media_url!} poster={post.thumbnail_url} titulo={post.titulo} tipo={post.tipo} />
+        ) : post.thumbnail_url || post.media_url? (
+          <Link href={`/post/${post.slug || post.id}`}>
+            <img src={post.thumbnail_url || post.media_url} alt={post.titulo} className="w-full h-full object-cover group-hover:scale-[1.03] transition duration-500" />
+          </Link>
         ) : (
           <div className="w-full h-full grid place-items-center bg-zinc-900 text-white font-bold text-xs tracking-widest">{post.tipo?.toUpperCase()}</div>
         )}
-        {cat && <span className="absolute top-3 left-3 text-[10px] font-bold px-2.5 py-1 rounded-full bg-white/90 backdrop-blur border shadow-sm" style={{ color: cat.cor || '#000' }}>{cat.nome}</span>}
+        {cat &&!hasMediaPlayer && (
+          <span className="absolute top-3 left-3 text-[10px] font-bold px-2.5 py-1 rounded-full bg-white/90 backdrop-blur border shadow-sm" style={{ color: cat.cor || '#000' }}>
+            {cat.nome}
+          </span>
+        )}
+        {hasMediaPlayer && (
+          <span className={`absolute top-3 left-3 text-[10px] font-bold px-2.5 py-1 rounded-full shadow-sm ${isAudio? 'bg-green-500' : 'bg-red-600'} text-white`}>
+            {post.tipo.toUpperCase()}
+          </span>
+        )}
       </div>
-      <div className="p-4">
+      <Link href={`/post/${post.slug || post.id}`} className="block p-4">
         <h3 className="font-semibold leading-tight line-clamp-2 group-hover:text-violet-600 transition text-[14px]">{post.titulo}</h3>
         {post.descricao && <p className="text-[12px] text-zinc-500 line-clamp-2 mt-1.5 leading-relaxed">{post.descricao}</p>}
         <div className="flex items-center justify-between mt-3">
@@ -52,21 +78,19 @@ function PostCard({ post, cat }: { post: Post, cat?: Category }) {
           </div>
           <span className="text-[10px] text-zinc-400">{new Date(post.created_at).toLocaleDateString('pt-AO')}</span>
         </div>
-      </div>
-    </Link>
+      </Link>
+    </div>
   )
 }
 
 function BannerSlot({ banner, pos }: { banner?: Banner, pos: string }) {
   if(!banner) return null
-  const Wrapper = banner.link_url? 'a' : 'div'
   return (
     <div className="my-8">
       <p className="text-[10px] tracking-widest text-zinc-400 mb-2 px-1">PUBLICIDADE • {pos.toUpperCase()}</p>
-      {/* @ts-ignore */}
-      <Wrapper href={banner.link_url} target={banner.link_url? "_blank" : undefined} className="block w-full rounded-[16px] overflow-hidden border border-zinc-200 bg-zinc-50 hover:opacity-95 transition">
+      <a href={banner.link_url} target={banner.link_url? "_blank" : undefined} className="block w-full rounded-[16px] overflow-hidden border border-zinc-200 bg-zinc-50 hover:opacity-95 transition">
         <img src={banner.imagem_url} alt={banner.titulo} className="w-full h-auto object-cover max-h-[160px] md:max-h-[220px]" />
-      </Wrapper>
+      </a>
     </div>
   )
 }
@@ -84,7 +108,7 @@ export default async function Home() {
     const principal = destaques[0] || posts[0]
     const secundarios = destaques.slice(1, 4).length? destaques.slice(1, 4) : posts.slice(1, 4)
     const maisLidos = [...posts].sort((a,b) => ((b as any).views||0) - ((a as any).views||0)).slice(0, 5)
-    const videos = posts.filter(p => p.tipo === 'video').slice(0, 4)
+    const videos = posts.filter(p => isVideoPost(p) || isAudioPost(p)).slice(0, 4)
     const recentes = posts.slice(0, 8)
 
     const bannerTopo = banners.find(b => b.posicao === 'home_topo')
@@ -99,9 +123,7 @@ export default async function Home() {
     return (
         <main className="min-h-screen bg-[#fcfcfc] text-zinc-900">
             <Header />
-
             <div className="px-4 sm:px-6 lg:px-8">
-                {/* HERO - MANTIDO MAS MAIS PRO */}
                 <section className="relative max-w-7xl mx-auto mt-6 md:mt-8 mb-10 rounded-[24px] md:rounded-[32px] overflow-hidden border border-zinc-200 bg-white">
                     <div className="absolute inset-0 bg-[linear-gradient(to_right,#e4e4e7_1px,transparent_1px),linear-gradient(to_bottom,#e4e4e7_1px,transparent_1px)] bg-[size:40px_40px] opacity-[0.3]" />
                     <div className="absolute -top-32 -left-32 size-[400px] bg-violet-300 rounded-full blur-[120px] opacity-20" />
@@ -125,20 +147,29 @@ export default async function Home() {
                                 <Link href="/sobre" className="px-6 py-3 rounded-full bg-white border border-zinc-200 text-[11px] font-bold tracking-widest hover:bg-zinc-50 transition">SOBRE NÓS</Link>
                             </div>
                             <div className="mt-6 flex gap-4 text-[11px] text-zinc-500">
-                              <span>• {posts.length} notícias publicadas</span>
+                              <span>• {posts.length} notícias</span>
                               <span>• {categories.length} categorias</span>
+                              <span>• {videos.length} vídeos/músicas</span>
                             </div>
                         </div>
                         <div className="col-span-12 md:col-span-5 relative">
                             {principal? (
-                              <Link href={`/post/${principal.slug || principal.id}`} className="block bg-white rounded-[20px] border border-zinc-200 p-3 shadow-xl hover:shadow-2xl transition">
-                                <div className="aspect-video rounded-[12px] overflow-hidden bg-zinc-100 mb-3">
-                                  {principal.thumbnail_url || principal.media_url? <img src={principal.thumbnail_url || principal.media_url} className="w-full h-full object-cover" alt="" /> : <div className="grid place-items-center h-full font-bold">CONNECT</div>}
+                              <div className="bg-white rounded-[20px] border border-zinc-200 p-3 shadow-xl">
+                                <div className="rounded-[12px] overflow-hidden bg-zinc-100 mb-3">
+                                  {(isVideoPost(principal) || isAudioPost(principal)) && principal.media_url? (
+                                    <ConnectPlayer src={principal.media_url} poster={principal.thumbnail_url} titulo={principal.titulo} tipo={principal.tipo} />
+                                  ) : principal.thumbnail_url || principal.media_url? (
+                                    <Link href={`/post/${principal.slug || principal.id}`}>
+                                      <img src={principal.thumbnail_url || principal.media_url} className="w-full h-full object-cover aspect-video" alt="" />
+                                    </Link>
+                                  ) : (
+                                    <div className="grid place-items-center h-full font-bold aspect-video">CONNECT</div>
+                                  )}
                                 </div>
                                 <p className="text-[10px] font-bold tracking-widest text-violet-600">DESTAQUE PRINCIPAL</p>
-                                <h3 className="font-bold leading-tight mt-1 line-clamp-2">{principal.titulo}</h3>
+                                <Link href={`/post/${principal.slug || principal.id}`}><h3 className="font-bold leading-tight mt-1 line-clamp-2 hover:text-violet-600 transition">{principal.titulo}</h3></Link>
                                 <p className="text-[12px] text-zinc-500 mt-1 line-clamp-2">{principal.descricao}</p>
-                              </Link>
+                              </div>
                             ) : (
                               <div className="bg-white rounded-[20px] border p-4 shadow-xl">
                                 <div className="h-3 w-3/4 bg-zinc-100 rounded mb-3" />
@@ -153,9 +184,7 @@ export default async function Home() {
                 <BannerSlot banner={bannerTopo} pos="home_topo" />
 
                 <div className="max-w-7xl mx-auto grid grid-cols-12 gap-6 lg:gap-8 pb-16">
-                    {/* COLUNA PRINCIPAL */}
                     <div className="col-span-12 lg:col-span-8">
-                        {/* DESTAQUES */}
                         <section id="destaques" className="mb-10">
                           <div className="flex items-center justify-between mb-4">
                             <h2 className="text-[13px] font-bold tracking-[0.2em]">DESTAQUES • HOJE</h2>
@@ -179,7 +208,6 @@ export default async function Home() {
 
                         <BannerSlot banner={bannerMeio} pos="home_meio" />
 
-                        {/* POR CATEGORIA */}
                         {postsByCategory.map(({ cat, posts }) => (
                           <section key={cat.id} className="mb-10">
                             <div className="flex items-center gap-3 mb-4">
@@ -194,31 +222,28 @@ export default async function Home() {
                           </section>
                         ))}
 
-                        {/* VÍDEOS */}
                         {videos.length > 0 && (
                           <section className="mb-10 bg-zinc-900 rounded-[24px] p-5 md:p-6 text-white">
                             <div className="flex items-center justify-between mb-4">
-                              <h2 className="text-[13px] font-bold tracking-[0.2em]">VÍDEOS • CONNECT TV</h2>
+                              <h2 className="text-[13px] font-bold tracking-[0.2em]">CONNECT TV • PLAYER BRABO</h2>
                               <span className="text-[10px] px-2 py-1 rounded-full bg-white/10 border border-white/10">AO VIVO</span>
                             </div>
                             <div className="grid sm:grid-cols-2 gap-4">
                               {videos.map(p => (
-                                <Link key={p.id} href={`/post/${p.slug || p.id}`} className="group relative rounded-[16px] overflow-hidden bg-zinc-800 border border-white/10 aspect-video grid place-items-center">
-                                  {p.thumbnail_url? <img src={p.thumbnail_url} className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-100 transition" alt="" /> : null}
-                                  <div className="relative z-10 w-12 h-12 rounded-full bg-white text-black grid place-items-center font-bold">▶</div>
-                                  <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/80 to-transparent">
-                                    <p className="text-[12px] font-semibold line-clamp-1">{p.titulo}</p>
-                                  </div>
-                                </Link>
+                                <div key={p.id}>
+                                  <ConnectPlayer src={p.media_url!} poster={p.thumbnail_url} titulo={p.titulo} tipo={p.tipo} />
+                                  <Link href={`/post/${p.slug || p.id}`} className="block mt-2">
+                                    <p className="text-[12px] font-semibold line-clamp-1 hover:text-violet-300 transition">{p.titulo}</p>
+                                    <p className="text-[11px] text-white/50">👁 {(p as any).views||0} • {p.tipo}</p>
+                                  </Link>
+                                </div>
                               ))}
                             </div>
                           </section>
                         )}
                     </div>
 
-                    {/* SIDEBAR */}
                     <div className="col-span-12 lg:col-span-4 space-y-6">
-                        {/* MAIS LIDOS */}
                         <div className="bg-white border border-zinc-200 rounded-[20px] p-5">
                           <h3 className="text-[11px] font-bold tracking-widest mb-4">MAIS LIDOS • 24H</h3>
                           <div className="space-y-3">
@@ -235,10 +260,8 @@ export default async function Home() {
                           </div>
                         </div>
 
-                        {/* BANNER SIDEBAR */}
                         {bannerSidebar && <BannerSlot banner={bannerSidebar} pos="sidebar" />}
 
-                        {/* APPS */}
                         <div className="bg-white border border-zinc-200 rounded-[20px] p-5">
                           <h3 className="text-[11px] font-bold tracking-widest mb-4">NOSSOS APPS</h3>
                           <div className="grid gap-2.5">
@@ -255,7 +278,6 @@ export default async function Home() {
                           </div>
                         </div>
 
-                        {/* CATEGORIAS */}
                         <div className="bg-white border border-zinc-200 rounded-[20px] p-5">
                           <h3 className="text-[11px] font-bold tracking-widest mb-3">EXPLORAR CATEGORIAS</h3>
                           <div className="flex flex-wrap gap-1.5">
