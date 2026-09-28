@@ -6,18 +6,18 @@ export default async function Home() {
 
     return (
         <main className="min-h-screen bg-zinc-950 text-white p-8">
-            <header className="max-w-6xl mx-auto flex justify-between items-center mb-12 bg-black border border-zinc-900 rounded-full px-6 py-3">
+            <header className="max-w-6xl mx-auto flex justify-between items-center mb-12 bg-white border border-zinc-200 rounded-full px-6 py-3">
                 <div className="flex items-center">
                     <img src="/connect.png" alt="CONNECT" className="h-7 w-auto object-contain" />
                 </div>
-                <nav className="hidden md:flex items-center gap-6 text-[11px] uppercase tracking-widest text-zinc-300">
-                    <span className="hover:text-white cursor-pointer transition">IMPULSO</span>
-                    <span className="hover:text-white cursor-pointer transition">PROOF SYSTEM</span>
-                    <span className="hover:text-white cursor-pointer transition">USE CASES</span>
-                    <span className="hover:text-white cursor-pointer transition">SUCCESS CASES</span>
-                    <span className="hover:text-white cursor-pointer transition">PARA PROFISSIONAIS</span>
+                <nav className="hidden md:flex items-center gap-6 text-[11px] uppercase tracking-widest text-zinc-600">
+                    <span className="hover:text-black cursor-pointer transition">IMPULSO</span>
+                    <span className="hover:text-black cursor-pointer transition">PROOF SYSTEM</span>
+                    <span className="hover:text-black cursor-pointer transition">USE CASES</span>
+                    <span className="hover:text-black cursor-pointer transition">SUCCESS CASES</span>
+                    <span className="hover:text-black cursor-pointer transition">PARA PROFISSIONAIS</span>
                 </nav>
-                <button className="px-7 py-2 rounded-full bg-zinc-900 border border-violet-500/30 text-xs font-bold tracking-widest hover:bg-zinc-800 transition">
+                <button className="px-7 py-2 rounded-full bg-white border border-zinc-900 text-black text-xs font-bold tracking-widest hover:bg-zinc-100 transition">
                     LOGIN
                 </button>
             </header>
