@@ -2,12 +2,8 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { toast, Toaster } from "sonner";
-import { API_URL, getToken, clearAuth } from "../../lib/api";
+import { API_URL, getToken, clearAuth, authHeader } from "../../lib/api";
 
-function authHeader() {
-    const t = getToken();
-    return t ? { Authorization: `Bearer ${t}` } : {};
-}
 
 type Category = { id: string; nome: string; slug: string; cor?: string; descricao?: string };
 type Post = any;
@@ -72,13 +68,13 @@ export default function AdminPage() {
     const [loading, setLoading] = useState(false);
     const [catForm, setCatForm] = useState({ nome: "", slug: "", descricao: "", cor: "#7c3aed" });
 
-    useEffect(() => { if (!getToken()) { router.replace("/admin/login"); return; } loadAll(); }, []);
+    useEffect(() => { if (!getToken()) { router.replace("/login"); return; } loadAll(); }, []);
     async function loadAll() {
         try {
             const [pRes, cRes] = await Promise.all([fetch(`${API_URL}/api/v1/posts`, { headers: authHeader() as any }), fetch(`${API_URL}/api/v1/categories`, { headers: authHeader() as any })]);
             if (pRes.status === 401 || cRes.status === 401) throw new Error("401");
             setPosts(await pRes.json()); setCats(await cRes.json());
-        } catch { clearAuth(); router.replace("/admin/login"); }
+        } catch { clearAuth(); router.replace("/login"); }
     }
 
     function openNewPost() { setEditingPost(null); setForm({ titulo: "", slug: "", tipo: "noticia", descricao: "", conteudo: "", category_id: "", status: "published", destaque: false, tags: "", media_url: "", thumbnail_url: "" }); setFiles(null); setTab('conteudo'); setShowPostModal(true); }
@@ -122,7 +118,7 @@ export default function AdminPage() {
                     <div className="flex gap-2">
                         <button onClick={openNewCat} className="text-xs px-4 py-2 rounded-full border border-zinc-200 hover:bg-zinc-50">+ CATEGORIA</button>
                         <button onClick={openNewPost} className="text-xs px-4 py-2 rounded-full bg-zinc-900 text-white hover:bg-black">+ NOVO POST</button>
-                        <button onClick={() => { clearAuth(); router.replace("/admin/login"); }} className="text-xs px-3 py-2 rounded-full text-zinc-400">SAIR</button>
+                        <button onClick={() => { clearAuth(); router.replace("/login"); }} className="text-xs px-3 py-2 rounded-full text-zinc-400">SAIR</button>
                     </div>
                 </div>
             </header>
@@ -245,3 +241,5 @@ export default function AdminPage() {
         </main>
     );
 }
+
+
