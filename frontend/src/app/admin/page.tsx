@@ -30,6 +30,25 @@ const POSICOES: { value: BannerPos, label: string }[] = [
     { value: 'footer', label: 'Footer' },
 ];
 
+// FUNÇÃO QUE GERA CAPA AUTOMÁTICA DO CLOUDINARY
+function generateCloudinaryThumb(videoUrl: string): string {
+    if (!videoUrl) return "";
+    // Se for Cloudinary video
+    if (videoUrl.includes("cloudinary") && videoUrl.includes("/video/upload/")) {
+        const parts = videoUrl.split("/video/upload/");
+        if (parts.length === 2) {
+            let suffix = parts[1];
+            // Remove transformações antigas se tiver so_ etc no começo pra não duplicar
+            suffix = suffix.replace(/^(so_[^/]+\/)+/, "");
+            // Pega frame do segundo 1, 1280x720 Netflix
+            const thumbUrl = `${parts[0]}/video/upload/so_1,w_1280,h_720,c_fill/${suffix}`.replace(/\.(mp4|mov|webm|m4v|avi|mkv)(\?.*)?$/i, ".jpg");
+            return thumbUrl;
+        }
+    }
+    // Se for vídeo normal não-cloudinary, não tem como gerar, retorna vazio pra usar o próprio video como fallback
+    return "";
+}
+
 function CustomSelect({ value, options, onChange, placeholder }: { value: string, options: { value: string, label: string }[], onChange: (v: string) => void, placeholder: string }) {
     const [open, setOpen] = useState(false);
     const ref = useRef<HTMLDivElement>(null);
@@ -74,6 +93,7 @@ export default function AdminPage() {
     const [tab, setTab] = useState<Tab>('conteudo');
     const [form, setForm] = useState({ titulo: "", slug: "", tipo: "noticia", descricao: "", conteudo: "", category_id: "", status: "published", destaque: false, tags: "", media_url: "", thumbnail_url: "" });
     const [files, setFiles] = useState<FileList | null>(null);
+    const [thumbFile, setThumbFile] = useState<FileList | null>(null);
     const [loading, setLoading] = useState(false);
     const [catForm, setCatForm] = useState({ nome: "", slug: "", descricao: "", cor: "#7c3aed" });
     const [bannerForm, setBannerForm] = useState({ titulo: "", imagem_url: "", link_url: "", posicao: "home_topo" as BannerPos, ativo: true, data_inicio: "", data_fim: "" });
@@ -104,25 +124,88 @@ export default function AdminPage() {
         }
     }
 
-    function openNewPost() { setEditingPost(null); setForm({ titulo: "", slug: "", tipo: "noticia", descricao: "", conteudo: "", category_id: "", status: "published", destaque: false, tags: "", media_url: "", thumbnail_url: "" }); setFiles(null); setTab('conteudo'); setShowPostModal(true); }
-    function openEditPost(p: Post) { setEditingPost(p); setForm({ titulo: p.titulo, slug: p.slug || "", tipo: p.tipo, descricao: p.descricao || "", conteudo: p.conteudo || "", category_id: p.category_id || "", status: p.status, destaque: p.destaque, tags: (p.tags || []).join(", "), media_url: p.media_url || "", thumbnail_url: p.thumbnail_url || "" }); setTab('conteudo'); setShowPostModal(true); }
+    function openNewPost() { setEditingPost(null); setForm({ titulo: "", slug: "", tipo: "noticia", descricao: "", conteudo: "", category_id: "", status: "published", destaque: false, tags: "", media_url: "", thumbnail_url: "" }); setFiles(null); setThumbFile(null); setTab('conteudo'); setShowPostModal(true); }
+    function openEditPost(p: Post) { setEditingPost(p); setForm({ titulo: p.titulo, slug: p.slug || "", tipo: p.tipo, descricao: p.descricao || "", conteudo: p.conteudo || "", category_id: p.category_id || "", status: p.status, destaque: p.destaque, tags: (p.tags || []).join(", "), media_url: p.media_url || "", thumbnail_url: p.thumbnail_url || "" }); setFiles(null); setThumbFile(null); setTab('conteudo'); setShowPostModal(true); }
+
     async function savePost() {
         if (!form.titulo) return toast.error("Título obrigatório");
         setLoading(true);
         try {
-            let media_url = form.media_url; let thumbnail_url = form.thumbnail_url; let media_files = null; let media_type = null;
+            let media_url = form.media_url.trim();
+            let thumbnail_url = form.thumbnail_url.trim(); // manual tem prioridade
+            let media_files = null;
+            let media_type = null;
+
+            // 1 - Se fez upload de capa manual separada, ela tem prioridade máxima
+            if (thumbFile && thumbFile.length > 0) {
+                const fd = new FormData(); fd.append("file", thumbFile[0]);
+                const up = await fetch(`${API_URL}/api/v1/upload`, { method: "POST", headers: authHeader() as any, body: fd });
+                const d = await up.json();
+                if (d.url) thumbnail_url = d.url;
+            }
+
+            // 2 - Upload de mídia principal (video/imagem)
             if (files && files.length > 0) {
                 const uploaded: any[] = [];
-                for (let i = 0; i < files.length; i++) { const fd = new FormData(); fd.append("file", files[i]); const up = await fetch(`${API_URL}/api/v1/upload`, { method: "POST", headers: authHeader() as any, body: fd }); const d = await up.json(); uploaded.push(d); }
-                media_files = uploaded; media_url = uploaded[0]?.url || media_url; media_type = uploaded[0]?.type || form.tipo; thumbnail_url = uploaded[0]?.url || thumbnail_url;
+                for (let i = 0; i < files.length; i++) {
+                    const fd = new FormData(); fd.append("file", files[i]);
+                    const up = await fetch(`${API_URL}/api/v1/upload`, { method: "POST", headers: authHeader() as any, body: fd });
+                    const d = await up.json(); uploaded.push(d);
+                }
+                media_files = uploaded;
+                // Pega o primeiro video ou o primeiro arquivo como media principal
+                const videoFile = uploaded.find((u: any) => u.url?.match(/\.(mp4|mov|webm|m4v)/i) || u.type?.includes("video"));
+                const mainFile = videoFile || uploaded[0];
+                if (mainFile?.url) media_url = mainFile.url;
+                if (mainFile?.type) media_type = mainFile.type;
+
+                // Se NÃO tem thumbnail manual, tenta gerar
+                if (!thumbnail_url) {
+                    // Se tem imagem no upload junto, usa ela
+                    const imgFile = uploaded.find((u: any) => u.url?.match(/\.(jpg|jpeg|png|webp)/i) || u.type?.includes("image"));
+                    if (imgFile?.url &&!videoFile) {
+                        thumbnail_url = imgFile.url;
+                    } else if (videoFile?.url) {
+                        thumbnail_url = generateCloudinaryThumb(videoFile.url);
+                    }
+                }
             }
-            const payload = { titulo: form.titulo, slug: form.slug || form.titulo.toLowerCase().replace(/[^a-z0-9]+/g, "-"), tipo: form.tipo, descricao: form.descricao, conteudo: form.conteudo, category_id: form.category_id || null, status: form.status, destaque: form.destaque, tags: form.tags.split(",").map(t => t.trim()).filter(Boolean), media_url, thumbnail_url, media_type, media_files };
-            const method = editingPost? "PUT" : "POST"; const url = editingPost? `${API_URL}/api/v1/posts/${editingPost.id}` : `${API_URL}/api/v1/posts`;
+
+            // 3 - Se ainda não tem thumb, mas tem media_url de video do Cloudinary, gera automático
+            if (!thumbnail_url && media_url) {
+                const autoThumb = generateCloudinaryThumb(media_url);
+                if (autoThumb) thumbnail_url = autoThumb;
+            }
+
+            // Fallback final: se ainda não tem thumb e é imagem, usa a propria media
+            if (!thumbnail_url && media_url && media_url.match(/\.(jpg|jpeg|png|webp)/i)) {
+                thumbnail_url = media_url;
+            }
+
+            const payload = {
+                titulo: form.titulo,
+                slug: form.slug || form.titulo.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
+                tipo: form.tipo,
+                descricao: form.descricao,
+                conteudo: form.conteudo,
+                category_id: form.category_id || null,
+                status: form.status,
+                destaque: form.destaque,
+                tags: form.tags.split(",").map(t => t.trim()).filter(Boolean),
+                media_url,
+                thumbnail_url, // AQUI JÁ VAI AUTOMÁTICA OU MANUAL E SALVA NO DB
+                media_type: media_type || form.tipo,
+                media_files
+            };
+
+            const method = editingPost? "PUT" : "POST";
+            const url = editingPost? `${API_URL}/api/v1/posts/${editingPost.id}` : `${API_URL}/api/v1/posts`;
             const res = await fetch(url, { method, body: JSON.stringify(payload), headers: { "Content-Type": "application/json",...authHeader() } as any });
             if (!res.ok) { const e = await res.text(); throw new Error(e); }
             toast.success(editingPost? "Atualizado!" : "Criado!"); setShowPostModal(false); loadAll();
         } catch (e: any) { toast.error(e.message); } finally { setLoading(false); }
     }
+
     async function deletePost(id: string) { if (!confirm("Apagar post?")) return; await fetch(`${API_URL}/api/v1/posts/${id}`, { method: "DELETE", headers: authHeader() as any }); setPosts(posts.filter(p => p.id!== id)); toast.success("Apagado"); }
     function openNewCat() { setEditingCat(null); setCatForm({ nome: "", slug: "", descricao: "", cor: "#7c3aed" }); setShowCatModal(true); }
     function openEditCat(c: Category) { setEditingCat(c as any); setCatForm({ nome: c.nome, slug: c.slug, descricao: (c as any).descricao || "", cor: (c as any).cor || "#7c3aed" }); setShowCatModal(true); }
@@ -175,6 +258,10 @@ export default function AdminPage() {
     const TabBtn = ({ id, label }: { id: Tab, label: string }) => (
         <button type="button" onClick={() => setTab(id)} className={`px-3.5 py-2 text-sm font-medium rounded-full transition border shrink-0 ${tab === id? 'bg-black text-white border-black' : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'}`}>{label}</button>
     );
+
+    // Preview da capa que vai ser salva
+    const previewAutoThumb = form.media_url? generateCloudinaryThumb(form.media_url) : "";
+    const previewFinalThumb = form.thumbnail_url || previewAutoThumb || form.media_url;
 
     return (
         <main className="min-h-screen bg-[#fcfcfc] text-zinc-900 font-sans">
@@ -240,21 +327,11 @@ export default function AdminPage() {
                                 <div key={p.id} className="group border-b last:border-0 hover:bg-zinc-50/70 transition p-4 md:px-6 md:py-4 md:grid md:grid-cols-12 md:items-center gap-3">
                                     <div className="col-span-5 flex gap-3 items-start">
                                         <div className="w-12 h-12 rounded-xl bg-zinc-100 overflow-hidden shrink-0 border border-zinc-100 mt-0.5 md:mt-0">
-                                            {p.thumbnail_url || p.media_url? <img src={p.media_url} className="w-full h-full object-cover" alt="" /> : <div className="w-full h-full grid place-items-center text-[10px] font-bold bg-zinc-900 text-white">{p.tipo[0].toUpperCase()}</div>}
+                                            {p.thumbnail_url? <img src={p.thumbnail_url} className="w-full h-full object-cover" alt="" /> : p.media_url? <img src={p.media_url} className="w-full h-full object-cover" alt="" /> : <div className="w-full h-full grid place-items-center text-[10px] font-bold bg-zinc-900 text-white">{p.tipo[0].toUpperCase()}</div>}
                                         </div>
                                         <div className="min-w-0 flex-1">
                                             <p className="text-[13.5px] font-semibold line-clamp-2 leading-tight">{p.titulo}</p>
                                             <p className="text-[11px] text-zinc-500 mt-1">{p.tipo} • {new Date(p.created_at).toLocaleDateString()}</p>
-                                            <div className="flex md:hidden flex-wrap items-center gap-1.5 mt-2.5">
-                                                <span className="text-[10px] px-2.5 py-1 rounded-full bg-violet-50 text-violet-700 border border-violet-100 font-medium">{catName}</span>
-                                                <span className={`text-[10px] px-2.5 py-1 rounded-full border font-medium ${p.status === 'published'? 'bg-green-50 text-green-700 border-green-200' : 'bg-zinc-100 text-zinc-600 border-zinc-200'}`}>{p.status}</span>
-                                            </div>
-                                            {/* MOBILE: MESMA LARGURA E FULL WIDTH */}
-                                            <div className="grid grid-cols-3 gap-1.5 mt-2.5 md:hidden w-full">
-                                                <span className="flex items-center justify-center gap-1 bg-zinc-50 border border-zinc-200 px-2 py-2.5 rounded-full text-[11px] font-medium w-full">👁 {views}</span>
-                                                <span className="flex items-center justify-center gap-1 bg-zinc-50 border border-zinc-200 px-2 py-2.5 rounded-full text-[11px] font-medium w-full">💬 {comments}</span>
-                                                <span className="flex items-center justify-center gap-1 bg-zinc-50 border border-zinc-200 px-2 py-2.5 rounded-full text-[11px] font-medium w-full">↗ {shares}</span>
-                                            </div>
                                         </div>
                                     </div>
                                     <div className="hidden md:block col-span-2"><span className="text-[11px] px-2.5 py-1 rounded-full bg-violet-50 text-violet-700 border border-violet-100 font-medium">{catName}</span></div>
@@ -290,21 +367,12 @@ export default function AdminPage() {
                                     <div className="min-w-0 flex-1">
                                         <p className="text-[13px] font-semibold line-clamp-1">{b.titulo}</p>
                                         <p className="text-[11px] text-zinc-500 truncate max-w-[200px]">{b.link_url || "sem link"}</p>
-                                        <div className="flex md:hidden flex-wrap gap-1.5 mt-2">
-                                            <span className="text-[10px] px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-100 font-medium">{POSICOES.find(p => p.value === b.posicao)?.label || b.posicao}</span>
-                                            <span className={`text-[10px] px-2.5 py-1 rounded-full border font-medium ${b.ativo? 'bg-green-50 text-green-700 border-green-200' : 'bg-zinc-100'}`}>{b.ativo? 'ATIVO' : 'OFF'}</span>
-                                        </div>
-                                        <div className="grid grid-cols-2 gap-1.5 mt-2 md:hidden w-full">
-                                            <span className="bg-zinc-50 border border-zinc-200 px-2 py-2.5 rounded-full text-[11px] font-medium flex items-center justify-center w-full">👁 {b.views || 0}</span>
-                                            <span className="bg-zinc-50 border border-zinc-200 px-2 py-2.5 rounded-full text-[11px] font-medium flex items-center justify-center w-full">↗ {b.clicks || 0}</span>
-                                        </div>
                                     </div>
                                 </div>
                                 <div className="hidden md:block col-span-2"><span className="text-[11px] px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-100 font-medium">{POSICOES.find(p => p.value === b.posicao)?.label || b.posicao}</span></div>
                                 <div className="hidden md:block col-span-1"><span className={`text-[10px] px-2.5 py-1 rounded-full border font-medium ${b.ativo? 'bg-green-50 text-green-700 border-green-200' : 'bg-zinc-100'}`}>{b.ativo? 'ATIVO' : 'OFF'}</span></div>
                                 <div className="hidden md:flex col-span-2 gap-1.5 text-[11px]"><span className="bg-zinc-50 border px-2 py-1 rounded-full">👁 {b.views || 0}</span><span className="bg-zinc-50 border px-2 py-1 rounded-full">↗ {b.clicks || 0}</span></div>
                                 <div className="flex items-center justify-between md:justify-end gap-1.5 col-span-12 md:col-span-2 mt-2 md:mt-0 border-t md:border-0 pt-3 md:pt-0 border-zinc-100">
-                                    <span className="md:hidden text-[11px] text-zinc-400 font-medium">Ações</span>
                                     <div className="flex gap-1.5">
                                         <button onClick={() => openEditBanner(b)} className="w-9 h-9 rounded-full bg-white border border-zinc-200 hover:bg-black hover:text-white grid place-items-center transition">✎</button>
                                         <button onClick={() => deleteBanner(b.id)} className="w-9 h-9 rounded-full bg-white border border-zinc-200 hover:bg-red-500 hover:text-white grid place-items-center transition">🗑</button>
@@ -347,15 +415,40 @@ export default function AdminPage() {
                             )}
                             {tab === 'midia' && (
                                 <div className="flex flex-col gap-3">
-                                    <div className="grid grid-cols-1 gap-2">
-                                        <div className="flex flex-col gap-1"><label className="text-xs font-bold tracking-widest text-black">MEDIA URL</label><input value={form.media_url} onChange={e => setForm({...form, media_url: e.target.value })} placeholder="https://..." className={inputClass} /></div>
-                                        <div className="flex flex-col gap-1"><label className="text-xs font-bold tracking-widest text-black">THUMBNAIL</label><input value={form.thumbnail_url} onChange={e => setForm({...form, thumbnail_url: e.target.value })} placeholder="https://..." className={inputClass} /></div>
+                                    <div className="grid grid-cols-1 gap-3">
+                                        <div className="flex flex-col gap-1">
+                                            <label className="text-[10px] font-bold tracking-widest text-black">VIDEO / MEDIA URL *</label>
+                                            <input value={form.media_url} onChange={e => setForm({...form, media_url: e.target.value })} placeholder="https://res.cloudinary.com/.../video/upload/..." className={inputClass} />
+                                            {previewAutoThumb &&!form.thumbnail_url && (
+                                                <p className="text-[10px] text-green-600 font-medium">✓ Capa automática será gerada: {previewAutoThumb.substring(0, 60)}...</p>
+                                            )}
+                                        </div>
+                                        <div className="flex flex-col gap-1">
+                                            <label className="text-[10px] font-bold tracking-widest text-black">THUMBNAIL / CAPA (opcional - manual tem prioridade)</label>
+                                            <input value={form.thumbnail_url} onChange={e => setForm({...form, thumbnail_url: e.target.value })} placeholder="https://...jpg - se vazio, gera automática" className={inputClass} />
+                                            {form.thumbnail_url && <p className="text-[10px] text-violet-600 font-medium">✓ Usará capa manual que você colocou</p>}
+                                            {!form.thumbnail_url && previewAutoThumb && <p className="text-[10px] text-zinc-500">Se deixar vazio, vai usar capa automática do Cloudinary (frame 1s)</p>}
+                                        </div>
                                     </div>
+
                                     <div className="mt-2 p-4 border border-dashed border-gray-300 rounded-2xl bg-gray-50/50">
-                                        <p className="text-xs font-bold tracking-widest text-black mb-2">UPLOAD ARQUIVOS</p>
-                                        <input type="file" multiple accept="image/*,video/*,audio/*,.pdf" onChange={e => setFiles(e.target.files)} className="w-full text-sm file:mr-3 file:px-4 file:py-2 file:rounded-full file:border-0 file:bg-black file:text-white file:text-xs file:font-bold hover:file:bg-zinc-800" />
+                                        <p className="text-[10px] font-bold tracking-widest text-black mb-2">UPLOAD VIDEO PRINCIPAL</p>
+                                        <input type="file" accept="video/*,image/*,audio/*,.pdf" onChange={e => setFiles(e.target.files)} className="w-full text-sm file:mr-3 file:px-4 file:py-2 file:rounded-full file:border-0 file:bg-black file:text-white file:text-xs file:font-bold hover:file:bg-zinc-800" />
                                         {files && <p className="text-xs text-black/60 mt-2">{files.length} arquivo(s) selecionado(s)</p>}
                                     </div>
+
+                                    <div className="p-4 border border-dashed border-violet-300 rounded-2xl bg-violet-50/50">
+                                        <p className="text-[10px] font-bold tracking-widest text-black mb-2">UPLOAD CAPA MANUAL (tem prioridade sobre automática)</p>
+                                        <input type="file" accept="image/*" onChange={e => setThumbFile(e.target.files)} className="w-full text-sm file:mr-3 file:px-4 file:py-2 file:rounded-full file:border-0 file:bg-violet-600 file:text-white file:text-xs file:font-bold hover:file:bg-violet-700" />
+                                        {thumbFile && <p className="text-xs text-violet-700 mt-2">Capa manual selecionada: {thumbFile[0].name}</p>}
+                                    </div>
+
+                                    {previewFinalThumb && (
+                                        <div className="mt-2">
+                                            <p className="text-[10px] font-bold tracking-widest mb-1">PREVIEW CAPA FINAL QUE VAI SALVAR NO DB:</p>
+                                            <img src={previewFinalThumb} className="w-full h-40 object-cover rounded-xl border" alt="preview" />
+                                        </div>
+                                    )}
                                 </div>
                             )}
                             {tab === 'config' && (
