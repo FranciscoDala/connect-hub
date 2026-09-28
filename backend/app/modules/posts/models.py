@@ -1,7 +1,7 @@
 from __future__ import annotations
 import uuid
 from datetime import datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy import String, Text, DateTime, ForeignKey, Boolean
@@ -28,11 +28,11 @@ class Post(Base):
     media_url: Mapped[str | None] = mapped_column(Text, nullable=True)
     media_type: Mapped[str | None] = mapped_column(String(20), nullable=True)
     thumbnail_url: Mapped[str | None] = mapped_column(Text, nullable=True)
-    media_files: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
+    media_files: Mapped[List[dict] | None] = mapped_column(JSONB, nullable=True)
 
     status: Mapped[str] = mapped_column(String(20), default="published")
     destaque: Mapped[bool] = mapped_column(Boolean, default=False)
-    tags: Mapped[list | None] = mapped_column(JSONB, nullable=True)
+    tags: Mapped[List[str] | None] = mapped_column(JSONB, nullable=True)
 
     author_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True)
 

@@ -1,17 +1,18 @@
 ﻿from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
-from fastapi.responses import RedirectResponse, JSONResponse
+from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 import os
 import time
 
+# --- ROUTERS CORRIGIDOS ---
 from app.modules.auth.router import router as auth_router
+from app.modules.categories.routes import router as categories_router
 from app.modules.posts.routes import router as posts_router
-from app.modules.upload.router import router as upload_router
 
-# importa models pro alembic / create_all
+# importa models pro create_all / Base.metadata
 from app.db.base import Base
 import app.modules.users.models
 import app.modules.categories.models
@@ -29,7 +30,7 @@ app = FastAPI(
     openapi_url="/openapi.json",
 )
 
-# --- MIDDLEWARES DE SEGURANÇA ---
+# --- MIDDLEWARES ---
 app.add_middleware(GZipMiddleware, minimum_size=1000)
 
 origins = [
@@ -52,22 +53,18 @@ app.add_middleware(
 async def add_security_headers(request: Request, call_next):
     start = time.time()
     response = await call_next(request)
-    # headers blindados
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["X-Frame-Options"] = "DENY"
     response.headers["X-XSS-Protection"] = "1; mode=block"
     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
     if IS_PROD:
         response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
-    # remove header que entrega stack - FIX: MutableHeaders não tem pop
     if "server" in response.headers:
         del response.headers["server"]
-    # log lento
-    process_time = time.time() - start
-    response.headers["X-Process-Time"] = str(process_time)
+    response.headers["X-Process-Time"] = str(time.time() - start)
     return response
 
-# --- EXCEPTION HANDLERS BLINDADOS (não vaza stacktrace) ---
+# --- EXCEPTION HANDLERS ---
 @app.exception_handler(StarletteHTTPException)
 async def http_exception_handler(request: Request, exc: StarletteHTTPException):
     return JSONResponse(
@@ -77,7 +74,10 @@ async def http_exception_handler(request: Request, exc: StarletteHTTPException):
 
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
-    return JSONResponse(status_code=422, content={"detail": "Dados inválidos", "errors": exc.errors() if not IS_PROD else []})
+    return JSONResponse(
+        status_code=422,
+        content={"detail": "Dados inválidos", "errors": exc.errors() if not IS_PROD else []}
+    )
 
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
@@ -95,9 +95,10 @@ def root():
 def health():
     return {"status": "enterprise ready", "env": ENV, "version": "1.0.0"}
 
-app.include_router(auth_router)
-app.include_router(posts_router)
-app.include_router(upload_router)
+# Registra routers - ORDEM IMPORTA
+app.include_router(auth_router)         # /api/v1/auth/*
+app.include_router(categories_router)   # /api/v1/categories
+app.include_router(posts_router)        # /api/v1/posts + /api/v1/upload
 
 @app.get("/api/v1/apps", tags=["apps"])
 def list_apps():

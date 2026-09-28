@@ -17,12 +17,12 @@ class Category(Base):
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     nome: Mapped[str] = mapped_column(String(100), unique=True, nullable=False, index=True)
-    slug: Mapped[str] = mapped_column(String(120), unique=True, index=True)
+    slug: Mapped[str] = mapped_column(String(120), unique=True, index=True, nullable=False)
     descricao: Mapped[str | None] = mapped_column(String(255), nullable=True)
-    cor: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    cor: Mapped[str | None] = mapped_column(String(20), nullable=True, default="#7c3aed")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
-    posts: Mapped[List[Post]] = relationship(back_populates="categoria", lazy="selectin")
+    posts: Mapped[List[Post]] = relationship(back_populates="categoria", lazy="selectin", cascade="all, delete-orphan")
 
     def __repr__(self):
         return f"<Category {self.nome}>"
