@@ -1,8 +1,8 @@
 """create users and posts
 
-Revision ID: f56afae56908
+Revision ID: 57a6750a5afa
 Revises: 
-Create Date: 2026-09-28 15:08:51.607540
+Create Date: 2026-09-28 15:18:34.795219
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision: str = 'f56afae56908'
+revision: str = '57a6750a5afa'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -33,7 +33,7 @@ def upgrade() -> None:
     op.create_index(op.f('ix_categories_nome'), 'categories', ['nome'], unique=True)
     op.create_index(op.f('ix_categories_slug'), 'categories', ['slug'], unique=True)
     op.create_table('users',
-    sa.Column('id', sa.String(), nullable=False),
+    sa.Column('id', sa.UUID(), nullable=False),
     sa.Column('email', sa.String(), nullable=False),
     sa.Column('name', sa.String(), nullable=False),
     sa.Column('hashed_password', sa.String(), nullable=False),
