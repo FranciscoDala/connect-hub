@@ -7,6 +7,8 @@ import { API_URL, getToken, clearAuth, authHeader } from "../../lib/api";
 type Category = { id: string; nome: string; slug: string; cor?: string; descricao?: string };
 type Post = any;
 type Tab = 'conteudo' | 'midia' | 'config';
+type BannerPos = 'home_topo' | 'home_meio' | 'sidebar' | 'dentro_post' | 'footer';
+type Banner = { id: string; titulo: string; imagem_url: string; link_url?: string; posicao: BannerPos; ativo: boolean; clicks?: number; views?: number; data_inicio?: string; data_fim?: string };
 
 const TIPOS = [
     { value: 'noticia', label: 'Notícia' },
@@ -19,6 +21,13 @@ const STATUS = [
     { value: 'published', label: 'Publicado' },
     { value: 'draft', label: 'Rascunho' },
     { value: 'archived', label: 'Arquivado' },
+];
+const POSICOES: { value: BannerPos, label: string }[] = [
+    { value: 'home_topo', label: 'Home Topo' },
+    { value: 'home_meio', label: 'Home Meio' },
+    { value: 'sidebar', label: 'Sidebar' },
+    { value: 'dentro_post', label: 'Dentro do Post' },
+    { value: 'footer', label: 'Footer' },
 ];
 
 function CustomSelect({ value, options, onChange, placeholder }: { value: string, options: { value: string, label: string }[], onChange: (v: string) => void, placeholder: string }) {
@@ -52,24 +61,36 @@ function CustomSelect({ value, options, onChange, placeholder }: { value: string
 export default function AdminPage() {
     const [posts, setPosts] = useState<Post[]>([]);
     const [cats, setCats] = useState<Category[]>([]);
+    const [banners, setBanners] = useState<Banner[]>([]);
     const [filter, setFilter] = useState("");
+    const [mainTab, setMainTab] = useState<'posts'|'banners'>('posts');
     const router = useRouter();
     const [showPostModal, setShowPostModal] = useState(false);
     const [showCatModal, setShowCatModal] = useState(false);
+    const [showBannerModal, setShowBannerModal] = useState(false);
     const [editingPost, setEditingPost] = useState<Post | null>(null);
     const [editingCat, setEditingCat] = useState<Category | null>(null);
+    const [editingBanner, setEditingBanner] = useState<Banner | null>(null);
     const [tab, setTab] = useState<Tab>('conteudo');
     const [form, setForm] = useState({ titulo: "", slug: "", tipo: "noticia", descricao: "", conteudo: "", category_id: "", status: "published", destaque: false, tags: "", media_url: "", thumbnail_url: "" });
     const [files, setFiles] = useState<FileList | null>(null);
     const [loading, setLoading] = useState(false);
     const [catForm, setCatForm] = useState({ nome: "", slug: "", descricao: "", cor: "#7c3aed" });
+    const [bannerForm, setBannerForm] = useState({ titulo: "", imagem_url: "", link_url: "", posicao: "home_topo" as BannerPos, ativo: true, data_inicio: "", data_fim: "" });
+    const [bannerFile, setBannerFile] = useState<FileList | null>(null);
 
     useEffect(() => { if (!getToken()) { router.replace("/login"); return; } loadAll(); }, []);
     async function loadAll() {
         try {
-            const [pRes, cRes] = await Promise.all([fetch(`${API_URL}/api/v1/posts`, { headers: authHeader() as any }), fetch(`${API_URL}/api/v1/categories`, { headers: authHeader() as any })]);
+            const [pRes, cRes, bRes] = await Promise.all([
+                fetch(`${API_URL}/api/v1/posts`, { headers: authHeader() as any }),
+                fetch(`${API_URL}/api/v1/categories`, { headers: authHeader() as any }),
+                fetch(`${API_URL}/api/v1/banners`, { headers: authHeader() as any }).catch(()=>({ json: async()=>[] } as any))
+            ]);
             if (pRes.status === 401 || cRes.status === 401) throw new Error("401");
-            setPosts(await pRes.json()); setCats(await cRes.json());
+            setPosts(await pRes.json());
+            setCats(await cRes.json());
+            try{ setBanners(await (bRes as any).json()); }catch{ setBanners([]); }
         } catch { clearAuth(); router.replace("/login"); }
     }
 
@@ -98,7 +119,32 @@ export default function AdminPage() {
     async function saveCat() { const method = editingCat? "PUT" : "POST"; const url = editingCat? `${API_URL}/api/v1/categories/${editingCat.id}` : `${API_URL}/api/v1/categories`; const res = await fetch(url, { method, body: JSON.stringify({...catForm, slug: catForm.slug || catForm.nome.toLowerCase().replace(/\s+/g, "-") }), headers: { "Content-Type": "application/json",...authHeader() } as any }); if (!res.ok) return toast.error("Erro categoria"); setShowCatModal(false); loadAll(); toast.success("Categoria salva!"); }
     async function deleteCat(id: string) { if (!confirm("Apagar categoria?")) return; await fetch(`${API_URL}/api/v1/categories/${id}`, { method: "DELETE", headers: authHeader() as any }); loadAll(); }
 
+    // BANNERS CRUD
+    function openNewBanner(){ setEditingBanner(null); setBannerForm({ titulo:"", imagem_url:"", link_url:"", posicao:"home_topo", ativo:true, data_inicio:"", data_fim:"" }); setBannerFile(null); setShowBannerModal(true); }
+    function openEditBanner(b: Banner){ setEditingBanner(b); setBannerForm({ titulo:b.titulo, imagem_url:b.imagem_url, link_url:b.link_url||"", posicao:b.posicao, ativo:b.ativo, data_inicio:b.data_inicio||"", data_fim:b.data_fim||"" }); setShowBannerModal(true); }
+    async function saveBanner(){
+        if(!bannerForm.titulo) return toast.error("Título obrigatório");
+        setLoading(true);
+        try{
+            let imagem_url = bannerForm.imagem_url;
+            if(bannerFile && bannerFile.length>0){
+                const fd = new FormData(); fd.append("file", bannerFile[0]);
+                const up = await fetch(`${API_URL}/api/v1/upload`, { method:"POST", headers: authHeader() as any, body: fd });
+                const d = await up.json(); imagem_url = d.url;
+            }
+            if(!imagem_url) return toast.error("Imagem obrigatória");
+            const payload = {...bannerForm, imagem_url };
+            const method = editingBanner? "PUT":"POST";
+            const url = editingBanner? `${API_URL}/api/v1/banners/${editingBanner.id}` : `${API_URL}/api/v1/banners`;
+            const res = await fetch(url, { method, body: JSON.stringify(payload), headers:{ "Content-Type":"application/json",...authHeader() } as any });
+            if(!res.ok) throw new Error(await res.text());
+            toast.success(editingBanner? "Banner atualizado!":"Banner criado!"); setShowBannerModal(false); loadAll();
+        }catch(e:any){ toast.error(e.message); }finally{ setLoading(false); }
+    }
+    async function deleteBanner(id:string){ if(!confirm("Apagar banner?")) return; await fetch(`${API_URL}/api/v1/banners/${id}`, { method:"DELETE", headers: authHeader() as any }); setBanners(banners.filter(b=>b.id!==id)); toast.success("Apagado"); }
+
     const filtered = posts.filter(p => p.titulo.toLowerCase().includes(filter.toLowerCase()));
+    const filteredBanners = banners.filter(b => b.titulo.toLowerCase().includes(filter.toLowerCase()));
     const inputClass = "w-full h-11 bg-white border border-gray-200 rounded-xl px-3 text-sm text-black placeholder:text-black/40 focus:outline-none focus:border-black focus:ring-1 focus:ring-black/10 transition";
     const TabBtn = ({ id, label }: { id: Tab, label: string }) => (
         <button type="button" onClick={() => setTab(id)} className={`px-3.5 py-2 text-sm font-medium rounded-full transition border shrink-0 ${tab === id? 'bg-black text-white border-black' : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'}`}>{label}</button>
@@ -132,21 +178,34 @@ export default function AdminPage() {
                     </div>
                 )}
 
+                {/* TABS PRINCIPAIS */}
+                <div className="flex gap-2 mb-6">
+                    <button onClick={()=>setMainTab('posts')} className={`h-9 px-5 rounded-full text-xs font-semibold border transition ${mainTab==='posts'?'bg-black text-white border-black':'bg-white border-zinc-200 hover:bg-zinc-50'}`}>POSTS • {posts.length}</button>
+                    <button onClick={()=>setMainTab('banners')} className={`h-9 px-5 rounded-full text-xs font-semibold border transition ${mainTab==='banners'?'bg-black text-white border-black':'bg-white border-zinc-200 hover:bg-zinc-50'}`}>BANNERS • {banners.length}</button>
+                </div>
+
                 <div className="flex flex-col gap-4 mb-6">
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                        <h2 className="text-sm font-semibold tracking-wide">Posts • {filtered.length}</h2>
+                        <h2 className="text-sm font-semibold tracking-wide">{mainTab==='posts'?`Posts • ${filtered.length}`:`Banners • ${filteredBanners.length}`}</h2>
                         <div className="flex flex-col md:flex-row gap-2 w-full md:w-auto">
                             <div className="relative w-full md:w-[280px]">
-                                <input value={filter} onChange={e => setFilter(e.target.value)} placeholder="Buscar post..." className="w-full h-10 pl-4 pr-4 rounded-full border border-zinc-200 bg-white text-sm outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900/10" />
+                                <input value={filter} onChange={e => setFilter(e.target.value)} placeholder={mainTab==='posts'?"Buscar post...":"Buscar banner..."} className="w-full h-10 pl-4 pr-4 rounded-full border border-zinc-200 bg-white text-sm outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900/10" />
                             </div>
                             <div className="flex gap-2">
-                                <button onClick={openNewCat} className="flex-1 md:flex-none h-10 px-5 rounded-full border border-zinc-200 bg-white hover:bg-zinc-50 text-xs font-semibold transition">+ CATEGORIA</button>
-                                <button onClick={openNewPost} className="flex-1 md:flex-none h-10 px-5 rounded-full bg-zinc-900 text-white hover:bg-black text-xs font-semibold transition">+ NOVO POST</button>
+                                {mainTab==='posts'?(
+                                    <>
+                                    <button onClick={openNewCat} className="flex-1 md:flex-none h-10 px-5 rounded-full border border-zinc-200 bg-white hover:bg-zinc-50 text-xs font-semibold transition">+ CATEGORIA</button>
+                                    <button onClick={openNewPost} className="flex-1 md:flex-none h-10 px-5 rounded-full bg-zinc-900 text-white hover:bg-black text-xs font-semibold transition">+ NOVO POST</button>
+                                    </>
+                                ):(
+                                    <button onClick={openNewBanner} className="flex-1 md:flex-none h-10 px-5 rounded-full bg-zinc-900 text-white hover:bg-black text-xs font-semibold transition">+ NOVO BANNER</button>
+                                )}
                             </div>
                         </div>
                     </div>
                 </div>
 
+                {mainTab==='posts'?(
                 <div className="bg-white border border-zinc-200 rounded-[20px] overflow-hidden shadow-sm">
                     <div className="hidden md:grid grid-cols-12 text-[10px] tracking-widest text-zinc-400 px-6 py-3 border-b bg-zinc-50/50">
                         <div className="col-span-5">TÍTULO</div>
@@ -155,11 +214,10 @@ export default function AdminPage() {
                         <div className="col-span-2">MÉTRICAS</div>
                         <div className="col-span-2 text-right">AÇÕES</div>
                     </div>
-
                     {filtered.map(p => {
-                        const views = p.views?? p.views_count?? p.visualizacoes?? 0;
-                        const comments = p.comments_count?? p.comentarios?? p.total_comments?? 0;
-                        const shares = p.shares?? p.shares_count?? p.partilhas?? 0;
+                        const views = p.views?? p.views_count?? 0;
+                        const comments = p.comments_count?? 0;
+                        const shares = p.shares?? p.shares_count?? 0;
                         return (
                         <div key={p.id} className="group border-b last:border-0 hover:bg-zinc-50/70 transition p-4 md:px-6 md:py-4 md:grid md:grid-cols-12 md:items-center gap-3">
                             <div className="col-span-5 flex gap-3 items-center">
@@ -169,40 +227,60 @@ export default function AdminPage() {
                                 <div className="min-w-0 flex-1">
                                     <p className="text-[13.5px] font-semibold line-clamp-1 leading-tight">{p.titulo}</p>
                                     <p className="text-[11px] text-zinc-500 mt-0.5">{p.tipo} • {new Date(p.created_at).toLocaleDateString()}</p>
-                                    {/* MOBILE: metricas */}
                                     <div className="flex items-center gap-2 mt-2 md:hidden">
-                                        <span className="flex items-center gap-1 text-[11px] bg-zinc-50 border px-2 py-0.5 rounded-full"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> {views}</span>
-                                        <span className="flex items-center gap-1 text-[11px] bg-zinc-50 border px-2 py-0.5 rounded-full"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg> {comments}</span>
-                                        <span className="flex items-center gap-1 text-[11px] bg-zinc-50 border px-2 py-0.5 rounded-full"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> {shares}</span>
-                                    </div>
-                                    <div className="flex flex-wrap gap-1.5 mt-2 md:hidden">
-                                        <span className="text-[10px] px-2.5 py-1 rounded-full bg-violet-50 text-violet-700 border border-violet-100 font-medium">{cats.find(c => c.id === p.category_id)?.nome || "—"}</span>
-                                        <span className={`text-[10px] px-2.5 py-1 rounded-full border font-medium ${p.status === 'published'? 'bg-green-50 text-green-700 border-green-200' : 'bg-zinc-100'}`}>{p.status}</span>
+                                        <span className="flex items-center gap-1 text-[11px] bg-zinc-50 border px-2 py-0.5 rounded-full">👁 {views}</span>
+                                        <span className="flex items-center gap-1 text-[11px] bg-zinc-50 border px-2 py-0.5 rounded-full">💬 {comments}</span>
+                                        <span className="flex items-center gap-1 text-[11px] bg-zinc-50 border px-2 py-0.5 rounded-full">↗ {shares}</span>
                                     </div>
                                 </div>
                             </div>
                             <div className="hidden md:block col-span-2"><span className="text-[11px] px-2.5 py-1 rounded-full bg-violet-50 text-violet-700 border border-violet-100 font-medium">{cats.find(c => c.id === p.category_id)?.nome || "—"}</span></div>
                             <div className="hidden md:flex col-span-1"><span className={`text-[10px] px-2.5 py-1 rounded-full border font-medium ${p.status === 'published'? 'bg-green-50 text-green-700 border-green-200' : 'bg-zinc-100 text-zinc-600'}`}>{p.status}</span></div>
-
-                            {/* MÉTRICAS DESKTOP */}
                             <div className="hidden md:flex col-span-2 items-center gap-1.5 text-[11px] text-zinc-600">
-                                <span title="Visualizações" className="flex items-center gap-1 bg-zinc-50 border px-2 py-1 rounded-full"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> {views}</span>
-                                <span title="Comentários" className="flex items-center gap-1 bg-zinc-50 border px-2 py-1 rounded-full"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg> {comments}</span>
-                                <span title="Partilhas" className="flex items-center gap-1 bg-zinc-50 border px-2 py-1 rounded-full"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> {shares}</span>
+                                <span className="flex items-center gap-1 bg-zinc-50 border px-2 py-1 rounded-full">👁 {views}</span>
+                                <span className="flex items-center gap-1 bg-zinc-50 border px-2 py-1 rounded-full">💬 {comments}</span>
+                                <span className="flex items-center gap-1 bg-zinc-50 border px-2 py-1 rounded-full">↗ {shares}</span>
                             </div>
-
                             <div className="flex items-center justify-end gap-1.5 mt-3 md:mt-0 col-span-2">
-                                <button onClick={() => openEditPost(p)} className="w-9 h-9 rounded-full bg-white border border-zinc-200 hover:border-zinc-900 hover:bg-zinc-900 hover:text-white grid place-items-center transition">
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                                </button>
-                                <button onClick={() => deletePost(p.id)} className="w-9 h-9 rounded-full bg-white border border-zinc-200 hover:border-red-500 hover:bg-red-500 hover:text-white grid place-items-center transition text-zinc-500">
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-                                </button>
+                                <button onClick={() => openEditPost(p)} className="w-9 h-9 rounded-full bg-white border border-zinc-200 hover:border-zinc-900 hover:bg-zinc-900 hover:text-white grid place-items-center transition">✎</button>
+                                <button onClick={() => deletePost(p.id)} className="w-9 h-9 rounded-full bg-white border border-zinc-200 hover:border-red-500 hover:bg-red-500 hover:text-white grid place-items-center transition text-zinc-500">🗑</button>
                             </div>
                         </div>
                         )})}
                     {filtered.length === 0 && <div className="p-12 text-center text-sm text-zinc-400">Nenhum post encontrado</div>}
                 </div>
+                ):(
+                <div className="bg-white border border-zinc-200 rounded-[20px] overflow-hidden shadow-sm">
+                    <div className="hidden md:grid grid-cols-12 text-[10px] tracking-widest text-zinc-400 px-6 py-3 border-b bg-zinc-50/50">
+                        <div className="col-span-5">BANNER</div>
+                        <div className="col-span-2">POSIÇÃO</div>
+                        <div className="col-span-1">STATUS</div>
+                        <div className="col-span-2">MÉTRICAS</div>
+                        <div className="col-span-2 text-right">AÇÕES</div>
+                    </div>
+                    {filteredBanners.map(b=>(
+                        <div key={b.id} className="group border-b last:border-0 hover:bg-zinc-50/70 transition p-4 md:px-6 md:py-4 md:grid md:grid-cols-12 md:items-center gap-3">
+                            <div className="col-span-5 flex gap-3 items-center">
+                                <div className="w-20 h-12 rounded-xl bg-zinc-100 overflow-hidden shrink-0 border border-zinc-100">
+                                    {b.imagem_url? <img src={b.imagem_url} className="w-full h-full object-cover" alt="" /> : <div className="w-full h-full grid place-items-center text-[10px]">SEM IMG</div>}
+                                </div>
+                                <div className="min-w-0">
+                                    <p className="text-[13px] font-semibold line-clamp-1">{b.titulo}</p>
+                                    <p className="text-[11px] text-zinc-500 truncate max-w-[200px]">{b.link_url||"sem link"}</p>
+                                </div>
+                            </div>
+                            <div className="hidden md:block col-span-2"><span className="text-[11px] px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-100 font-medium">{POSICOES.find(p=>p.value===b.posicao)?.label||b.posicao}</span></div>
+                            <div className="hidden md:block col-span-1"><span className={`text-[10px] px-2.5 py-1 rounded-full border font-medium ${b.ativo?'bg-green-50 text-green-700 border-green-200':'bg-zinc-100'}`}>{b.ativo?'ATIVO':'OFF'}</span></div>
+                            <div className="hidden md:flex col-span-2 gap-1.5 text-[11px]"><span className="bg-zinc-50 border px-2 py-1 rounded-full">👁 {b.views||0}</span><span className="bg-zinc-50 border px-2 py-1 rounded-full">↗ {b.clicks||0}</span></div>
+                            <div className="flex items-center justify-end gap-1.5 col-span-12 md:col-span-2 mt-2 md:mt-0">
+                                <button onClick={()=>openEditBanner(b)} className="w-9 h-9 rounded-full bg-white border border-zinc-200 hover:bg-black hover:text-white grid place-items-center transition">✎</button>
+                                <button onClick={()=>deleteBanner(b.id)} className="w-9 h-9 rounded-full bg-white border border-zinc-200 hover:bg-red-500 hover:text-white grid place-items-center transition">🗑</button>
+                            </div>
+                        </div>
+                    ))}
+                    {filteredBanners.length===0 && <div className="p-12 text-center text-sm text-zinc-400">Nenhum banner. Clica em + NOVO BANNER</div>}
+                </div>
+                )}
             </div>
 
             {showPostModal && (
@@ -215,7 +293,6 @@ export default function AdminPage() {
                         </div>
                         <div className="px-6 pt-5 pb-3 shrink-0 border-b border-gray-100">
                             <h3 className="text-lg font-bold text-gray-900 leading-tight">{editingPost? 'Editar Post' : 'Novo Post'}</h3>
-                            <p className="text-sm text-gray-500 mt-1">Gerencie conteúdo do Connect.ao</p>
                             <div className="flex gap-1.5 mt-4 overflow-x-auto scrollbar-none">
                                 <TabBtn id="conteudo" label="Conteúdo" />
                                 <TabBtn id="midia" label="Mídia" />
@@ -288,6 +365,44 @@ export default function AdminPage() {
                             <div className="mt-6 flex gap-2">
                                 <button onClick={() => setShowCatModal(false)} className="flex-1 h-11 rounded-full border border-gray-200 bg-white flex items-center justify-center">×</button>
                                 <button onClick={saveCat} className="flex-1 h-11 rounded-full bg-violet-600 text-white font-semibold hover:bg-violet-700 flex items-center justify-center">SALVAR</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {showBannerModal && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={(e) => e.stopPropagation()} />
+                    <div className="relative bg-white rounded-[24px] w-full max-w-[460px] overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.25)] max-h-[90vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
+                        <div className="relative h-[72px] px-5 pt-5 flex justify-between items-start bg-amber-50 shrink-0">
+                            <div className="w-9 h-9 rounded-full bg-white border shadow-sm flex items-center justify-center text-sm">📢</div>
+                            <button onClick={() => setShowBannerModal(false)} className="w-8 h-8 rounded-full bg-white border shadow-sm flex items-center justify-center">×</button>
+                        </div>
+                        <div className="p-6 overflow-y-auto scrollbar-none">
+                            <h3 className="text-lg font-bold">{editingBanner? "Editar Banner" : "Novo Banner"}</h3>
+                            <div className="mt-4 space-y-3">
+                                <input value={bannerForm.titulo} onChange={e => setBannerForm({...bannerForm, titulo: e.target.value })} placeholder="Título do banner ex: Unitel 5G" className={inputClass} />
+                                <CustomSelect value={bannerForm.posicao} onChange={v => setBannerForm({...bannerForm, posicao: v as BannerPos })} placeholder="Posição" options={POSICOES} />
+                                <input value={bannerForm.link_url} onChange={e => setBannerForm({...bannerForm, link_url: e.target.value })} placeholder="Link ao clicar ex: https://..." className={inputClass} />
+                                <input value={bannerForm.imagem_url} onChange={e => setBannerForm({...bannerForm, imagem_url: e.target.value })} placeholder="URL da imagem ou faz upload abaixo" className={inputClass} />
+                                <div className="p-3 border border-dashed border-gray-300 rounded-2xl bg-gray-50/50">
+                                    <p className="text-[10px] font-bold tracking-widest mb-2">UPLOAD IMAGEM BANNER</p>
+                                    <input type="file" accept="image/*" onChange={e => setBannerFile(e.target.files)} className="w-full text-sm file:mr-3 file:px-4 file:py-2 file:rounded-full file:border-0 file:bg-black file:text-white file:text-xs file:font-bold" />
+                                </div>
+                                <div className="grid grid-cols-2 gap-2">
+                                    <div className="flex flex-col gap-1"><label className="text-[10px] font-bold">INÍCIO</label><input type="date" value={bannerForm.data_inicio} onChange={e => setBannerForm({...bannerForm, data_inicio: e.target.value })} className={inputClass} /></div>
+                                    <div className="flex flex-col gap-1"><label className="text-[10px] font-bold">FIM</label><input type="date" value={bannerForm.data_fim} onChange={e => setBannerForm({...bannerForm, data_fim: e.target.value })} className={inputClass} /></div>
+                                </div>
+                                <label className="flex items-center gap-2 h-11 px-3 border border-gray-200 rounded-xl cursor-pointer bg-white hover:bg-gray-50 transition">
+                                    <input type="checkbox" checked={bannerForm.ativo} onChange={e => setBannerForm({...bannerForm, ativo: e.target.checked })} className="w-4 h-4 accent-black rounded" />
+                                    <span className="text-xs text-black font-medium">Banner ativo?</span>
+                                </label>
+                                {bannerForm.imagem_url && <img src={bannerForm.imagem_url} className="w-full h-32 object-cover rounded-xl border" alt="preview" />}
+                            </div>
+                            <div className="mt-6 flex gap-2">
+                                <button onClick={() => setShowBannerModal(false)} className="flex-1 h-11 rounded-full border border-gray-200 bg-white flex items-center justify-center">×</button>
+                                <button onClick={saveBanner} disabled={loading} className="flex-1 h-11 rounded-full bg-black text-white font-semibold hover:bg-zinc-800 flex items-center justify-center disabled:opacity-50">{loading? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <>SALVAR</>}</button>
                             </div>
                         </div>
                     </div>
