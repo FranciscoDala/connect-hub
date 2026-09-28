@@ -25,7 +25,7 @@ export function authHeader() {
   return t ? { Authorization: `Bearer ${t}` } : {};
 }
 
-// PUBLIC
+// --- PUBLIC - ESSES DOIS PRECISAM EXISTIR POR CAUSA DO page.tsx ---
 export async function getPosts() {
   try {
     const res = await fetch(`${API_URL}/api/v1/posts`, { next: { revalidate: 60 } });
@@ -34,7 +34,23 @@ export async function getPosts() {
   } catch { return []; }
 }
 
-// AUTH
+export async function getApps() {
+  try {
+    const res = await fetch(`${API_URL}/api/v1/apps`, { next: { revalidate: 60 } });
+    if (!res.ok) return [];
+    return await res.json();
+  } catch { return []; }
+}
+
+export async function getCategories() {
+  try {
+    const res = await fetch(`${API_URL}/api/v1/categories`, { next: { revalidate: 60 } });
+    if (!res.ok) return [];
+    return await res.json();
+  } catch { return []; }
+}
+
+// --- AUTH ---
 export async function loginAdmin(email: string, password: string) {
   const res = await fetch(`${API_URL}/api/v1/auth/login`, {
     method: "POST",
