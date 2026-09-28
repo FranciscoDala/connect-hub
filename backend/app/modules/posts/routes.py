@@ -18,6 +18,13 @@ router = APIRouter(prefix="/api/v1", tags=["posts"])
 
 def slugify(text: str) -> str:
     text = text.lower()
+    # remove acentos simples para URL limpa
+    text = re.sub(r'[áàâãä]', 'a', text)
+    text = re.sub(r'[éèêë]', 'e', text)
+    text = re.sub(r'[íìîï]', 'i', text)
+    text = re.sub(r'[óòôõö]', 'o', text)
+    text = re.sub(r'[úùûü]', 'u', text)
+    text = re.sub(r'[ç]', 'c', text)
     text = re.sub(r'[^a-z0-9]+', '-', text)
     return text.strip('-')
 
@@ -62,9 +69,18 @@ def delete_category(cat_id: uuid.UUID, admin=Depends(get_current_admin), db: Ses
 async def upload_post_media(file: UploadFile = File(...), admin=Depends(get_current_admin)):
     return await upload_media(file, folder="connect-hub/posts")
 
-# ========== POSTS ==========
+# ========== POSTS - LISTAGEM ==========
 @router.get("/posts", response_model=List[PostResponse])
-def list_posts(db: Session=Depends(get_db), tipo: Optional[str]=None, category_id: Optional[uuid.UUID]=None, status: Optional[str]=Query(None), q: Optional[str]=None, destaque: Optional[bool]=None, limit: int=Query(50, le=100), offset: int=0):
+def list_posts(
+    db: Session=Depends(get_db),
+    tipo: Optional[str]=None,
+    category_id: Optional[uuid.UUID]=None,
+    status: Optional[str]=Query(None),
+    q: Optional[str]=None,
+    destaque: Optional[bool]=None,
+    limit: int=Query(50, le=100),
+    offset: int=0
+):
     query = db.query(Post)
     if tipo: query = query.filter(Post.tipo == tipo)
     if category_id: query = query.filter(Post.category_id == category_id)
@@ -74,6 +90,17 @@ def list_posts(db: Session=Depends(get_db), tipo: Optional[str]=None, category_i
     posts = query.order_by(Post.created_at.desc()).offset(offset).limit(limit).all()
     return [to_post_response(p, db) for p in posts]
 
+# ========== POSTS - POR SLUG (TEM QUE VIR ANTES DO {post_id}) ==========
+@router.get("/posts/slug/{slug}", response_model=PostResponse)
+def get_post_by_slug(slug: str, db: Session=Depends(get_db)):
+    post = db.query(Post).filter(Post.slug == slug).first()
+    if not post:
+        # tenta sem acento ou id curto
+        post = db.query(Post).filter(Post.slug.ilike(f"%{slug}%")).first()
+    if not post: raise HTTPException(404, "Post não encontrado")
+    return to_post_response(post, db)
+
+# ========== POSTS - POR ID ==========
 @router.get("/posts/{post_id}", response_model=PostResponse)
 def get_post(post_id: uuid.UUID, db: Session=Depends(get_db)):
     post = db.query(Post).filter(Post.id == post_id).first()
@@ -93,7 +120,12 @@ def create_post(data: PostCreate, admin=Depends(get_current_admin), db: Session=
 def update_post(post_id: uuid.UUID, data: PostUpdate, admin=Depends(get_current_admin), db: Session=Depends(get_db)):
     post = db.query(Post).filter(Post.id == post_id).first()
     if not post: raise HTTPException(404, "Post não encontrado")
-    for k, v in data.model_dump(exclude_unset=True).items(): setattr(post, k, v)
+    payload = data.model_dump(exclude_unset=True)
+    # se mudar título e não mandar slug, regenera
+    if "titulo" in payload and not payload.get("slug"):
+        payload["slug"] = slugify(payload["titulo"])
+    for k, v in payload.items():
+        setattr(post, k, v)
     db.commit(); db.refresh(post)
     return to_post_response(post, db)
 
@@ -104,7 +136,7 @@ def delete_post(post_id: uuid.UUID, admin=Depends(get_current_admin), db: Sessio
     db.delete(post); db.commit()
     return {"ok": True}
 
-# ========== VIEWS & SHARES ==========
+# ========== VIEWS & SHARES - PÚBLICO ==========
 @router.post("/posts/{post_id}/view")
 def add_view(post_id: uuid.UUID, db: Session=Depends(get_db)):
     post = db.query(Post).filter(Post.id == post_id).first()
@@ -113,6 +145,11 @@ def add_view(post_id: uuid.UUID, db: Session=Depends(get_db)):
     db.commit()
     return {"views": post.views}
 
+# alias pra compatibilidade com frontend antigo
+@router.post("/posts/{post_id}/views")
+def add_views_alias(post_id: uuid.UUID, db: Session=Depends(get_db)):
+    return add_view(post_id, db)
+
 @router.post("/posts/{post_id}/share")
 def add_share(post_id: uuid.UUID, db: Session=Depends(get_db)):
     post = db.query(Post).filter(Post.id == post_id).first()
@@ -120,6 +157,15 @@ def add_share(post_id: uuid.UUID, db: Session=Depends(get_db)):
     post.shares_count = (post.shares_count or 0) + 1
     db.commit()
     return {"shares_count": post.shares_count}
+
+# view por slug também (usado pela page nova)
+@router.post("/posts/slug/{slug}/view")
+def add_view_by_slug(slug: str, db: Session=Depends(get_db)):
+    post = db.query(Post).filter(Post.slug == slug).first()
+    if not post: raise HTTPException(404, "Post não encontrado")
+    post.views = (post.views or 0) + 1
+    db.commit()
+    return {"views": post.views}
 
 # ========== COMMENTS ==========
 @router.get("/posts/{post_id}/comments", response_model=List[CommentResponse])
