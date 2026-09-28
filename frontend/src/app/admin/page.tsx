@@ -138,14 +138,12 @@ export default function AdminPage() {
                 </div>
 
                 <div className="bg-white border border-zinc-200 rounded-2xl md:rounded-3xl overflow-hidden">
-                    {/* HEADER TABELA - SÓ DESKTOP */}
                     <div className="hidden md:grid grid-cols-12 text-[10px] tracking-widest text-zinc-400 px-6 py-3 border-b bg-zinc-50/50">
                         <div className="col-span-6">TÍTULO</div><div className="col-span-2">CATEGORIA</div><div className="col-span-2">STATUS</div><div className="col-span-2 text-right">AÇÕES</div>
                     </div>
 
                     {filtered.map(p => (
                         <div key={p.id} className="border-b last:border-0 hover:bg-zinc-50/70 transition p-4 md:px-6 md:py-4 md:grid md:grid-cols-12 md:items-center gap-3">
-                            {/* MOBILE CARD LAYOUT */}
                             <div className="col-span-6 flex gap-3 items-center">
                                 <div className="w-14 h-14 md:w-12 md:h-12 rounded-xl bg-zinc-100 overflow-hidden shrink-0">
                                     {p.thumbnail_url || p.media_url? <img src={p.media_url} className="w-full h-full object-cover" alt="" /> : <div className="w-full h-full grid place-items-center text-[10px]">{p.tipo[0].toUpperCase()}</div>}
@@ -153,7 +151,6 @@ export default function AdminPage() {
                                 <div className="min-w-0 flex-1">
                                     <p className="text-sm font-medium line-clamp-1 md:line-clamp-1">{p.titulo}</p>
                                     <p className="text-xs text-zinc-500 truncate">{p.tipo} • {new Date(p.created_at).toLocaleDateString()}</p>
-                                    {/* BADGES NO MOBILE - DENTRO DO CARD */}
                                     <div className="flex flex-wrap gap-1.5 mt-2 md:hidden">
                                         <span className="text-[10px] px-2 py-1 rounded-full bg-violet-50 text-violet-600 border border-violet-100 truncate max-w-[100px]">{cats.find(c => c.id === p.category_id)?.nome || "—"}</span>
                                         <span className={`text-[10px] px-2 py-1 rounded-full border ${p.status === 'published'? 'bg-green-50 text-green-700 border-green-200' : 'bg-zinc-100'}`}>{p.status}</span>
@@ -161,11 +158,8 @@ export default function AdminPage() {
                                     </div>
                                 </div>
                             </div>
-
-                            {/* DESKTOP COLS */}
                             <div className="hidden md:block col-span-2"><span className="text-xs px-2.5 py-1 rounded-full bg-violet-50 text-violet-600 border border-violet-100 truncate">{cats.find(c => c.id === p.category_id)?.nome || "—"}</span></div>
                             <div className="hidden md:flex col-span-2 gap-1"><span className={`text-[10px] px-2 py-1 rounded-full border ${p.status === 'published'? 'bg-green-50 text-green-700 border-green-200' : 'bg-zinc-100'}`}>{p.status}</span>{p.destaque && <span className="text-[10px] px-2 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200">DESTAQUE</span>}</div>
-
                             <div className="flex md:justify-end gap-2 mt-3 md:mt-0 col-span-2">
                                 <button onClick={() => openEditPost(p)} className="flex-1 md:flex-none md:w-8 h-9 md:h-8 rounded-full border bg-white hover:bg-zinc-100 grid place-items-center text-sm">✎ Editar</button>
                                 <button onClick={() => deletePost(p.id)} className="flex-1 md:flex-none md:w-8 h-9 md:h-8 rounded-full border bg-white hover:bg-red-50 hover:text-red-500 grid place-items-center text-sm">🗑</button>
@@ -176,11 +170,11 @@ export default function AdminPage() {
                 </div>
             </div>
 
-            {/* MODAIS - RESPONSIVOS */}
+            {/* MODAL POST - CENTRALIZADA IGUAL REFERENCIA */}
             {showPostModal && (
-                <div className="fixed inset-0 z-[100] flex items-end md:items-center justify-center md:p-4">
-                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowPostModal(false)} />
-                    <div className="relative bg-white rounded-t-3xl md:rounded-3xl w-full max-w-[560px] overflow-hidden shadow-2xl max-h-[95vh] md:max-h-[90vh] flex flex-col">
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={(e) => e.stopPropagation()} />
+                    <div className="relative bg-white rounded-[24px] w-full max-w-[560px] overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.25)] max-h-[90vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
                         <div className="relative h-[72px] px-5 pt-5 flex justify-between items-start bg-blue-50 shrink-0">
                             <div className="w-9 h-9 rounded-full bg-white border shadow-sm flex items-center justify-center text-sm">📄</div>
                             <button onClick={() => setShowPostModal(false)} className="w-8 h-8 rounded-full bg-white border shadow-sm flex items-center justify-center hover:bg-gray-50">×</button>
@@ -233,7 +227,7 @@ export default function AdminPage() {
                                 </div>
                             )}
                         </div>
-                        <div className="shrink-0 px-6 py-4 border-t border-gray-100 bg-white flex gap-2 pb-[calc(1rem+env(safe-area-inset-bottom))]">
+                        <div className="shrink-0 px-6 py-4 border-t border-gray-100 bg-white flex gap-2">
                             <button type="button" onClick={() => setShowPostModal(false)} className="flex-1 h-11 rounded-full border border-gray-200 bg-white flex items-center justify-center hover:bg-gray-50">×</button>
                             <button onClick={savePost} disabled={loading} className="flex-1 h-11 rounded-full bg-black text-white font-semibold hover:bg-zinc-800 flex items-center justify-center disabled:opacity-50">{loading? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <>{editingPost? 'ATUALIZAR' : 'CRIAR'}</>}</button>
                         </div>
@@ -242,14 +236,14 @@ export default function AdminPage() {
             )}
 
             {showCatModal && (
-                <div className="fixed inset-0 z-[100] flex items-end md:items-center justify-center md:p-4">
-                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowCatModal(false)} />
-                    <div className="relative bg-white rounded-t-3xl md:rounded-3xl w-full max-w-[400px] overflow-hidden shadow-2xl">
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={(e) => e.stopPropagation()} />
+                    <div className="relative bg-white rounded-[24px] w-full max-w-[400px] overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.25)] max-h-[90vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
                         <div className="relative h-[72px] px-5 pt-5 flex justify-between items-start bg-violet-50 shrink-0">
                             <div className="w-9 h-9 rounded-full bg-white border shadow-sm flex items-center justify-center text-sm">🏷️</div>
                             <button onClick={() => setShowCatModal(false)} className="w-8 h-8 rounded-full bg-white border shadow-sm flex items-center justify-center">×</button>
                         </div>
-                        <div className="p-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))]">
+                        <div className="p-6">
                             <h3 className="text-lg font-bold">{editingCat? "Editar Categoria" : "Nova Categoria"}</h3>
                             <div className="mt-4 space-y-3">
                                 <input value={catForm.nome} onChange={e => setCatForm({...catForm, nome: e.target.value })} placeholder="Nome ex: Política" className={inputClass} />
