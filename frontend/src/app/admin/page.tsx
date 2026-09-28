@@ -109,7 +109,6 @@ export default function AdminPage() {
             <Toaster richColors position="top-center" />
             <style>{`.scrollbar-none::-webkit-scrollbar{display:none}.scrollbar-none{-ms-overflow-style:none;scrollbar-width:none}`}</style>
 
-            {/* HEADER LIMPO */}
             <header className="sticky top-0 z-20 bg-white border-b border-zinc-200">
                 <div className="max-w-7xl mx-auto flex justify-between items-center py-4 px-4 md:px-6">
                     <h1 className="text-[11px] font-bold tracking-[0.2em]">ADMIN • CONNECT.AO</h1>
@@ -118,7 +117,6 @@ export default function AdminPage() {
             </header>
 
             <div className="max-w-7xl mx-auto px-4 md:px-6 py-6 md:py-8">
-                {/* CATEGORIAS */}
                 {cats.length > 0 && (
                     <div className="flex gap-2 mb-6 overflow-x-auto scrollbar-none pb-2">
                         {cats.map(c => (
@@ -134,7 +132,6 @@ export default function AdminPage() {
                     </div>
                 )}
 
-                {/* BARRA DE AÇÃO NOVA - BUSCA + BOTÕES JUNTOS */}
                 <div className="flex flex-col gap-4 mb-6">
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                         <h2 className="text-sm font-semibold tracking-wide">Posts • {filtered.length}</h2>
@@ -150,21 +147,34 @@ export default function AdminPage() {
                     </div>
                 </div>
 
-                {/* LISTA DE POSTS - NOVO VISUAL */}
                 <div className="bg-white border border-zinc-200 rounded-[20px] overflow-hidden shadow-sm">
                     <div className="hidden md:grid grid-cols-12 text-[10px] tracking-widest text-zinc-400 px-6 py-3 border-b bg-zinc-50/50">
-                        <div className="col-span-6">TÍTULO</div><div className="col-span-2">CATEGORIA</div><div className="col-span-2">STATUS</div><div className="col-span-2 text-right">AÇÕES</div>
+                        <div className="col-span-5">TÍTULO</div>
+                        <div className="col-span-2">CATEGORIA</div>
+                        <div className="col-span-1">STATUS</div>
+                        <div className="col-span-2">MÉTRICAS</div>
+                        <div className="col-span-2 text-right">AÇÕES</div>
                     </div>
 
-                    {filtered.map(p => (
+                    {filtered.map(p => {
+                        const views = p.views?? p.views_count?? p.visualizacoes?? 0;
+                        const comments = p.comments_count?? p.comentarios?? p.total_comments?? 0;
+                        const shares = p.shares?? p.shares_count?? p.partilhas?? 0;
+                        return (
                         <div key={p.id} className="group border-b last:border-0 hover:bg-zinc-50/70 transition p-4 md:px-6 md:py-4 md:grid md:grid-cols-12 md:items-center gap-3">
-                            <div className="col-span-6 flex gap-3 items-center">
+                            <div className="col-span-5 flex gap-3 items-center">
                                 <div className="w-12 h-12 rounded-xl bg-zinc-100 overflow-hidden shrink-0 border border-zinc-100">
                                     {p.thumbnail_url || p.media_url? <img src={p.media_url} className="w-full h-full object-cover" alt="" /> : <div className="w-full h-full grid place-items-center text-[10px] font-bold bg-zinc-900 text-white">{p.tipo[0].toUpperCase()}</div>}
                                 </div>
                                 <div className="min-w-0 flex-1">
                                     <p className="text-[13.5px] font-semibold line-clamp-1 leading-tight">{p.titulo}</p>
                                     <p className="text-[11px] text-zinc-500 mt-0.5">{p.tipo} • {new Date(p.created_at).toLocaleDateString()}</p>
+                                    {/* MOBILE: metricas */}
+                                    <div className="flex items-center gap-2 mt-2 md:hidden">
+                                        <span className="flex items-center gap-1 text-[11px] bg-zinc-50 border px-2 py-0.5 rounded-full"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> {views}</span>
+                                        <span className="flex items-center gap-1 text-[11px] bg-zinc-50 border px-2 py-0.5 rounded-full"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg> {comments}</span>
+                                        <span className="flex items-center gap-1 text-[11px] bg-zinc-50 border px-2 py-0.5 rounded-full"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> {shares}</span>
+                                    </div>
                                     <div className="flex flex-wrap gap-1.5 mt-2 md:hidden">
                                         <span className="text-[10px] px-2.5 py-1 rounded-full bg-violet-50 text-violet-700 border border-violet-100 font-medium">{cats.find(c => c.id === p.category_id)?.nome || "—"}</span>
                                         <span className={`text-[10px] px-2.5 py-1 rounded-full border font-medium ${p.status === 'published'? 'bg-green-50 text-green-700 border-green-200' : 'bg-zinc-100'}`}>{p.status}</span>
@@ -172,9 +182,15 @@ export default function AdminPage() {
                                 </div>
                             </div>
                             <div className="hidden md:block col-span-2"><span className="text-[11px] px-2.5 py-1 rounded-full bg-violet-50 text-violet-700 border border-violet-100 font-medium">{cats.find(c => c.id === p.category_id)?.nome || "—"}</span></div>
-                            <div className="hidden md:flex col-span-2 gap-1.5"><span className={`text-[10px] px-2.5 py-1 rounded-full border font-medium ${p.status === 'published'? 'bg-green-50 text-green-700 border-green-200' : 'bg-zinc-100 text-zinc-600'}`}>{p.status}</span>{p.destaque && <span className="text-[10px] px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200 font-medium">DESTAQUE</span>}</div>
+                            <div className="hidden md:flex col-span-1"><span className={`text-[10px] px-2.5 py-1 rounded-full border font-medium ${p.status === 'published'? 'bg-green-50 text-green-700 border-green-200' : 'bg-zinc-100 text-zinc-600'}`}>{p.status}</span></div>
 
-                            {/* AÇÕES NOVAS - SEM BUG */}
+                            {/* MÉTRICAS DESKTOP */}
+                            <div className="hidden md:flex col-span-2 items-center gap-1.5 text-[11px] text-zinc-600">
+                                <span title="Visualizações" className="flex items-center gap-1 bg-zinc-50 border px-2 py-1 rounded-full"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> {views}</span>
+                                <span title="Comentários" className="flex items-center gap-1 bg-zinc-50 border px-2 py-1 rounded-full"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg> {comments}</span>
+                                <span title="Partilhas" className="flex items-center gap-1 bg-zinc-50 border px-2 py-1 rounded-full"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> {shares}</span>
+                            </div>
+
                             <div className="flex items-center justify-end gap-1.5 mt-3 md:mt-0 col-span-2">
                                 <button onClick={() => openEditPost(p)} className="w-9 h-9 rounded-full bg-white border border-zinc-200 hover:border-zinc-900 hover:bg-zinc-900 hover:text-white grid place-items-center transition">
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
@@ -184,12 +200,11 @@ export default function AdminPage() {
                                 </button>
                             </div>
                         </div>
-                    ))}
+                        )})}
                     {filtered.length === 0 && <div className="p-12 text-center text-sm text-zinc-400">Nenhum post encontrado</div>}
                 </div>
             </div>
 
-            {/* MODAL POST - CENTRALIZADA */}
             {showPostModal && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
                     <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={(e) => e.stopPropagation()} />
