@@ -5,7 +5,8 @@ import uuid
 
 from app.db.session import get_db
 from app.shared.deps import get_current_admin
-from app.modules.posts.models import Post, Category
+from app.modules.posts.models import Post
+from app.modules.categories.models import Category
 from app.modules.posts.schemas import (
     PostCreate, PostUpdate, PostResponse,
     CategoryCreate, CategoryResponse
