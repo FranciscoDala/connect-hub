@@ -105,64 +105,83 @@ export default function AdminPage() {
     );
 
     return (
-        <main className="min-h-screen bg-zinc-50 text-zinc-900 font-sans">
+        <main className="min-h-screen bg-[#fcfcfc] text-zinc-900 font-sans">
             <Toaster richColors position="top-center" />
             <style>{`.scrollbar-none::-webkit-scrollbar{display:none}.scrollbar-none{-ms-overflow-style:none;scrollbar-width:none}`}</style>
 
-            {/* HEADER - RESPONSIVO */}
-            <header className="sticky top-0 z-20 backdrop-blur-xl bg-white/80 border-b border-zinc-200">
-                <div className="max-w-7xl mx-auto flex flex-wrap md:flex-nowrap justify-between items-center gap-3 py-3 px-4 md:px-6">
-                    <h1 className="text-xs font-bold tracking-widest shrink-0">ADMIN • CONNECT.AO</h1>
-                    <div className="flex gap-2 w-full md:w-auto">
-                        <button onClick={openNewCat} className="flex-1 md:flex-none text-[11px] md:text-xs px-3 md:px-4 py-2.5 rounded-full border border-zinc-200 hover:bg-zinc-50 font-medium">+ CATEGORIA</button>
-                        <button onClick={openNewPost} className="flex-1 md:flex-none text-[11px] md:text-xs px-3 md:px-4 py-2.5 rounded-full bg-zinc-900 text-white hover:bg-black font-medium">+ NOVO POST</button>
-                        <button onClick={() => { clearAuth(); router.replace("/login"); }} className="text-[11px] md:text-xs px-3 py-2.5 rounded-full text-zinc-500 hover:text-black">SAIR</button>
-                    </div>
+            {/* HEADER LIMPO */}
+            <header className="sticky top-0 z-20 bg-white border-b border-zinc-200">
+                <div className="max-w-7xl mx-auto flex justify-between items-center py-4 px-4 md:px-6">
+                    <h1 className="text-[11px] font-bold tracking-[0.2em]">ADMIN • CONNECT.AO</h1>
+                    <button onClick={() => { clearAuth(); router.replace("/login"); }} className="text-xs px-3 py-2 rounded-full bg-zinc-100 hover:bg-zinc-200 transition">SAIR</button>
                 </div>
             </header>
 
             <div className="max-w-7xl mx-auto px-4 md:px-6 py-6 md:py-8">
-                <div className="flex gap-2 mb-6 overflow-x-auto scrollbar-none pb-1">
-                    {cats.map(c => (
-                        <div key={c.id} className="group flex items-center gap-2 px-3 py-1.5 rounded-full border bg-white text-xs shrink-0">
-                            <span className="w-2 h-2 rounded-full shrink-0" style={{ background: (c as any).cor || "#7c3aed" }} /><span className="truncate max-w-[120px]">{c.nome}</span>
-                            <button onClick={() => openEditCat(c)} className="ml-1">✎</button>
-                            <button onClick={() => deleteCat(c.id)} className="text-red-400">×</button>
+                {/* CATEGORIAS */}
+                {cats.length > 0 && (
+                    <div className="flex gap-2 mb-6 overflow-x-auto scrollbar-none pb-2">
+                        {cats.map(c => (
+                            <div key={c.id} className="group flex items-center gap-2 pl-3 pr-1.5 py-1.5 rounded-full border bg-white text-[12px] shrink-0 shadow-sm">
+                                <span className="w-2 h-2 rounded-full shrink-0" style={{ background: (c as any).cor || "#7c3aed" }} />
+                                <span className="font-medium">{c.nome}</span>
+                                <div className="flex items-center gap-0.5 ml-1">
+                                    <button onClick={() => openEditCat(c)} className="w-6 h-6 rounded-full hover:bg-zinc-100 grid place-items-center">✎</button>
+                                    <button onClick={() => deleteCat(c.id)} className="w-6 h-6 rounded-full hover:bg-red-50 text-zinc-400 hover:text-red-500 grid place-items-center">×</button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
+
+                {/* BARRA DE AÇÃO NOVA - BUSCA + BOTÕES JUNTOS */}
+                <div className="flex flex-col gap-4 mb-6">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <h2 className="text-sm font-semibold tracking-wide">Posts • {filtered.length}</h2>
+                        <div className="flex flex-col md:flex-row gap-2 w-full md:w-auto">
+                            <div className="relative w-full md:w-[280px]">
+                                <input value={filter} onChange={e => setFilter(e.target.value)} placeholder="Buscar post..." className="w-full h-10 pl-4 pr-4 rounded-full border border-zinc-200 bg-white text-sm outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900/10" />
+                            </div>
+                            <div className="flex gap-2">
+                                <button onClick={openNewCat} className="flex-1 md:flex-none h-10 px-5 rounded-full border border-zinc-200 bg-white hover:bg-zinc-50 text-xs font-semibold transition">+ CATEGORIA</button>
+                                <button onClick={openNewPost} className="flex-1 md:flex-none h-10 px-5 rounded-full bg-zinc-900 text-white hover:bg-black text-xs font-semibold transition">+ NOVO POST</button>
+                            </div>
                         </div>
-                    ))}
+                    </div>
                 </div>
 
-                <div className="flex flex-col md:flex-row justify-between md:items-center gap-3 mb-4">
-                    <h2 className="font-semibold">Posts • {filtered.length}</h2>
-                    <input value={filter} onChange={e => setFilter(e.target.value)} placeholder="Buscar..." className="px-4 py-2.5 rounded-full border text-sm w-full md:w-64 outline-none focus:border-zinc-900 bg-white" />
-                </div>
-
-                <div className="bg-white border border-zinc-200 rounded-2xl md:rounded-3xl overflow-hidden">
+                {/* LISTA DE POSTS - NOVO VISUAL */}
+                <div className="bg-white border border-zinc-200 rounded-[20px] overflow-hidden shadow-sm">
                     <div className="hidden md:grid grid-cols-12 text-[10px] tracking-widest text-zinc-400 px-6 py-3 border-b bg-zinc-50/50">
                         <div className="col-span-6">TÍTULO</div><div className="col-span-2">CATEGORIA</div><div className="col-span-2">STATUS</div><div className="col-span-2 text-right">AÇÕES</div>
                     </div>
 
                     {filtered.map(p => (
-                        <div key={p.id} className="border-b last:border-0 hover:bg-zinc-50/70 transition p-4 md:px-6 md:py-4 md:grid md:grid-cols-12 md:items-center gap-3">
+                        <div key={p.id} className="group border-b last:border-0 hover:bg-zinc-50/70 transition p-4 md:px-6 md:py-4 md:grid md:grid-cols-12 md:items-center gap-3">
                             <div className="col-span-6 flex gap-3 items-center">
-                                <div className="w-14 h-14 md:w-12 md:h-12 rounded-xl bg-zinc-100 overflow-hidden shrink-0">
-                                    {p.thumbnail_url || p.media_url? <img src={p.media_url} className="w-full h-full object-cover" alt="" /> : <div className="w-full h-full grid place-items-center text-[10px]">{p.tipo[0].toUpperCase()}</div>}
+                                <div className="w-12 h-12 rounded-xl bg-zinc-100 overflow-hidden shrink-0 border border-zinc-100">
+                                    {p.thumbnail_url || p.media_url? <img src={p.media_url} className="w-full h-full object-cover" alt="" /> : <div className="w-full h-full grid place-items-center text-[10px] font-bold bg-zinc-900 text-white">{p.tipo[0].toUpperCase()}</div>}
                                 </div>
                                 <div className="min-w-0 flex-1">
-                                    <p className="text-sm font-medium line-clamp-1 md:line-clamp-1">{p.titulo}</p>
-                                    <p className="text-xs text-zinc-500 truncate">{p.tipo} • {new Date(p.created_at).toLocaleDateString()}</p>
+                                    <p className="text-[13.5px] font-semibold line-clamp-1 leading-tight">{p.titulo}</p>
+                                    <p className="text-[11px] text-zinc-500 mt-0.5">{p.tipo} • {new Date(p.created_at).toLocaleDateString()}</p>
                                     <div className="flex flex-wrap gap-1.5 mt-2 md:hidden">
-                                        <span className="text-[10px] px-2 py-1 rounded-full bg-violet-50 text-violet-600 border border-violet-100 truncate max-w-[100px]">{cats.find(c => c.id === p.category_id)?.nome || "—"}</span>
-                                        <span className={`text-[10px] px-2 py-1 rounded-full border ${p.status === 'published'? 'bg-green-50 text-green-700 border-green-200' : 'bg-zinc-100'}`}>{p.status}</span>
-                                        {p.destaque && <span className="text-[10px] px-2 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200">DESTAQUE</span>}
+                                        <span className="text-[10px] px-2.5 py-1 rounded-full bg-violet-50 text-violet-700 border border-violet-100 font-medium">{cats.find(c => c.id === p.category_id)?.nome || "—"}</span>
+                                        <span className={`text-[10px] px-2.5 py-1 rounded-full border font-medium ${p.status === 'published'? 'bg-green-50 text-green-700 border-green-200' : 'bg-zinc-100'}`}>{p.status}</span>
                                     </div>
                                 </div>
                             </div>
-                            <div className="hidden md:block col-span-2"><span className="text-xs px-2.5 py-1 rounded-full bg-violet-50 text-violet-600 border border-violet-100 truncate">{cats.find(c => c.id === p.category_id)?.nome || "—"}</span></div>
-                            <div className="hidden md:flex col-span-2 gap-1"><span className={`text-[10px] px-2 py-1 rounded-full border ${p.status === 'published'? 'bg-green-50 text-green-700 border-green-200' : 'bg-zinc-100'}`}>{p.status}</span>{p.destaque && <span className="text-[10px] px-2 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200">DESTAQUE</span>}</div>
-                            <div className="flex md:justify-end gap-2 mt-3 md:mt-0 col-span-2">
-                                <button onClick={() => openEditPost(p)} className="flex-1 md:flex-none md:w-8 h-9 md:h-8 rounded-full border bg-white hover:bg-zinc-100 grid place-items-center text-sm">✎ Editar</button>
-                                <button onClick={() => deletePost(p.id)} className="flex-1 md:flex-none md:w-8 h-9 md:h-8 rounded-full border bg-white hover:bg-red-50 hover:text-red-500 grid place-items-center text-sm">🗑</button>
+                            <div className="hidden md:block col-span-2"><span className="text-[11px] px-2.5 py-1 rounded-full bg-violet-50 text-violet-700 border border-violet-100 font-medium">{cats.find(c => c.id === p.category_id)?.nome || "—"}</span></div>
+                            <div className="hidden md:flex col-span-2 gap-1.5"><span className={`text-[10px] px-2.5 py-1 rounded-full border font-medium ${p.status === 'published'? 'bg-green-50 text-green-700 border-green-200' : 'bg-zinc-100 text-zinc-600'}`}>{p.status}</span>{p.destaque && <span className="text-[10px] px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200 font-medium">DESTAQUE</span>}</div>
+
+                            {/* AÇÕES NOVAS - SEM BUG */}
+                            <div className="flex items-center justify-end gap-1.5 mt-3 md:mt-0 col-span-2">
+                                <button onClick={() => openEditPost(p)} className="w-9 h-9 rounded-full bg-white border border-zinc-200 hover:border-zinc-900 hover:bg-zinc-900 hover:text-white grid place-items-center transition">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                                </button>
+                                <button onClick={() => deletePost(p.id)} className="w-9 h-9 rounded-full bg-white border border-zinc-200 hover:border-red-500 hover:bg-red-500 hover:text-white grid place-items-center transition text-zinc-500">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                                </button>
                             </div>
                         </div>
                     ))}
@@ -170,7 +189,7 @@ export default function AdminPage() {
                 </div>
             </div>
 
-            {/* MODAL POST - CENTRALIZADA IGUAL REFERENCIA */}
+            {/* MODAL POST - CENTRALIZADA */}
             {showPostModal && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
                     <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={(e) => e.stopPropagation()} />
