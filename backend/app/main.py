@@ -7,16 +7,18 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 import os
 import time
 
-# --- ROUTERS CORRIGIDOS ---
+# --- ROUTERS ---
 from app.modules.auth.router import router as auth_router
 from app.modules.categories.routes import router as categories_router
 from app.modules.posts.routes import router as posts_router
+from app.modules.banners.router import router as banners_router
 
-# importa models pro create_all / Base.metadata
+# importa models pro Base.metadata / alembic
 from app.db.base import Base
 import app.modules.users.models
 import app.modules.categories.models
 import app.modules.posts.models
+import app.modules.banners.models
 
 ENV = os.getenv("ENV", "production")
 IS_PROD = ENV == "production"
@@ -99,6 +101,7 @@ def health():
 app.include_router(auth_router)         # /api/v1/auth/*
 app.include_router(categories_router)   # /api/v1/categories
 app.include_router(posts_router)        # /api/v1/posts + /api/v1/upload
+app.include_router(banners_router)      # /api/v1/banners
 
 @app.get("/api/v1/apps", tags=["apps"])
 def list_apps():

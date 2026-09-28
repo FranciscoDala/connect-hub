@@ -12,6 +12,12 @@ sys.path.append(str(BACKEND_DIR))
 from app.core.config import settings
 from app.db.base import Base
 
+# IMPORTA TODOS OS MODELS PRA O ALEMBIC ENXERGAR
+import app.modules.users.models
+import app.modules.categories.models
+import app.modules.posts.models
+import app.modules.banners.models
+
 config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)

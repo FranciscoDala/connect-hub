@@ -5,11 +5,12 @@ import uuid, re
 
 from app.db.session import get_db
 from app.shared.deps import get_current_admin
-from app.modules.posts.models import Post
+from app.modules.posts.models import Post, Comment
 from app.modules.categories.models import Category
 from app.modules.posts.schemas import (
     PostCreate, PostUpdate, PostResponse,
-    CategoryCreate, CategoryUpdate, CategoryResponse
+    CategoryCreate, CategoryUpdate, CategoryResponse,
+    CommentCreate, CommentResponse
 )
 from app.core.upload_Imagem import upload_media
 
@@ -19,6 +20,11 @@ def slugify(text: str) -> str:
     text = text.lower()
     text = re.sub(r'[^a-z0-9]+', '-', text)
     return text.strip('-')
+
+def to_post_response(post: Post, db: Session):
+    count = db.query(Comment).filter(Comment.post_id == post.id).count()
+    data = PostResponse.from_orm_with_counts(post, comments_count=count)
+    return data
 
 # ========== CATEGORIES ==========
 @router.get("/categories", response_model=List[CategoryResponse])
@@ -39,10 +45,8 @@ def update_category(cat_id: uuid.UUID, data: CategoryUpdate, admin=Depends(get_c
     cat = db.query(Category).filter(Category.id == cat_id).first()
     if not cat: raise HTTPException(404, "Categoria não encontrada")
     for k, v in data.model_dump(exclude_unset=True).items():
-        if v is not None:
-            setattr(cat, k, v)
-    if data.nome and not data.slug:
-        cat.slug = slugify(data.nome)
+        if v is not None: setattr(cat, k, v)
+    if data.nome and not data.slug: cat.slug = slugify(data.nome)
     db.commit(); db.refresh(cat)
     return cat
 
@@ -67,13 +71,14 @@ def list_posts(db: Session=Depends(get_db), tipo: Optional[str]=None, category_i
     if status: query = query.filter(Post.status == status)
     if destaque is not None: query = query.filter(Post.destaque == destaque)
     if q: query = query.filter(Post.titulo.ilike(f"%{q}%"))
-    return query.order_by(Post.created_at.desc()).offset(offset).limit(limit).all()
+    posts = query.order_by(Post.created_at.desc()).offset(offset).limit(limit).all()
+    return [to_post_response(p, db) for p in posts]
 
 @router.get("/posts/{post_id}", response_model=PostResponse)
 def get_post(post_id: uuid.UUID, db: Session=Depends(get_db)):
     post = db.query(Post).filter(Post.id == post_id).first()
     if not post: raise HTTPException(404, "Post não encontrado")
-    return post
+    return to_post_response(post, db)
 
 @router.post("/posts", response_model=PostResponse)
 def create_post(data: PostCreate, admin=Depends(get_current_admin), db: Session=Depends(get_db)):
@@ -82,20 +87,56 @@ def create_post(data: PostCreate, admin=Depends(get_current_admin), db: Session=
         final_slug = f"{final_slug}-{uuid.uuid4().hex[:4]}"
     post = Post(**data.model_dump(exclude={"slug"}), slug=final_slug, author_id=admin.id)
     db.add(post); db.commit(); db.refresh(post)
-    return post
+    return to_post_response(post, db)
 
 @router.put("/posts/{post_id}", response_model=PostResponse)
 def update_post(post_id: uuid.UUID, data: PostUpdate, admin=Depends(get_current_admin), db: Session=Depends(get_db)):
     post = db.query(Post).filter(Post.id == post_id).first()
     if not post: raise HTTPException(404, "Post não encontrado")
-    for k, v in data.model_dump(exclude_unset=True).items():
-        setattr(post, k, v)
+    for k, v in data.model_dump(exclude_unset=True).items(): setattr(post, k, v)
     db.commit(); db.refresh(post)
-    return post
+    return to_post_response(post, db)
 
 @router.delete("/posts/{post_id}")
 def delete_post(post_id: uuid.UUID, admin=Depends(get_current_admin), db: Session=Depends(get_db)):
     post = db.query(Post).filter(Post.id == post_id).first()
     if not post: raise HTTPException(404, "Post não encontrado")
     db.delete(post); db.commit()
+    return {"ok": True}
+
+# ========== VIEWS & SHARES ==========
+@router.post("/posts/{post_id}/view")
+def add_view(post_id: uuid.UUID, db: Session=Depends(get_db)):
+    post = db.query(Post).filter(Post.id == post_id).first()
+    if not post: raise HTTPException(404, "Post não encontrado")
+    post.views = (post.views or 0) + 1
+    db.commit()
+    return {"views": post.views}
+
+@router.post("/posts/{post_id}/share")
+def add_share(post_id: uuid.UUID, db: Session=Depends(get_db)):
+    post = db.query(Post).filter(Post.id == post_id).first()
+    if not post: raise HTTPException(404, "Post não encontrado")
+    post.shares_count = (post.shares_count or 0) + 1
+    db.commit()
+    return {"shares_count": post.shares_count}
+
+# ========== COMMENTS ==========
+@router.get("/posts/{post_id}/comments", response_model=List[CommentResponse])
+def list_comments(post_id: uuid.UUID, db: Session=Depends(get_db)):
+    return db.query(Comment).filter(Comment.post_id == post_id).order_by(Comment.created_at.desc()).all()
+
+@router.post("/posts/{post_id}/comments", response_model=CommentResponse)
+def create_comment(post_id: uuid.UUID, data: CommentCreate, db: Session=Depends(get_db)):
+    post = db.query(Post).filter(Post.id == post_id).first()
+    if not post: raise HTTPException(404, "Post não encontrado")
+    c = Comment(post_id=post_id, nome=data.nome or "Anónimo", conteudo=data.conteudo)
+    db.add(c); db.commit(); db.refresh(c)
+    return c
+
+@router.delete("/comments/{comment_id}")
+def delete_comment(comment_id: uuid.UUID, admin=Depends(get_current_admin), db: Session=Depends(get_db)):
+    c = db.query(Comment).filter(Comment.id == comment_id).first()
+    if not c: raise HTTPException(404, "Comentário não encontrado")
+    db.delete(c); db.commit()
     return {"ok": True}
