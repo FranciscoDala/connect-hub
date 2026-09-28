@@ -1,4 +1,5 @@
 ﻿import { getPosts, getApps } from '@/lib/api'
+import Header from '@/components/Header'
 
 export default async function Home() {
     const posts = await getPosts()
@@ -6,28 +7,11 @@ export default async function Home() {
 
     return (
         <main className="min-h-screen bg-white text-zinc-900">
-            <header className="max-w-6xl mx-auto flex justify-between items-center my-6 bg-white border border-zinc-200 rounded-full px-6 py-3 shadow-sm sticky top-6 z-50">
-                <div className="flex items-center">
-                    <img src="/connect.png" alt="CONNECT" className="h-7 w-auto object-contain" />
-                </div>
-                <nav className="hidden md:flex items-center gap-6 text-[11px] uppercase tracking-widest text-zinc-600">
-                    <span className="hover:text-black cursor-pointer transition">Página Inical</span>
-                    <span className="hover:text-black cursor-pointer transition">Connect-Tics</span>
-                    <span className="hover:text-black cursor-pointer transition">Nóticias</span>
-                    <span className="hover:text-black cursor-pointer transition">Serviços</span>
-                    <span className="hover:text-black cursor-pointer transition">App</span>
-                    <span className="hover:text-black cursor-pointer transition">Projectos</span>
-                </nav>
-                <button className="px-7 py-2 rounded-full bg-zinc-900 text-white text-xs font-bold tracking-widest hover:bg-black transition">
-                    LOGIN
-                </button>
-            </header>
+            <Header />
 
             {/* BANNER TECH - CORRIGIDO */}
             <section className="relative max-w-6xl mx-auto mt-8 mb-16 rounded-4xl overflow-hidden border border-zinc-200 bg-zinc-50">
-                {/* grid effect */}
                 <div className="absolute inset-0 bg-[linear-gradient(to_right,#e4e4e7_1px,transparent_1px),linear-gradient(to_bottom,#e4e4e7_1px,transparent_1px)] bg-size-[40px_40px] opacity-40" />
-                {/* glows */}
                 <div className="absolute -top-32 -left-32 w-125 h-125 bg-violet-300 rounded-full blur-[120px] opacity-30" />
                 <div className="absolute -bottom-32 -right-32 w-125 h-125 bg-blue-300 rounded-full blur-[120px] opacity-30" />
 
@@ -62,7 +46,7 @@ export default async function Home() {
                                 <div className="h-3 w-full bg-violet-100 rounded" />
                                 <div className="h-3 w-5/6 bg-zinc-100 rounded" />
                                 <div className="p-3 rounded-xl bg-zinc-900 text-green-400">
-                                    ✓ build success<br />✓ deploy connect.ao<br />→ live in 0.8s
+                                    ✓ build success<br/>✓ deploy connect.ao<br/>→ live in 0.8s
                                 </div>
                             </div>
                         </div>
