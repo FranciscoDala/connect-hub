@@ -34,21 +34,21 @@ function CustomSelect({ value, options, onChange, placeholder }: { value: string
     const [open, setOpen] = useState(false);
     const ref = useRef<HTMLDivElement>(null);
     useEffect(() => {
-        const h = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false) };
+        const h = (e: MouseEvent) => { if (ref.current &&!ref.current.contains(e.target as Node)) setOpen(false) };
         document.addEventListener('mousedown', h);
         return () => document.removeEventListener('mousedown', h);
     }, []);
     const selected = options.find(o => o.value === value);
     return (
         <div ref={ref} className="relative w-full">
-            <button type="button" onClick={() => setOpen(!open)} className={`w-full h-11 bg-white border border-gray-200 rounded-xl px-3 text-sm text-black flex items-center justify-between focus:outline-none focus:border-black transition ${open ? 'border-black ring-2 ring-black/10' : ''}`}>
-                <span className={`truncate ${selected ? 'text-black font-medium' : 'text-black/40'}`}>{selected ? selected.label : placeholder}</span>
-                <span className={`text-gray-400 transition-transform shrink-0 text-xs ${open ? 'rotate-180' : ''}`}>▼</span>
+            <button type="button" onClick={() => setOpen(!open)} className={`w-full h-11 bg-white border border-gray-200 rounded-xl px-3 text-sm text-black flex items-center justify-between focus:outline-none focus:border-black transition ${open? 'border-black ring-2 ring-black/10' : ''}`}>
+                <span className={`truncate ${selected? 'text-black font-medium' : 'text-black/40'}`}>{selected? selected.label : placeholder}</span>
+                <span className={`text-gray-400 transition-transform shrink-0 text-xs ${open? 'rotate-180' : ''}`}>▼</span>
             </button>
             {open && (
                 <div className="absolute z-[70] top-12 left-0 w-full bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden p-1.5 max-h-[220px] overflow-y-auto scrollbar-none">
                     {options.map(o => (
-                        <button key={o.value} type="button" onClick={() => { onChange(o.value); setOpen(false) }} className={`w-full text-left px-3 py-2.5 rounded-xl text-sm flex items-center justify-between transition ${value === o.value ? 'bg-blue-50 font-semibold text-black' : 'hover:bg-gray-50 text-gray-700'}`}>
+                        <button key={o.value} type="button" onClick={() => { onChange(o.value); setOpen(false) }} className={`w-full text-left px-3 py-2.5 rounded-xl text-sm flex items-center justify-between transition ${value === o.value? 'bg-blue-50 font-semibold text-black' : 'hover:bg-gray-50 text-gray-700'}`}>
                             {o.label} {value === o.value && <span>✓</span>}
                         </button>
                     ))}
@@ -90,18 +90,15 @@ export default function AdminPage() {
             if (pRes.status === 401 || cRes.status === 401) throw new Error("401");
             const pData = await pRes.json();
             const cData = await cRes.json();
-            setPosts(Array.isArray(pData) ? pData : []);
-            setCats(Array.isArray(cData) ? cData : []);
-
-            // banners separado pra não quebrar se não existir
+            setPosts(Array.isArray(pData)? pData : []);
+            setCats(Array.isArray(cData)? cData : []);
             try {
                 const bRes = await fetch(`${API_URL}/api/v1/banners`, { headers: authHeader() as any });
                 if (bRes.ok) {
                     const bData = await bRes.json();
-                    setBanners(Array.isArray(bData) ? bData : []);
+                    setBanners(Array.isArray(bData)? bData : []);
                 }
             } catch { }
-
         } catch (e) {
             clearAuth(); router.replace("/login");
         }
@@ -120,23 +117,18 @@ export default function AdminPage() {
                 media_files = uploaded; media_url = uploaded[0]?.url || media_url; media_type = uploaded[0]?.type || form.tipo; thumbnail_url = uploaded[0]?.url || thumbnail_url;
             }
             const payload = { titulo: form.titulo, slug: form.slug || form.titulo.toLowerCase().replace(/[^a-z0-9]+/g, "-"), tipo: form.tipo, descricao: form.descricao, conteudo: form.conteudo, category_id: form.category_id || null, status: form.status, destaque: form.destaque, tags: form.tags.split(",").map(t => t.trim()).filter(Boolean), media_url, thumbnail_url, media_type, media_files };
-            const method = editingPost ? "PUT" : "POST"; const url = editingPost ? `${API_URL}/api/v1/posts/${editingPost.id}` : `${API_URL}/api/v1/posts`;
-            const res = await fetch(url, { method, body: JSON.stringify(payload), headers: { "Content-Type": "application/json", ...authHeader() } as any });
+            const method = editingPost? "PUT" : "POST"; const url = editingPost? `${API_URL}/api/v1/posts/${editingPost.id}` : `${API_URL}/api/v1/posts`;
+            const res = await fetch(url, { method, body: JSON.stringify(payload), headers: { "Content-Type": "application/json",...authHeader() } as any });
             if (!res.ok) { const e = await res.text(); throw new Error(e); }
-            toast.success(editingPost ? "Atualizado!" : "Criado!"); setShowPostModal(false); loadAll();
+            toast.success(editingPost? "Atualizado!" : "Criado!"); setShowPostModal(false); loadAll();
         } catch (e: any) { toast.error(e.message); } finally { setLoading(false); }
     }
-    async function deletePost(id: string) { if (!confirm("Apagar post?")) return; await fetch(`${API_URL}/api/v1/posts/${id}`, { method: "DELETE", headers: authHeader() as any }); setPosts(posts.filter(p => p.id !== id)); toast.success("Apagado"); }
+    async function deletePost(id: string) { if (!confirm("Apagar post?")) return; await fetch(`${API_URL}/api/v1/posts/${id}`, { method: "DELETE", headers: authHeader() as any }); setPosts(posts.filter(p => p.id!== id)); toast.success("Apagado"); }
     function openNewCat() { setEditingCat(null); setCatForm({ nome: "", slug: "", descricao: "", cor: "#7c3aed" }); setShowCatModal(true); }
     function openEditCat(c: Category) { setEditingCat(c as any); setCatForm({ nome: c.nome, slug: c.slug, descricao: (c as any).descricao || "", cor: (c as any).cor || "#7c3aed" }); setShowCatModal(true); }
-    async function saveCat() { const method = editingCat ? "PUT" : "POST"; const url = editingCat ? `${API_URL}/api/v1/categories/${editingCat.id}` : `${API_URL}/api/v1/categories`; const res = await fetch(url, { method, body: JSON.stringify({ ...catForm, slug: catForm.slug || catForm.nome.toLowerCase().replace(/\s+/g, "-") }), headers: { "Content-Type": "application/json", ...authHeader() } as any }); if (!res.ok) return toast.error("Erro categoria"); setShowCatModal(false); loadAll(); toast.success("Categoria salva!"); }
+    async function saveCat() { const method = editingCat? "PUT" : "POST"; const url = editingCat? `${API_URL}/api/v1/categories/${editingCat.id}` : `${API_URL}/api/v1/categories`; const res = await fetch(url, { method, body: JSON.stringify({...catForm, slug: catForm.slug || catForm.nome.toLowerCase().replace(/\s+/g, "-") }), headers: { "Content-Type": "application/json",...authHeader() } as any }); if (!res.ok) return toast.error("Erro categoria"); setShowCatModal(false); loadAll(); toast.success("Categoria salva!"); }
     async function deleteCat(id: string) { if (!confirm("Apagar categoria?")) return; await fetch(`${API_URL}/api/v1/categories/${id}`, { method: "DELETE", headers: authHeader() as any }); loadAll(); }
-
     function openNewBanner() { setEditingBanner(null); setBannerForm({ titulo: "", imagem_url: "", link_url: "", posicao: "home_topo", ativo: true, data_inicio: "", data_fim: "" }); setBannerFile(null); setShowBannerModal(true); }
-
-
-    // TROCA essas 2 funções no teu frontend:
-
     function openEditBanner(b: Banner) {
         setEditingBanner(b);
         setBannerForm({
@@ -145,13 +137,11 @@ export default function AdminPage() {
             link_url: b.link_url || "",
             posicao: b.posicao,
             ativo: b.ativo,
-            // corta o T00:00:00 pra cair no input date
-            data_inicio: b.data_inicio ? b.data_inicio.split('T')[0] : "",
-            data_fim: b.data_fim ? b.data_fim.split('T')[0] : ""
+            data_inicio: b.data_inicio? b.data_inicio.split('T')[0] : "",
+            data_fim: b.data_fim? b.data_fim.split('T')[0] : ""
         });
         setShowBannerModal(true);
     }
-
     async function saveBanner() {
         if (!bannerForm.titulo) return toast.error("Título obrigatório");
         setLoading(true);
@@ -164,27 +154,26 @@ export default function AdminPage() {
             }
             if (!imagem_url) return toast.error("Imagem obrigatória");
             const payload = {
-                ...bannerForm,
+               ...bannerForm,
                 imagem_url,
-                // converte "" para null pra não dar 422
                 data_inicio: bannerForm.data_inicio || null,
                 data_fim: bannerForm.data_fim || null,
                 link_url: bannerForm.link_url || null
             };
-            const method = editingBanner ? "PUT" : "POST";
-            const url = editingBanner ? `${API_URL}/api/v1/banners/${editingBanner.id}` : `${API_URL}/api/v1/banners`;
-            const res = await fetch(url, { method, body: JSON.stringify(payload), headers: { "Content-Type": "application/json", ...authHeader() } as any });
+            const method = editingBanner? "PUT" : "POST";
+            const url = editingBanner? `${API_URL}/api/v1/banners/${editingBanner.id}` : `${API_URL}/api/v1/banners`;
+            const res = await fetch(url, { method, body: JSON.stringify(payload), headers: { "Content-Type": "application/json",...authHeader() } as any });
             if (!res.ok) throw new Error(await res.text());
-            toast.success(editingBanner ? "Banner atualizado!" : "Banner criado!"); setShowBannerModal(false); loadAll();
+            toast.success(editingBanner? "Banner atualizado!" : "Banner criado!"); setShowBannerModal(false); loadAll();
         } catch (e: any) { toast.error(e.message); } finally { setLoading(false); }
     }
-    async function deleteBanner(id: string) { if (!confirm("Apagar banner?")) return; await fetch(`${API_URL}/api/v1/banners/${id}`, { method: "DELETE", headers: authHeader() as any }); setBanners(banners.filter(b => b.id !== id)); toast.success("Apagado"); }
+    async function deleteBanner(id: string) { if (!confirm("Apagar banner?")) return; await fetch(`${API_URL}/api/v1/banners/${id}`, { method: "DELETE", headers: authHeader() as any }); setBanners(banners.filter(b => b.id!== id)); toast.success("Apagado"); }
 
     const filtered = posts.filter(p => p.titulo.toLowerCase().includes(filter.toLowerCase()));
     const filteredBanners = banners.filter(b => b.titulo.toLowerCase().includes(filter.toLowerCase()));
     const inputClass = "w-full h-11 bg-white border border-gray-200 rounded-xl px-3 text-sm text-black placeholder:text-black/40 focus:outline-none focus:border-black focus:ring-1 focus:ring-black/10 transition";
     const TabBtn = ({ id, label }: { id: Tab, label: string }) => (
-        <button type="button" onClick={() => setTab(id)} className={`px-3.5 py-2 text-sm font-medium rounded-full transition border shrink-0 ${tab === id ? 'bg-black text-white border-black' : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'}`}>{label}</button>
+        <button type="button" onClick={() => setTab(id)} className={`px-3.5 py-2 text-sm font-medium rounded-full transition border shrink-0 ${tab === id? 'bg-black text-white border-black' : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'}`}>{label}</button>
     );
 
     return (
@@ -213,18 +202,18 @@ export default function AdminPage() {
                     </div>
                 )}
                 <div className="flex gap-2 mb-6">
-                    <button onClick={() => setMainTab('posts')} className={`h-9 px-5 rounded-full text-xs font-semibold border transition ${mainTab === 'posts' ? 'bg-black text-white border-black' : 'bg-white border-zinc-200 hover:bg-zinc-50'}`}>POSTS • {posts.length}</button>
-                    <button onClick={() => setMainTab('banners')} className={`h-9 px-5 rounded-full text-xs font-semibold border transition ${mainTab === 'banners' ? 'bg-black text-white border-black' : 'bg-white border-zinc-200 hover:bg-zinc-50'}`}>BANNERS • {banners.length}</button>
+                    <button onClick={() => setMainTab('posts')} className={`h-9 px-5 rounded-full text-xs font-semibold border transition ${mainTab === 'posts'? 'bg-black text-white border-black' : 'bg-white border-zinc-200 hover:bg-zinc-50'}`}>POSTS</button>
+                    <button onClick={() => setMainTab('banners')} className={`h-9 px-5 rounded-full text-xs font-semibold border transition ${mainTab === 'banners'? 'bg-black text-white border-black' : 'bg-white border-zinc-200 hover:bg-zinc-50'}`}>BANNERS</button>
                 </div>
                 <div className="flex flex-col gap-4 mb-6">
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                        <h2 className="text-sm font-semibold tracking-wide">{mainTab === 'posts' ? `Posts • ${filtered.length}` : `Banners • ${filteredBanners.length}`}</h2>
+                        <h2 className="text-sm font-semibold tracking-wide">{mainTab === 'posts'? `Posts • ${filtered.length}` : `Banners • ${filteredBanners.length}`}</h2>
                         <div className="flex flex-col md:flex-row gap-2 w-full md:w-auto">
                             <div className="relative w-full md:w-[280px]">
-                                <input value={filter} onChange={e => setFilter(e.target.value)} placeholder={mainTab === 'posts' ? "Buscar post..." : "Buscar banner..."} className="w-full h-10 pl-4 pr-4 rounded-full border border-zinc-200 bg-white text-sm outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900/10" />
+                                <input value={filter} onChange={e => setFilter(e.target.value)} placeholder={mainTab === 'posts'? "Buscar post..." : "Buscar banner..."} className="w-full h-10 pl-4 pr-4 rounded-full border border-zinc-200 bg-white text-sm outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900/10" />
                             </div>
                             <div className="flex gap-2">
-                                {mainTab === 'posts' ? (
+                                {mainTab === 'posts'? (
                                     <>
                                         <button onClick={openNewCat} className="flex-1 md:flex-none h-10 px-5 rounded-full border border-zinc-200 bg-white hover:bg-zinc-50 text-xs font-semibold transition">+ CATEGORIA</button>
                                         <button onClick={openNewPost} className="flex-1 md:flex-none h-10 px-5 rounded-full bg-zinc-900 text-white hover:bg-black text-xs font-semibold transition">+ NOVO POST</button>
@@ -237,36 +226,51 @@ export default function AdminPage() {
                     </div>
                 </div>
 
-                {mainTab === 'posts' ? (
+                {mainTab === 'posts'? (
                     <div className="bg-white border border-zinc-200 rounded-[20px] overflow-hidden shadow-sm">
                         <div className="hidden md:grid grid-cols-12 text-[10px] tracking-widest text-zinc-400 px-6 py-3 border-b bg-zinc-50/50">
                             <div className="col-span-5">TÍTULO</div><div className="col-span-2">CATEGORIA</div><div className="col-span-1">STATUS</div><div className="col-span-2">MÉTRICAS</div><div className="col-span-2 text-right">AÇÕES</div>
                         </div>
                         {filtered.map(p => {
-                            const views = p.views ?? p.views_count ?? 0;
-                            const comments = p.comments_count ?? 0;
-                            const shares = p.shares ?? p.shares_count ?? 0;
+                            const views = p.views?? p.views_count?? 0;
+                            const comments = p.comments_count?? p.comments?? 0;
+                            const shares = p.shares?? p.shares_count?? 0;
+                            const catName = cats.find(c => c.id === p.category_id)?.nome || "—";
                             return (
                                 <div key={p.id} className="group border-b last:border-0 hover:bg-zinc-50/70 transition p-4 md:px-6 md:py-4 md:grid md:grid-cols-12 md:items-center gap-3">
-                                    <div className="col-span-5 flex gap-3 items-center">
-                                        <div className="w-12 h-12 rounded-xl bg-zinc-100 overflow-hidden shrink-0 border border-zinc-100">
-                                            {p.thumbnail_url || p.media_url ? <img src={p.media_url} className="w-full h-full object-cover" alt="" /> : <div className="w-full h-full grid place-items-center text-[10px] font-bold bg-zinc-900 text-white">{p.tipo[0].toUpperCase()}</div>}
+                                    <div className="col-span-5 flex gap-3 items-start">
+                                        <div className="w-12 h-12 rounded-xl bg-zinc-100 overflow-hidden shrink-0 border border-zinc-100 mt-0.5 md:mt-0">
+                                            {p.thumbnail_url || p.media_url? <img src={p.media_url} className="w-full h-full object-cover" alt="" /> : <div className="w-full h-full grid place-items-center text-[10px] font-bold bg-zinc-900 text-white">{p.tipo[0].toUpperCase()}</div>}
                                         </div>
                                         <div className="min-w-0 flex-1">
-                                            <p className="text-[13.5px] font-semibold line-clamp-1 leading-tight">{p.titulo}</p>
-                                            <p className="text-[11px] text-zinc-500 mt-0.5">{p.tipo} • {new Date(p.created_at).toLocaleDateString()}</p>
+                                            <p className="text-[13.5px] font-semibold line-clamp-2 leading-tight">{p.titulo}</p>
+                                            <p className="text-[11px] text-zinc-500 mt-1">{p.tipo} • {new Date(p.created_at).toLocaleDateString()}</p>
+                                            {/* MOBILE: mostra tudo aqui */}
+                                            <div className="flex md:hidden flex-wrap items-center gap-1.5 mt-2.5">
+                                                <span className="text-[10px] px-2.5 py-1 rounded-full bg-violet-50 text-violet-700 border border-violet-100 font-medium">{catName}</span>
+                                                <span className={`text-[10px] px-2.5 py-1 rounded-full border font-medium ${p.status === 'published'? 'bg-green-50 text-green-700 border-green-200' : 'bg-zinc-100 text-zinc-600 border-zinc-200'}`}>{p.status}</span>
+                                            </div>
+                                            <div className="flex md:hidden flex-wrap items-center gap-1.5 mt-2">
+                                                <span className="flex items-center gap-1 bg-zinc-50 border border-zinc-200 px-2.5 py-1 rounded-full text-[11px]">👁 {views}</span>
+                                                <span className="flex items-center gap-1 bg-zinc-50 border border-zinc-200 px-2.5 py-1 rounded-full text-[11px]">💬 {comments}</span>
+                                                <span className="flex items-center gap-1 bg-zinc-50 border border-zinc-200 px-2.5 py-1 rounded-full text-[11px]">↗ {shares}</span>
+                                            </div>
                                         </div>
                                     </div>
-                                    <div className="hidden md:block col-span-2"><span className="text-[11px] px-2.5 py-1 rounded-full bg-violet-50 text-violet-700 border border-violet-100 font-medium">{cats.find(c => c.id === p.category_id)?.nome || "—"}</span></div>
-                                    <div className="hidden md:flex col-span-1"><span className={`text-[10px] px-2.5 py-1 rounded-full border font-medium ${p.status === 'published' ? 'bg-green-50 text-green-700 border-green-200' : 'bg-zinc-100 text-zinc-600'}`}>{p.status}</span></div>
+                                    {/* DESKTOP */}
+                                    <div className="hidden md:block col-span-2"><span className="text-[11px] px-2.5 py-1 rounded-full bg-violet-50 text-violet-700 border border-violet-100 font-medium">{catName}</span></div>
+                                    <div className="hidden md:flex col-span-1"><span className={`text-[10px] px-2.5 py-1 rounded-full border font-medium ${p.status === 'published'? 'bg-green-50 text-green-700 border-green-200' : 'bg-zinc-100 text-zinc-600'}`}>{p.status}</span></div>
                                     <div className="hidden md:flex col-span-2 items-center gap-1.5 text-[11px] text-zinc-600">
                                         <span className="flex items-center gap-1 bg-zinc-50 border px-2 py-1 rounded-full">👁 {views}</span>
                                         <span className="flex items-center gap-1 bg-zinc-50 border px-2 py-1 rounded-full">💬 {comments}</span>
                                         <span className="flex items-center gap-1 bg-zinc-50 border px-2 py-1 rounded-full">↗ {shares}</span>
                                     </div>
-                                    <div className="flex items-center justify-end gap-1.5 mt-3 md:mt-0 col-span-2">
-                                        <button onClick={() => openEditPost(p)} className="w-9 h-9 rounded-full bg-white border border-zinc-200 hover:border-zinc-900 hover:bg-zinc-900 hover:text-white grid place-items-center transition">✎</button>
-                                        <button onClick={() => deletePost(p.id)} className="w-9 h-9 rounded-full bg-white border border-zinc-200 hover:border-red-500 hover:bg-red-500 hover:text-white grid place-items-center transition text-zinc-500">🗑</button>
+                                    <div className="flex items-center justify-between md:justify-end gap-1.5 mt-3 md:mt-0 col-span-12 md:col-span-2 border-t md:border-0 pt-3 md:pt-0 border-zinc-100">
+                                        <span className="md:hidden text-[11px] text-zinc-400 font-medium">Ações</span>
+                                        <div className="flex gap-1.5">
+                                            <button onClick={() => openEditPost(p)} className="w-9 h-9 rounded-full bg-white border border-zinc-200 hover:border-zinc-900 hover:bg-zinc-900 hover:text-white grid place-items-center transition">✎</button>
+                                            <button onClick={() => deletePost(p.id)} className="w-9 h-9 rounded-full bg-white border border-zinc-200 hover:border-red-500 hover:bg-red-500 hover:text-white grid place-items-center transition text-zinc-500">🗑</button>
+                                        </div>
                                     </div>
                                 </div>
                             )
@@ -280,25 +284,34 @@ export default function AdminPage() {
                         </div>
                         {filteredBanners.map(b => (
                             <div key={b.id} className="group border-b last:border-0 hover:bg-zinc-50/70 transition p-4 md:px-6 md:py-4 md:grid md:grid-cols-12 md:items-center gap-3">
-                                <div className="col-span-5 flex gap-3 items-center">
+                                <div className="col-span-5 flex gap-3 items-start">
                                     <div className="w-20 h-12 rounded-xl bg-zinc-100 overflow-hidden shrink-0 border border-zinc-100">
-                                        {b.imagem_url ? <img src={b.imagem_url} className="w-full h-full object-cover" alt="" /> : <div className="w-full h-full grid place-items-center text-[10px]">SEM IMG</div>}
+                                        {b.imagem_url? <img src={b.imagem_url} className="w-full h-full object-cover" alt="" /> : <div className="w-full h-full grid place-items-center text-[10px]">SEM IMG</div>}
                                     </div>
-                                    <div className="min-w-0">
+                                    <div className="min-w-0 flex-1">
                                         <p className="text-[13px] font-semibold line-clamp-1">{b.titulo}</p>
                                         <p className="text-[11px] text-zinc-500 truncate max-w-[200px]">{b.link_url || "sem link"}</p>
+                                        <div className="flex md:hidden flex-wrap gap-1.5 mt-2">
+                                            <span className="text-[10px] px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-100 font-medium">{POSICOES.find(p => p.value === b.posicao)?.label || b.posicao}</span>
+                                            <span className={`text-[10px] px-2.5 py-1 rounded-full border font-medium ${b.ativo? 'bg-green-50 text-green-700 border-green-200' : 'bg-zinc-100'}`}>{b.ativo? 'ATIVO' : 'OFF'}</span>
+                                            <span className="bg-zinc-50 border px-2 py-1 rounded-full text-[11px]">👁 {b.views || 0}</span>
+                                            <span className="bg-zinc-50 border px-2 py-1 rounded-full text-[11px]">↗ {b.clicks || 0}</span>
+                                        </div>
                                     </div>
                                 </div>
                                 <div className="hidden md:block col-span-2"><span className="text-[11px] px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-100 font-medium">{POSICOES.find(p => p.value === b.posicao)?.label || b.posicao}</span></div>
-                                <div className="hidden md:block col-span-1"><span className={`text-[10px] px-2.5 py-1 rounded-full border font-medium ${b.ativo ? 'bg-green-50 text-green-700 border-green-200' : 'bg-zinc-100'}`}>{b.ativo ? 'ATIVO' : 'OFF'}</span></div>
+                                <div className="hidden md:block col-span-1"><span className={`text-[10px] px-2.5 py-1 rounded-full border font-medium ${b.ativo? 'bg-green-50 text-green-700 border-green-200' : 'bg-zinc-100'}`}>{b.ativo? 'ATIVO' : 'OFF'}</span></div>
                                 <div className="hidden md:flex col-span-2 gap-1.5 text-[11px]"><span className="bg-zinc-50 border px-2 py-1 rounded-full">👁 {b.views || 0}</span><span className="bg-zinc-50 border px-2 py-1 rounded-full">↗ {b.clicks || 0}</span></div>
-                                <div className="flex items-center justify-end gap-1.5 col-span-12 md:col-span-2 mt-2 md:mt-0">
-                                    <button onClick={() => openEditBanner(b)} className="w-9 h-9 rounded-full bg-white border border-zinc-200 hover:bg-black hover:text-white grid place-items-center transition">✎</button>
-                                    <button onClick={() => deleteBanner(b.id)} className="w-9 h-9 rounded-full bg-white border border-zinc-200 hover:bg-red-500 hover:text-white grid place-items-center transition">🗑</button>
+                                <div className="flex items-center justify-between md:justify-end gap-1.5 col-span-12 md:col-span-2 mt-2 md:mt-0 border-t md:border-0 pt-3 md:pt-0 border-zinc-100">
+                                    <span className="md:hidden text-[11px] text-zinc-400 font-medium">Ações</span>
+                                    <div className="flex gap-1.5">
+                                        <button onClick={() => openEditBanner(b)} className="w-9 h-9 rounded-full bg-white border border-zinc-200 hover:bg-black hover:text-white grid place-items-center transition">✎</button>
+                                        <button onClick={() => deleteBanner(b.id)} className="w-9 h-9 rounded-full bg-white border border-zinc-200 hover:bg-red-500 hover:text-white grid place-items-center transition">🗑</button>
+                                    </div>
                                 </div>
                             </div>
                         ))}
-                        {filteredBanners.length === 0 && <div className="p-12 text-center text-sm text-zinc-400">Nenhum banner. Clica em + NOVO BANNER<br /><span className="text-[11px]">Se o backend ainda não tem rota de banners, vai ficar 0 até criar</span></div>}
+                        {filteredBanners.length === 0 && <div className="p-12 text-center text-sm text-zinc-400">Nenhum banner. Clica em + NOVO BANNER</div>}
                     </div>
                 )}
             </div>
@@ -312,7 +325,7 @@ export default function AdminPage() {
                             <button onClick={() => setShowPostModal(false)} className="w-8 h-8 rounded-full bg-white border shadow-sm flex items-center justify-center hover:bg-gray-50">×</button>
                         </div>
                         <div className="px-6 pt-5 pb-3 shrink-0 border-b border-gray-100">
-                            <h3 className="text-lg font-bold text-gray-900 leading-tight">{editingPost ? 'Editar Post' : 'Novo Post'}</h3>
+                            <h3 className="text-lg font-bold text-gray-900 leading-tight">{editingPost? 'Editar Post' : 'Novo Post'}</h3>
                             <div className="flex gap-1.5 mt-4 overflow-x-auto scrollbar-none">
                                 <TabBtn id="conteudo" label="Conteúdo" />
                                 <TabBtn id="midia" label="Mídia" />
@@ -322,21 +335,21 @@ export default function AdminPage() {
                         <div className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-none px-6 py-4">
                             {tab === 'conteudo' && (
                                 <div className="flex flex-col gap-3">
-                                    <input value={form.titulo} onChange={e => setForm({ ...form, titulo: e.target.value })} placeholder="Título do post *" className={inputClass} />
-                                    <input value={form.slug} onChange={e => setForm({ ...form, slug: e.target.value })} placeholder="Slug (auto)" className={inputClass} />
+                                    <input value={form.titulo} onChange={e => setForm({...form, titulo: e.target.value })} placeholder="Título do post *" className={inputClass} />
+                                    <input value={form.slug} onChange={e => setForm({...form, slug: e.target.value })} placeholder="Slug (auto)" className={inputClass} />
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                                        <CustomSelect value={form.category_id} onChange={v => setForm({ ...form, category_id: v })} placeholder="Categoria" options={cats.map(c => ({ value: c.id, label: c.nome }))} />
-                                        <CustomSelect value={form.tipo} onChange={v => setForm({ ...form, tipo: v })} placeholder="Tipo" options={TIPOS} />
+                                        <CustomSelect value={form.category_id} onChange={v => setForm({...form, category_id: v })} placeholder="Categoria" options={cats.map(c => ({ value: c.id, label: c.nome }))} />
+                                        <CustomSelect value={form.tipo} onChange={v => setForm({...form, tipo: v })} placeholder="Tipo" options={TIPOS} />
                                     </div>
-                                    <textarea value={form.descricao} onChange={e => setForm({ ...form, descricao: e.target.value })} rows={2} placeholder="Descrição curta" className="w-full bg-white border border-gray-200 rounded-xl px-3 py-3 text-sm text-black placeholder:text-black/40 focus:outline-none focus:border-black" />
-                                    <textarea value={form.conteudo} onChange={e => setForm({ ...form, conteudo: e.target.value })} rows={6} placeholder="Conteúdo completo" className="w-full bg-white border border-gray-200 rounded-xl px-3 py-3 text-sm text-black placeholder:text-black/40 focus:outline-none focus:border-black" />
+                                    <textarea value={form.descricao} onChange={e => setForm({...form, descricao: e.target.value })} rows={2} placeholder="Descrição curta" className="w-full bg-white border border-gray-200 rounded-xl px-3 py-3 text-sm text-black placeholder:text-black/40 focus:outline-none focus:border-black" />
+                                    <textarea value={form.conteudo} onChange={e => setForm({...form, conteudo: e.target.value })} rows={6} placeholder="Conteúdo completo" className="w-full bg-white border border-gray-200 rounded-xl px-3 py-3 text-sm text-black placeholder:text-black/40 focus:outline-none focus:border-black" />
                                 </div>
                             )}
                             {tab === 'midia' && (
                                 <div className="flex flex-col gap-3">
                                     <div className="grid grid-cols-1 gap-2">
-                                        <div className="flex flex-col gap-1"><label className="text-xs font-bold tracking-widest text-black">MEDIA URL</label><input value={form.media_url} onChange={e => setForm({ ...form, media_url: e.target.value })} placeholder="https://..." className={inputClass} /></div>
-                                        <div className="flex flex-col gap-1"><label className="text-xs font-bold tracking-widest text-black">THUMBNAIL</label><input value={form.thumbnail_url} onChange={e => setForm({ ...form, thumbnail_url: e.target.value })} placeholder="https://..." className={inputClass} /></div>
+                                        <div className="flex flex-col gap-1"><label className="text-xs font-bold tracking-widest text-black">MEDIA URL</label><input value={form.media_url} onChange={e => setForm({...form, media_url: e.target.value })} placeholder="https://..." className={inputClass} /></div>
+                                        <div className="flex flex-col gap-1"><label className="text-xs font-bold tracking-widest text-black">THUMBNAIL</label><input value={form.thumbnail_url} onChange={e => setForm({...form, thumbnail_url: e.target.value })} placeholder="https://..." className={inputClass} /></div>
                                     </div>
                                     <div className="mt-2 p-4 border border-dashed border-gray-300 rounded-2xl bg-gray-50/50">
                                         <p className="text-xs font-bold tracking-widest text-black mb-2">UPLOAD ARQUIVOS</p>
@@ -348,19 +361,19 @@ export default function AdminPage() {
                             {tab === 'config' && (
                                 <div className="flex flex-col gap-3">
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                                        <CustomSelect value={form.status} onChange={v => setForm({ ...form, status: v })} placeholder="Status" options={STATUS} />
+                                        <CustomSelect value={form.status} onChange={v => setForm({...form, status: v })} placeholder="Status" options={STATUS} />
                                         <label className="flex items-center gap-2 h-11 px-3 border border-gray-200 rounded-xl cursor-pointer bg-white hover:bg-gray-50 transition">
-                                            <input type="checkbox" checked={form.destaque} onChange={e => setForm({ ...form, destaque: e.target.checked })} className="w-4 h-4 accent-black rounded" />
+                                            <input type="checkbox" checked={form.destaque} onChange={e => setForm({...form, destaque: e.target.checked })} className="w-4 h-4 accent-black rounded" />
                                             <span className="text-xs text-black font-medium">Destaque?</span>
                                         </label>
                                     </div>
-                                    <input value={form.tags} onChange={e => setForm({ ...form, tags: e.target.value })} placeholder="Tags separadas por vírgula" className={inputClass} />
+                                    <input value={form.tags} onChange={e => setForm({...form, tags: e.target.value })} placeholder="Tags separadas por vírgula" className={inputClass} />
                                 </div>
                             )}
                         </div>
                         <div className="shrink-0 px-6 py-4 border-t border-gray-100 bg-white flex gap-2">
                             <button type="button" onClick={() => setShowPostModal(false)} className="flex-1 h-11 rounded-full border border-gray-200 bg-white flex items-center justify-center hover:bg-gray-50">×</button>
-                            <button onClick={savePost} disabled={loading} className="flex-1 h-11 rounded-full bg-black text-white font-semibold hover:bg-zinc-800 flex items-center justify-center disabled:opacity-50">{loading ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <>{editingPost ? 'ATUALIZAR' : 'CRIAR'}</>}</button>
+                            <button onClick={savePost} disabled={loading} className="flex-1 h-11 rounded-full bg-black text-white font-semibold hover:bg-zinc-800 flex items-center justify-center disabled:opacity-50">{loading? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <>{editingPost? 'ATUALIZAR' : 'CRIAR'}</>}</button>
                         </div>
                     </div>
                 </div>
@@ -375,12 +388,12 @@ export default function AdminPage() {
                             <button onClick={() => setShowCatModal(false)} className="w-8 h-8 rounded-full bg-white border shadow-sm flex items-center justify-center">×</button>
                         </div>
                         <div className="p-6">
-                            <h3 className="text-lg font-bold">{editingCat ? "Editar Categoria" : "Nova Categoria"}</h3>
+                            <h3 className="text-lg font-bold">{editingCat? "Editar Categoria" : "Nova Categoria"}</h3>
                             <div className="mt-4 space-y-3">
-                                <input value={catForm.nome} onChange={e => setCatForm({ ...catForm, nome: e.target.value })} placeholder="Nome ex: Política" className={inputClass} />
-                                <input value={catForm.slug} onChange={e => setCatForm({ ...catForm, slug: e.target.value })} placeholder="Slug ex: politica" className={inputClass} />
-                                <input value={catForm.descricao} onChange={e => setCatForm({ ...catForm, descricao: e.target.value })} placeholder="Descrição" className={inputClass} />
-                                <div className="flex items-center gap-3 h-11 px-3 border border-gray-200 rounded-xl"><input type="color" value={catForm.cor} onChange={e => setCatForm({ ...catForm, cor: e.target.value })} className="w-8 h-8 rounded-full overflow-hidden border-0 p-0" /><span className="text-sm">Cor da categoria</span><span className="ml-auto text-xs text-black/50">{catForm.cor}</span></div>
+                                <input value={catForm.nome} onChange={e => setCatForm({...catForm, nome: e.target.value })} placeholder="Nome ex: Política" className={inputClass} />
+                                <input value={catForm.slug} onChange={e => setCatForm({...catForm, slug: e.target.value })} placeholder="Slug ex: politica" className={inputClass} />
+                                <input value={catForm.descricao} onChange={e => setCatForm({...catForm, descricao: e.target.value })} placeholder="Descrição" className={inputClass} />
+                                <div className="flex items-center gap-3 h-11 px-3 border border-gray-200 rounded-xl"><input type="color" value={catForm.cor} onChange={e => setCatForm({...catForm, cor: e.target.value })} className="w-8 h-8 rounded-full overflow-hidden border-0 p-0" /><span className="text-sm">Cor da categoria</span><span className="ml-auto text-xs text-black/50">{catForm.cor}</span></div>
                             </div>
                             <div className="mt-6 flex gap-2">
                                 <button onClick={() => setShowCatModal(false)} className="flex-1 h-11 rounded-full border border-gray-200 bg-white flex items-center justify-center">×</button>
@@ -400,29 +413,29 @@ export default function AdminPage() {
                             <button onClick={() => setShowBannerModal(false)} className="w-8 h-8 rounded-full bg-white border shadow-sm flex items-center justify-center">×</button>
                         </div>
                         <div className="p-6 overflow-y-auto scrollbar-none">
-                            <h3 className="text-lg font-bold">{editingBanner ? "Editar Banner" : "Novo Banner"}</h3>
+                            <h3 className="text-lg font-bold">{editingBanner? "Editar Banner" : "Novo Banner"}</h3>
                             <div className="mt-4 space-y-3">
-                                <input value={bannerForm.titulo} onChange={e => setBannerForm({ ...bannerForm, titulo: e.target.value })} placeholder="Título do banner ex: Unitel 5G" className={inputClass} />
-                                <CustomSelect value={bannerForm.posicao} onChange={v => setBannerForm({ ...bannerForm, posicao: v as BannerPos })} placeholder="Posição" options={POSICOES} />
-                                <input value={bannerForm.link_url} onChange={e => setBannerForm({ ...bannerForm, link_url: e.target.value })} placeholder="Link ao clicar ex: https://..." className={inputClass} />
-                                <input value={bannerForm.imagem_url} onChange={e => setBannerForm({ ...bannerForm, imagem_url: e.target.value })} placeholder="URL da imagem ou faz upload abaixo" className={inputClass} />
+                                <input value={bannerForm.titulo} onChange={e => setBannerForm({...bannerForm, titulo: e.target.value })} placeholder="Título do banner ex: Unitel 5G" className={inputClass} />
+                                <CustomSelect value={bannerForm.posicao} onChange={v => setBannerForm({...bannerForm, posicao: v as BannerPos })} placeholder="Posição" options={POSICOES} />
+                                <input value={bannerForm.link_url} onChange={e => setBannerForm({...bannerForm, link_url: e.target.value })} placeholder="Link ao clicar ex: https://..." className={inputClass} />
+                                <input value={bannerForm.imagem_url} onChange={e => setBannerForm({...bannerForm, imagem_url: e.target.value })} placeholder="URL da imagem ou faz upload abaixo" className={inputClass} />
                                 <div className="p-3 border border-dashed border-gray-300 rounded-2xl bg-gray-50/50">
                                     <p className="text-[10px] font-bold tracking-widest mb-2">UPLOAD IMAGEM BANNER</p>
                                     <input type="file" accept="image/*" onChange={e => setBannerFile(e.target.files)} className="w-full text-sm file:mr-3 file:px-4 file:py-2 file:rounded-full file:border-0 file:bg-black file:text-white file:text-xs file:font-bold" />
                                 </div>
                                 <div className="grid grid-cols-2 gap-2">
-                                    <div className="flex flex-col gap-1"><label className="text-[10px] font-bold">INÍCIO</label><input type="date" value={bannerForm.data_inicio} onChange={e => setBannerForm({ ...bannerForm, data_inicio: e.target.value })} className={inputClass} /></div>
-                                    <div className="flex flex-col gap-1"><label className="text-[10px] font-bold">FIM</label><input type="date" value={bannerForm.data_fim} onChange={e => setBannerForm({ ...bannerForm, data_fim: e.target.value })} className={inputClass} /></div>
+                                    <div className="flex flex-col gap-1"><label className="text-[10px] font-bold">INÍCIO</label><input type="date" value={bannerForm.data_inicio} onChange={e => setBannerForm({...bannerForm, data_inicio: e.target.value })} className={inputClass} /></div>
+                                    <div className="flex flex-col gap-1"><label className="text-[10px] font-bold">FIM</label><input type="date" value={bannerForm.data_fim} onChange={e => setBannerForm({...bannerForm, data_fim: e.target.value })} className={inputClass} /></div>
                                 </div>
                                 <label className="flex items-center gap-2 h-11 px-3 border border-gray-200 rounded-xl cursor-pointer bg-white hover:bg-gray-50 transition">
-                                    <input type="checkbox" checked={bannerForm.ativo} onChange={e => setBannerForm({ ...bannerForm, ativo: e.target.checked })} className="w-4 h-4 accent-black rounded" />
+                                    <input type="checkbox" checked={bannerForm.ativo} onChange={e => setBannerForm({...bannerForm, ativo: e.target.checked })} className="w-4 h-4 accent-black rounded" />
                                     <span className="text-xs text-black font-medium">Banner ativo?</span>
                                 </label>
                                 {bannerForm.imagem_url && <img src={bannerForm.imagem_url} className="w-full h-32 object-cover rounded-xl border" alt="preview" />}
                             </div>
                             <div className="mt-6 flex gap-2">
                                 <button onClick={() => setShowBannerModal(false)} className="flex-1 h-11 rounded-full border border-gray-200 bg-white flex items-center justify-center">×</button>
-                                <button onClick={saveBanner} disabled={loading} className="flex-1 h-11 rounded-full bg-black text-white font-semibold hover:bg-zinc-800 flex items-center justify-center disabled:opacity-50">{loading ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <>SALVAR</>}</button>
+                                <button onClick={saveBanner} disabled={loading} className="flex-1 h-11 rounded-full bg-black text-white font-semibold hover:bg-zinc-800 flex items-center justify-center disabled:opacity-50">{loading? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <>SALVAR</>}</button>
                             </div>
                         </div>
                     </div>
