@@ -99,37 +99,26 @@ export default async function Home() {
 
                 {/* HERO AQUALIFE - GLASS PROFISSIONAL */}
                 <section className="relative max-w-7xl mx-auto mt-6 md:mt-8 mb-14 rounded-[32px] overflow-hidden border border-white/10 bg-[#020617] min-h-[640px] md:min-h-[720px]">
-                    {/* BG OCEANO + CORAIS */}
-                    <img src="https://images.unsplash.com/photo-1551244072-5d1289329ab9?q=80&w=2070" className="absolute inset-0 w-full h-full object-cover" alt="" />
+                    <img src="https://images.unsplash.com/photo-1551244072-5d1289329ab9?q=80&w=2070" className="absolute inset-0 w-full h-full object-cover" alt="ocean" />
                     <div className="absolute inset-0 bg-gradient-to-r from-[#020617] via-[#020617]/70 to-[#020617]/10" />
                     <div className="absolute -bottom-20 -left-20 w-[380px] h-[260px] bg-[#9333ea] rounded-full blur-[70px] opacity-60" />
                     <div className="absolute -bottom-10 -right-10 w-[280px] h-[180px] bg-[#22d3ee] rounded-full blur-[60px] opacity-70" />
 
-                    {/* TARTARUGA SAINDO DO CARD */}
-                    <img
-                      src="https://res.cloudinary.com/dwqkvhqwu/image/upload/v1710000000/turtle-cute-3d.png"
-                      alt="tartaruga"
-                      className="hidden md:block absolute right-[-40px] lg:right-[20px] top-[90px] w-[58%] max-w-[680px] z-10 drop-shadow-[0_0_50px_rgba(56,189,248,0.6)] pointer-events-none"
-                      onError={(e) => (e.currentTarget.style.display='none')}
-                    />
+                    <div className="hidden md:block absolute right-[-20px] lg:right-[20px] top-[90px] w-[58%] max-w-[680px] z-10">
+                        <img src="/turtle.png" alt="tartaruga" className="w-full h-auto drop-shadow-[0_0_50px_rgba(56,189,248,0.6)]" />
+                    </div>
 
-                    {/* CARD DE VIDRO - EXATO DO PRINT */}
                     <div className="relative z-20 m-4 md:m-6 lg:m-8 max-w-[560px] rounded-[32px] border border-white/15 bg-gradient-to-b from-white/[0.12] to-white/[0.04] backdrop-blur-[28px] shadow-[0_0_0_1px_rgba(96,165,250,0.2),0_0_80px_rgba(59,130,246,0.15)_inset] p-6 md:p-8">
-                        {/* brilho borda */}
                         <div className="absolute -top-px left-6 right-6 h-px bg-gradient-to-r from-transparent via-cyan-300/60 to-transparent" />
-                        <div className="absolute right-0 top-0 bottom-0 w-px bg-gradient-to-b from-cyan-300/60 via-transparent to-transparent hidden md:block" style={{ right: '-1px', clipPath: 'ellipse(100% 50% at 0% 50%)' }} />
-
                         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.08] border border-white/10 text-[11px] text-cyan-200 backdrop-blur">
                             <span>〰️</span> Mergulhe num mundo melhor
                         </div>
-
                         <h1 className="text-[36px] md:text-[54px] font-black tracking-tight leading-[0.9] text-white mt-5">
                             Descubra.<br/>Experimente.<br/><span className="bg-gradient-to-r from-cyan-300 to-blue-400 bg-clip-text text-transparent">Inove.</span>
                         </h1>
-
                         {principal? (
                           <div className="mt-4">
-                            <p className="text-white/70 text-[13px] leading-relaxed line-clamp-2">{principal.titulo} — {principal.descricao || 'Explore tecnologia de ponta e crie memórias que duram a vida toda.'}</p>
+                            <p className="text-white/70 text-[13px] leading-relaxed line-clamp-2">{principal.titulo}</p>
                             <div className="flex gap-3 mt-6">
                                 <Link href={`/post/${principal.slug || principal.id}`} className="px-7 py-3 rounded-full bg-gradient-to-r from-[#9333ea] to-[#38bdf8] text-white text-[13px] font-bold flex items-center gap-2 shadow-lg">Começar <span>→</span></Link>
                                 <Link href={`/post/${principal.slug || principal.id}`} className="px-5 py-3 rounded-full bg-white/10 border border-white/20 text-white text-[13px] flex items-center gap-2 backdrop-blur"><span className="w-7 h-7 rounded-full bg-white/10 grid place-items-center">▶</span> Ver história</Link>
@@ -140,27 +129,23 @@ export default async function Home() {
                             <p className="text-white/60 text-[13px] mt-4 max-w-[360px]">Explore tecnologia de ponta e crie memórias que duram a vida toda.</p>
                             <div className="flex gap-3 mt-6">
                                 <Link href="#destaques" className="px-7 py-3 rounded-full bg-gradient-to-r from-[#9333ea] to-[#38bdf8] text-white text-[13px] font-bold">Começar →</Link>
-                                <button className="px-5 py-3 rounded-full bg-white/10 border border-white/20 text-white text-[13px]">▶ Ver história</button>
+                                <Link href="#destaques" className="px-5 py-3 rounded-full bg-white/10 border border-white/20 text-white text-[13px]">▶ Ver história</Link>
                             </div>
                           </>
                         )}
-
                         <div className="mt-8 rounded-[16px] bg-white/[0.06] border border-white/10 p-2.5 flex gap-2 backdrop-blur">
-                            <div className="flex-1 flex gap-2 items-center text-[11px] text-white/80 border-r border-white/10 pr-2"><span className="w-8 h-8 rounded-lg bg-white/10 grid place-items-center">🍃</span><div><b className="text-white">IA Avançada</b><br/><span className="text-[10px] opacity-60">Tecnologia sustentável</span></div></div>
-                            <div className="flex-1 flex gap-2 items-center text-[11px] text-white/80 border-r border-white/10 pr-2"><span className="w-8 h-8 rounded-lg bg-white/10 grid place-items-center">💎</span><div><b className="text-white">Serviço Premium</b><br/><span className="text-[10px] opacity-60">Experiência de classe</span></div></div>
+                            <div className="flex-1 flex gap-2 items-center text-[11px] text-white/80 border-r border-white/10 pr-2"><span className="w-8 h-8 rounded-lg bg-white/10 grid place-items-center">🍃</span><div><b className="text-white">IA Avançada</b><br/><span className="text-[10px] opacity-60">Sustentável</span></div></div>
+                            <div className="flex-1 flex gap-2 items-center text-[11px] text-white/80 border-r border-white/10 pr-2"><span className="w-8 h-8 rounded-lg bg-white/10 grid place-items-center">💎</span><div><b className="text-white">Premium</b><br/><span className="text-[10px] opacity-60">Classe</span></div></div>
                             <div className="flex-1 flex gap-2 items-center text-[11px] text-white/80"><span className="w-8 h-8 rounded-lg bg-white/10 grid place-items-center">🛡️</span><div><b className="text-white">Seguro</b><br/><span className="text-[10px] opacity-60">Confiável</span></div></div>
                         </div>
                     </div>
 
-                    {/* STATS BAR - GLASS ESCURO */}
                     <div className="absolute bottom-4 left-4 right-4 md:left-8 md:right-auto md:w-[640px] z-30 rounded-[18px] border border-white/10 bg-white/[0.08] backdrop-blur-[20px] flex justify-around py-3.5 px-4">
                         <div className="flex gap-2.5 items-center text-white"><span className="w-8 h-8 rounded-full bg-purple-500/30 grid place-items-center text-[12px]">👥</span><div><b className="text-[14px]">12K+</b><br/><span className="text-[10px] opacity-60">Usuários felizes</span></div></div>
                         <div className="w-px bg-white/10" />
                         <div className="flex gap-2.5 items-center text-white"><span className="w-8 h-8 rounded-full bg-pink-500/30 grid place-items-center text-[12px]">🪸</span><div><b className="text-[14px]">350+</b><br/><span className="text-[10px] opacity-60">Destinos Tech</span></div></div>
                         <div className="w-px bg-white/10 hidden sm:block" />
                         <div className="hidden sm:flex gap-2.5 items-center text-white"><span className="w-8 h-8 rounded-full bg-cyan-500/30 grid place-items-center text-[12px]">📸</span><div><b className="text-[14px]">25K+</b><br/><span className="text-[10px] opacity-60">Momentos</span></div></div>
-                        <div className="w-px bg-white/10 hidden sm:block" />
-                        <div className="hidden sm:flex gap-2.5 items-center text-white"><span className="w-8 h-8 rounded-full bg-white/10 grid place-items-center text-[12px]">⭐</span><div><b className="text-[14px]">4.9</b><br/><span className="text-[10px] opacity-60">Avaliação</span></div></div>
                     </div>
                 </section>
 
