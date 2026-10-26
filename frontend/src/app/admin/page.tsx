@@ -7,17 +7,21 @@ import { API_URL, getToken, clearAuth, authHeader } from "../../lib/api";
 
 type Category = { id: string; nome: string; slug: string; cor?: string; descricao?: string };
 type Post = any;
-type Tab = 'conteudo' | 'midia' | 'produto' | 'config';
+type Tab = 'conteudo' | 'midia' | 'produto' | 'plataforma' | 'config';
 type BannerPos = 'home_topo' | 'home_meio' | 'sidebar' | 'dentro_post' | 'footer';
 type Banner = { id: string; titulo: string; imagem_url: string; link_url?: string; posicao: BannerPos; ativo: boolean; clicks?: number; views?: number; data_inicio?: string; data_fim?: string };
 
 const TIPOS = [
     { value: 'noticia', label: 'Notícia' },
     { value: 'produto', label: 'Produto' },
+    { value: 'plataforma', label: 'Plataforma / SaaS' },
+    { value: 'app', label: 'App' },
+    { value: 'site', label: 'Site' },
+    { value: 'sistema', label: 'Sistema' },
+    { value: 'saas', label: 'SaaS' },
+    { value: 'case', label: 'Case / Projeto' },
     { value: 'video', label: 'Vídeo' },
     { value: 'imagem', label: 'Imagem' },
-    { value: 'audio', label: 'Áudio' },
-    { value: 'pdf', label: 'PDF' },
 ];
 const STATUS = [
     { value: 'published', label: 'Publicado' },
@@ -31,6 +35,7 @@ const POSICOES: { value: BannerPos, label: string }[] = [
     { value: 'dentro_post', label: 'Dentro do Post' },
     { value: 'footer', label: 'Footer' },
 ];
+const TIPOS_PLATAFORMA = ['plataforma','app','site','sistema','saas','case','projeto'];
 
 function generateCloudinaryThumb(videoUrl: string): string {
     if (!videoUrl) return "";
@@ -87,7 +92,7 @@ export default function AdminPage() {
     const [editingBanner, setEditingBanner] = useState<Banner | null>(null);
     const [tab, setTab] = useState<Tab>('conteudo');
     const [form, setForm] = useState({
-        titulo: "", slug: "", tipo: "noticia", descricao: "", conteudo: "", category_id: "", status: "published", destaque: false, tags: "", media_url: "", thumbnail_url: "",
+        titulo: "", slug: "", tipo: "noticia", descricao: "", conteudo: "", category_id: "", status: "published", destaque: false, tags: "", media_url: "", thumbnail_url: "", link_url: "",
         preco: "", preco_promocional: "", estoque: "", sku: "", unidade: "un", em_promocao: false
     });
     const [files, setFiles] = useState<FileList | null>(null);
@@ -121,13 +126,13 @@ export default function AdminPage() {
 
     function openNewPost() {
         setEditingPost(null);
-        setForm({ titulo: "", slug: "", tipo: "noticia", descricao: "", conteudo: "", category_id: "", status: "published", destaque: false, tags: "", media_url: "", thumbnail_url: "", preco: "", preco_promocional: "", estoque: "1", sku: "", unidade: "un", em_promocao: false });
+        setForm({ titulo: "", slug: "", tipo: "noticia", descricao: "", conteudo: "", category_id: "", status: "published", destaque: false, tags: "", media_url: "", thumbnail_url: "", link_url: "", preco: "", preco_promocional: "", estoque: "1", sku: "", unidade: "un", em_promocao: false });
         setFiles(null); setThumbFile(null); setTab('conteudo'); setShowPostModal(true);
     }
     function openEditPost(p: Post) {
         setEditingPost(p);
         setForm({
-            titulo: p.titulo, slug: p.slug || "", tipo: p.tipo, descricao: p.descricao || "", conteudo: p.conteudo || "", category_id: p.category_id || "", status: p.status, destaque: p.destaque, tags: (p.tags || []).join(", "), media_url: p.media_url || "", thumbnail_url: p.thumbnail_url || "",
+            titulo: p.titulo, slug: p.slug || "", tipo: p.tipo, descricao: p.descricao || "", conteudo: p.conteudo || "", category_id: p.category_id || "", status: p.status, destaque: p.destaque, tags: (p.tags || []).join(", "), media_url: p.media_url || "", thumbnail_url: p.thumbnail_url || "", link_url: p.link_url || "",
             preco: p.preco?.toString() || "", preco_promocional: p.preco_promocional?.toString() || "", estoque: p.estoque?.toString() || "", sku: p.sku || "", unidade: p.unidade || "un", em_promocao: p.em_promocao || false
         });
         setFiles(null); setThumbFile(null); setTab('conteudo'); setShowPostModal(true);
@@ -169,7 +174,7 @@ export default function AdminPage() {
                 tipo: form.tipo, descricao: form.descricao, conteudo: form.conteudo,
                 category_id: form.category_id || null, status: form.status, destaque: form.destaque,
                 tags: form.tags.split(",").map(t => t.trim()).filter(Boolean),
-                media_url, thumbnail_url, media_type: media_type || form.tipo, media_files
+                media_url, thumbnail_url, link_url: form.link_url || null, media_type: media_type || form.tipo, media_files
             };
 
             if(form.tipo === 'produto'){
@@ -223,6 +228,7 @@ export default function AdminPage() {
     const previewAutoThumb = form.media_url ? generateCloudinaryThumb(form.media_url) : "";
     const previewFinalThumb = form.thumbnail_url || previewAutoThumb || form.media_url;
     const isProduto = form.tipo === 'produto';
+    const isPlataforma = TIPOS_PLATAFORMA.includes(form.tipo);
 
     return (
         <main className="min-h-screen bg-[#f8fafc] text-zinc-900 font-sans">
@@ -301,13 +307,21 @@ export default function AdminPage() {
                     <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
                     <div className="relative flex max-h-[90vh] w-full max-w-xl flex-col overflow-hidden rounded-3xl bg-white shadow-2xl">
                         <div className="flex h-18 shrink-0 items-start justify-between bg-blue-50 px-5 pt-5"><div className="grid h-9 w-9 place-items-center rounded-full border bg-white shadow-sm text-sm">📄</div><button onClick={() => setShowPostModal(false)} className="grid h-8 w-8 place-items-center rounded-full border bg-white">×</button></div>
-                        <div className="border-b px-6 pb-3 pt-5"><h3 className="text-lg font-bold">{editingPost ? 'Editar' : 'Novo'} {isProduto ? 'Produto' : 'Post'}</h3><div className="mt-4 flex gap-1.5 flex-wrap"><TabBtn id="conteudo" label="Conteúdo" /><TabBtn id="midia" label="Mídia" /><TabBtn id="produto" label="Preço" show={isProduto} /><TabBtn id="config" label="Config" /></div></div>
+                        <div className="border-b px-6 pb-3 pt-5"><h3 className="text-lg font-bold">{editingPost ? 'Editar' : 'Novo'} {isProduto ? 'Produto' : isPlataforma ? 'Plataforma' : 'Post'}</h3><div className="mt-4 flex gap-1.5 flex-wrap"><TabBtn id="conteudo" label="Conteúdo" /><TabBtn id="midia" label="Mídia" /><TabBtn id="plataforma" label="Plataforma / Link" show={isPlataforma} /><TabBtn id="produto" label="Preço" show={isProduto} /><TabBtn id="config" label="Config" /></div></div>
                         <div className="flex-1 overflow-y-auto px-6 py-4">
-                            {tab === 'conteudo' && <div className="flex flex-col gap-3"><input value={form.titulo} onChange={e => setForm({ ...form, titulo: e.target.value })} placeholder={isProduto ? "Nome do produto *" : "Título *"} className={inputClass} /><div className="grid gap-2 md:grid-cols-2"><CustomSelect value={form.category_id} onChange={v => setForm({ ...form, category_id: v })} placeholder="Categoria" options={cats.map(c => ({ value: c.id, label: c.nome }))} /><CustomSelect value={form.tipo} onChange={v => { setForm({ ...form, tipo: v }); if(v==='produto') setTab('produto'); }} placeholder="Tipo" options={TIPOS} /></div><textarea value={form.descricao} onChange={e => setForm({ ...form, descricao: e.target.value })} rows={3} placeholder={isProduto ? "Descrição curta do produto" : "Descrição curta"} className="w-full rounded-xl border border-gray-200 px-3 py-3 text-sm focus:outline-none focus:border-black" /><textarea value={form.conteudo} onChange={e => setForm({ ...form, conteudo: e.target.value })} rows={5} placeholder={isProduto ? "Ficha técnica / conteúdo detalhado" : "Conteúdo completo"} className="w-full rounded-xl border border-gray-200 px-3 py-3 text-sm focus:outline-none focus:border-black" /></div>}
-                            {tab === 'midia' && <div className="flex flex-col gap-3"><input value={form.media_url} onChange={e => setForm({ ...form, media_url: e.target.value })} placeholder="Media URL" className={inputClass} /><div><p className="mb-1 text-xs font-semibold">Thumbnail (capa)</p><input type="file" accept="image/*" onChange={e => setThumbFile(e.target.files)} className="text-sm" /></div><div><p className="mb-1 text-xs font-semibold">Galeria</p><input type="file" multiple onChange={e => setFiles(e.target.files)} className="text-sm" /></div>{previewFinalThumb && <img src={previewFinalThumb} className="h-40 w-full rounded-xl border object-cover" alt="" />}</div>}
+                            {tab === 'conteudo' && <div className="flex flex-col gap-3"><input value={form.titulo} onChange={e => setForm({ ...form, titulo: e.target.value })} placeholder={isProduto ? "Nome do produto *" : isPlataforma ? "Nome da plataforma / site *" : "Título *"} className={inputClass} /><div className="grid gap-2 md:grid-cols-2"><CustomSelect value={form.category_id} onChange={v => setForm({ ...form, category_id: v })} placeholder="Categoria" options={cats.map(c => ({ value: c.id, label: c.nome }))} /><CustomSelect value={form.tipo} onChange={v => { setForm({ ...form, tipo: v }); if(v==='produto') setTab('produto'); else if(TIPOS_PLATAFORMA.includes(v)) setTab('plataforma'); }} placeholder="Tipo" options={TIPOS} /></div><textarea value={form.descricao} onChange={e => setForm({ ...form, descricao: e.target.value })} rows={3} placeholder={isPlataforma ? "Descrição curta - aparece no card" : isProduto ? "Descrição curta do produto" : "Descrição curta"} className="w-full rounded-xl border border-gray-200 px-3 py-3 text-sm focus:outline-none focus:border-black" /><textarea value={form.conteudo} onChange={e => setForm({ ...form, conteudo: e.target.value })} rows={5} placeholder={isPlataforma ? "Sobre a plataforma, tecnologias usadas..." : isProduto ? "Ficha técnica / conteúdo detalhado" : "Conteúdo completo"} className="w-full rounded-xl border border-gray-200 px-3 py-3 text-sm focus:outline-none focus:border-black" /></div>}
+                            {tab === 'midia' && <div className="flex flex-col gap-3"><input value={form.media_url} onChange={e => setForm({ ...form, media_url: e.target.value })} placeholder="Media URL" className={inputClass} /><div><p className="mb-1 text-xs font-semibold">Thumbnail (capa) - Recomendado 1280x720</p><input type="file" accept="image/*" onChange={e => setThumbFile(e.target.files)} className="text-sm" /></div><div><p className="mb-1 text-xs font-semibold">Galeria</p><input type="file" multiple onChange={e => setFiles(e.target.files)} className="text-sm" /></div>{previewFinalThumb && <img src={previewFinalThumb} className="h-40 w-full rounded-xl border object-cover" alt="" />}</div>}
+                            {tab === 'plataforma' && isPlataforma && (
+                                <div className="flex flex-col gap-3">
+                                    <div className="rounded-2xl bg-blue-50 border border-blue-200 p-3 text-xs text-blue-800">🔗 Configuração de Plataforma / Site - este card vai aparecer na seção arrastável da home</div>
+                                    <div><label className="text-xs font-semibold">Link da Plataforma / App / Site *</label><input value={form.link_url} onChange={e => setForm({ ...form, link_url: e.target.value })} placeholder="https://minhaplataforma.ao ou https://play.google.com/..." className={inputClass} /><p className="mt-1 text-xs text-gray-500">Esse é o link do botão "Explorar" na seção.</p></div>
+                                    <div><label className="text-xs font-semibold">Tags (ex: PRODUTO CONNECT, SAAS, APP)</label><input value={form.tags} onChange={e => setForm({ ...form, tags: e.target.value })} placeholder="PRODUTO CONNECT, SAAS, APP" className={inputClass} /></div>
+                                    <div className="rounded-xl bg-zinc-50 border p-3 text-xs"><p className="font-semibold mb-1">Preview como vai aparecer:</p><p className="text-zinc-600">Tipo: <b>{form.tipo}</b> • Título: <b>{form.titulo || "Sem título"}</b></p><p className="text-zinc-600 truncate">Link: {form.link_url || "Sem link"}</p></div>
+                                </div>
+                            )}
                             {tab === 'produto' && isProduto && (
                                 <div className="flex flex-col gap-3">
-                                    <div className="rounded-2xl bg-amber-50 border border-amber-200 p-3 text-xs text-amber-800">💰 Configuração de Produto - estes campos só aparecem para tipo Produto</div>
+                                    <div className="rounded-2xl bg-amber-50 border border-amber-200 p-3 text-xs text-amber-800">💰 Configuração de Produto</div>
                                     <div className="grid gap-3 md:grid-cols-2">
                                         <div><label className="text-xs font-semibold">Preço (Kz) *</label><input value={form.preco} onChange={e => setForm({ ...form, preco: e.target.value })} type="number" placeholder="150000" className={inputClass} /></div>
                                         <div><label className="text-xs font-semibold">Preço Promocional (Kz)</label><input value={form.preco_promocional} onChange={e => setForm({ ...form, preco_promocional: e.target.value })} type="number" placeholder="129000" className={inputClass} /></div>

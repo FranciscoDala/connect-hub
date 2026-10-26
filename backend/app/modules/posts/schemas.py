@@ -46,11 +46,12 @@ class PostCreate(BaseModel):
     media_url: Optional[str] = None
     media_type: Optional[str] = None
     thumbnail_url: Optional[str] = None
+    link_url: Optional[str] = None
     media_files: Optional[Any] = None
     status: str = Field(default="published")
     destaque: bool = False
     tags: Optional[List[str]] = None
-    # produto
+    # produto / saas
     preco: Optional[float] = None
     preco_promocional: Optional[float] = None
     estoque: Optional[int] = 0
@@ -68,6 +69,7 @@ class PostUpdate(BaseModel):
     media_url: Optional[str] = None
     media_type: Optional[str] = None
     thumbnail_url: Optional[str] = None
+    link_url: Optional[str] = None
     media_files: Optional[Any] = None
     status: Optional[str] = None
     destaque: Optional[bool] = None
@@ -91,6 +93,7 @@ class PostResponse(BaseModel):
     media_url: Optional[str] = None
     media_type: Optional[str] = None
     thumbnail_url: Optional[str] = None
+    link_url: Optional[str] = None
     media_files: Optional[Any] = None
     status: str
     destaque: bool
@@ -101,7 +104,7 @@ class PostResponse(BaseModel):
     shares_count: int = 0
     shares: int = 0
     comments_count: int = 0
-    # produto
+    # produto / saas
     preco: Optional[float] = None
     preco_promocional: Optional[float] = None
     estoque: int = 0
@@ -118,19 +121,35 @@ class PostResponse(BaseModel):
     @classmethod
     def from_orm_with_counts(cls, post, comments_count: int = 0):
         return cls(
-            id=post.id, titulo=post.titulo, slug=post.slug, tipo=post.tipo,
-            descricao=post.descricao, conteudo=post.conteudo,
-            category_id=post.category_id, categoria=post.categoria,
-            media_url=post.media_url, media_type=post.media_type,
-            thumbnail_url=post.thumbnail_url, media_files=post.media_files,
-            status=post.status, destaque=post.destaque, tags=post.tags,
+            id=post.id,
+            titulo=post.titulo,
+            slug=post.slug,
+            tipo=post.tipo,
+            descricao=post.descricao,
+            conteudo=post.conteudo,
+            category_id=post.category_id,
+            categoria=post.categoria,
+            media_url=post.media_url,
+            media_type=post.media_type,
+            thumbnail_url=post.thumbnail_url,
+            link_url=post.link_url,
+            media_files=post.media_files,
+            status=post.status,
+            destaque=post.destaque,
+            tags=post.tags,
             author_id=post.author_id,
-            views=post.views or 0, views_count=post.views or 0,
-            shares_count=post.shares_count or 0, shares=post.shares_count or 0,
+            views=post.views or 0,
+            views_count=post.views or 0,
+            shares_count=post.shares_count or 0,
+            shares=post.shares_count or 0,
             comments_count=comments_count,
             preco=float(post.preco) if post.preco else None,
             preco_promocional=float(post.preco_promocional) if post.preco_promocional else None,
-            estoque=post.estoque or 0, sku=post.sku, unidade=post.unidade or "un",
+            estoque=post.estoque or 0,
+            sku=post.sku,
+            unidade=post.unidade or "un",
             em_promocao=post.em_promocao or False,
-            created_at=post.created_at, updated_at=post.updated_at, published_at=post.published_at
+            created_at=post.created_at,
+            updated_at=post.updated_at,
+            published_at=post.published_at
         )

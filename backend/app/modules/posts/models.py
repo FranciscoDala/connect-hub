@@ -18,7 +18,7 @@ class Post(Base):
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     titulo: Mapped[str] = mapped_column(String(300), nullable=False)
     slug: Mapped[str] = mapped_column(String(350), unique=True, index=True, nullable=True)
-    tipo: Mapped[str] = mapped_column(String(50), default="noticia") # noticia | produto | video...
+    tipo: Mapped[str] = mapped_column(String(50), default="noticia") # noticia | produto | video | plataforma | app | site | case | saas
     descricao: Mapped[str] = mapped_column(Text, default="")
     conteudo: Mapped[str] = mapped_column(Text, default="")
 
@@ -28,6 +28,7 @@ class Post(Base):
     media_url: Mapped[str | None] = mapped_column(Text, nullable=True)
     media_type: Mapped[str | None] = mapped_column(String(20), nullable=True)
     thumbnail_url: Mapped[str | None] = mapped_column(Text, nullable=True)
+    link_url: Mapped[str | None] = mapped_column(Text, nullable=True)
     media_files: Mapped[List[dict] | None] = mapped_column(JSONB, nullable=True)
 
     status: Mapped[str] = mapped_column(String(20), default="published")
@@ -37,7 +38,7 @@ class Post(Base):
     views: Mapped[int] = mapped_column(Integer, default=0)
     shares_count: Mapped[int] = mapped_column(Integer, default=0)
 
-    # ===== CAMPOS PRODUTO =====
+    # ===== CAMPOS PRODUTO / SAAS =====
     preco: Mapped[float | None] = mapped_column(Numeric(12,2), nullable=True)
     preco_promocional: Mapped[float | None] = mapped_column(Numeric(12,2), nullable=True)
     estoque: Mapped[int] = mapped_column(Integer, default=0)
