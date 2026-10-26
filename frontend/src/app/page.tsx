@@ -28,8 +28,11 @@ function ParceriasSection() {
             <div className="mx-auto max-w-7xl px-5 sm:px-8">
                 <div className="mx-auto max-w-3xl text-center">
                     <div className="flex items-center justify-center gap-3">
+
                         <span className="h-px w-8 bg-[#0e8ac2]" />
                         <p className="text-xs font-bold uppercase tracking-widest text-[#0e8ac2]">PARCERIAS ESTRATÉGICAS</p>
+                        <span className="h-px w-8 bg-[#0e8ac2]" />
+
                     </div>
                     <h2 className="mt-6 text-3xl font-semibold tracking-tight text-[#1e293b] sm:text-5xl">Colabore para o Futuro.</h2>
                     <p className="mt-6 text-sm leading-7 text-[#64748b] sm:text-base sm:leading-8">
@@ -69,7 +72,7 @@ function EquipeSection() {
                         <p className="text-xs font-bold uppercase tracking-widest text-[#0e8ac2]">LIDERANÇA</p>
                         <span className="h-px w-8 bg-[#0e8ac2]" />
                     </div>
-                    <h2 className="mt-4 text-3xl font-semibold tracking-tight text-[#1e293b] sm:text-4xl">Conheça Nossa Equipe Executiva.</h2>
+                    <h2 className="mt-4 text-3xl font-semibold tracking-tight text-[#1e293b] sm:text-4xl">CEO</h2>
                     <p className="mt-4 max-w-xl text-sm leading-6 text-[#64748b]">
                         Guiados por décadas de experiência na indústria de tecnologia, logística global e conformidade regulatória internacional.
                     </p>
@@ -78,7 +81,7 @@ function EquipeSection() {
                 {/* CARDS - CENTRALIZA QUANDO 1 OU 2, ALINHA QUANDO 3+ */}
                 <div className="mt-12 flex flex-wrap justify-center gap-6">
                     {/* CEO */}
-                    <div className="flex w-full max-w-[380px] flex-col rounded-3xl border border-[#e2e8f0] bg-white p-7 shadow-sm">
+                    <div className="flex w-full max-w-sm flex-col rounded-3xl border border-[#e2e8f0] bg-white p-7 shadow-sm">
                         <div className="mx-auto h-50 w-50 overflow-hidden rounded-full border-4 border-white shadow">
                             <img src="/team/ceo.jpeg" alt="CEO" className="h-full w-full object-cover" />
                         </div>
