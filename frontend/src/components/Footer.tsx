@@ -7,11 +7,10 @@ export default function Footer() {
 
     useEffect(() => {
         setNow(new Date());
-        const id = setInterval(() => setNow(new Date()), 60000); // atualiza a cada minuto
+        const id = setInterval(() => setNow(new Date()), 60000);
         return () => clearInterval(id);
     }, []);
 
-    // Tudo dinâmico no fuso de Luanda
     const timeZone = "Africa/Luanda";
 
     const timeString = now
@@ -27,7 +26,6 @@ export default function Footer() {
         : "";
 
     const isWeekend = now ? [0, 6].includes(now.getDay()) : false;
-    // Checa horário comercial 9h-17h no fuso de Luanda
     const hourLuanda = now ? parseInt(new Intl.DateTimeFormat("pt-AO", { hour: "2-digit", hour12: false, timeZone }).format(now)) : 0;
     const isOpen = !isWeekend && hourLuanda >= 9 && hourLuanda < 17;
 
@@ -47,10 +45,10 @@ export default function Footer() {
                         <p className="mt-4 max-w-sm text-sm leading-6 text-[#64748b]">
                             Your trusted partner in advanced technology and digital excellence.
                         </p>
-                        <div className="mt-4 inline-flex items-center gap-2 rounded-full border bg-white px-3 py-1.5 text-xs font-semibold">
-                            <span className={`h-2 w-2 rounded-full ${isOpen ? 'bg-green-500 animate-pulse' : 'bg-zinc-400'}`} />
+                        <p className="mt-4 flex items-center gap-2 text-xs text-[#64748b]">
+                            <span className={`h-2 w-2 rounded-full ${isOpen ? 'bg-green-500' : 'bg-zinc-400'}`} />
                             {isOpen ? 'Aberto agora' : 'Fechado'} • {timeString}
-                        </div>
+                        </p>
                     </div>
 
                     {/* COLUNA 2 - EXPLORE */}
@@ -64,19 +62,19 @@ export default function Footer() {
                         </ul>
                     </div>
 
-                    {/* COLUNA 3 - OFFICE DINÂMICO */}
+                    {/* COLUNA 3 - OFFICE DINÂMICO SEM CAIXA BRANCA */}
                     <div className="md:col-span-4">
                         <h4 className="text-sm font-bold tracking-widest text-[#334155]">CONNECT-Tics</h4>
                         <div className="mt-4 grid gap-1.5 text-sm leading-6 text-[#64748b]">
                             <p>Talatona, Luanda Sul, Via AL16<br />Luanda, AO • {timeZone}</p>
 
-                            <div className="mt-3 rounded-2xl border bg-white p-3">
+                            <div className="mt-3 grid gap-1">
                                 <p className="text-xs font-bold uppercase tracking-widest text-[#334155]">{weekDayString} • {dateString}</p>
-                                <p className="mt-1 text-sm font-semibold text-[#1e293b]">{timeString} • Luanda</p>
-                                <p className="mt-1 text-xs">Seg - Sex, 9:00 - 17:00 {isOpen ? '(Aberto)' : '(Fechado)'}</p>
+                                <p className="text-sm font-semibold text-[#1e293b]">{timeString} • Luanda</p>
+                                <p className="text-xs">Seg - Sex, 9:00 - 17:00 {isOpen ? '(Aberto)' : '(Fechado)'}</p>
                             </div>
 
-                            <a href="mailto:geral@connect.ao" className="mt-2 hover:text-black">connecttics25@gmail.com</a>
+                            <a href="mailto:connecttics25@gmail.com" className="mt-2 hover:text-black">connecttics25@gmail.com</a>
                         </div>
                     </div>
                 </div>
