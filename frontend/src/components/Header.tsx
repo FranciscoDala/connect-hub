@@ -1,26 +1,49 @@
 "use client";
-import { useState } from "react";
 import Link from "next/link";
+import { useState } from "react";
+
 export default function Header() {
-    const [mobileOpen, setMobileOpen] = useState(false);
-    return (
-        <>
-            <div className="w-full bg-[#0a2a5e] text-white text-[10px] py-1.5 px-4 flex justify-between items-center tracking-wide">
-                <span>geral@connect.ao • Linha de apoio: 15555</span><span className="hidden md:block">Segunda a sexta • 8h às 17h</span>
+  const [open, setOpen] = useState(false);
+  return (
+    <header className="fixed left-0 right-0 top-0 z-40 border-b border-[#e2e8f0] bg-white/80 backdrop-blur-xl">
+      <nav className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4 sm:px-8">
+        <Link href="/" className="flex flex-col items-center text-center leading-none">
+          <span className="text-[22px] sm:text-[26px] font-bold tracking-wide text-[#0e8ac2]" style={{ fontFamily: "var(--font-montserrat)" }}>CONNECT</span>
+          <span className="mt-[2px] text-[9px] font-bold tracking-[0.22em] text-[#64748b] uppercase">TICS TECHNOLOGIES</span>
+        </Link>
+
+        <div className="hidden lg:flex items-center gap-6 text-[13px] font-semibold text-[#475569]">
+          <a href="#destaques" className="hover:text-black transition">Destaques</a>
+          <a href="#categorias" className="hover:text-black transition">Tecnologia</a>
+          <a href="#categorias" className="hover:text-black transition">Produtos</a>
+          <a href="#videos" className="hover:text-black transition">Connect TV</a>
+          <a href="#apps" className="hover:text-black transition">Apps</a>
+          <Link href="/posts" className="ml-2 rounded-full bg-[#0e8ac2] px-5 py-2.5 text-white shadow-[0_8px_20px_rgba(14,138,194,0.25)] hover:bg-[#0c709e]">Partner</Link>
+        </div>
+
+        <button onClick={() => setOpen(!open)} className="lg:hidden inline-flex h-11 w-11 items-center justify-center rounded-full border border-[#e2e8f0] bg-white shadow-sm">
+          <span className="text-lg">{open ? "✕" : "☰"}</span>
+        </button>
+      </nav>
+
+      {open && (
+        <div className="fixed inset-0 z-[80] min-h-dvh bg-[#f8fafc] lg:hidden flex flex-col">
+          <div className="flex items-center justify-between px-5 py-4 border-b bg-white/90 backdrop-blur">
+            <span className="font-bold text-[#0e8ac2]">CONNECT TICS</span>
+            <button onClick={() => setOpen(false)} className="h-11 w-11 rounded-full border bg-white">✕</button>
+          </div>
+          <div className="mx-auto w-full max-w-md flex-1 px-5 py-8">
+            <div className="rounded-[2rem] border bg-white p-6 shadow-sm">
+              <p className="mb-3 text-[11px] font-bold tracking-widest text-[#94a3b8]">MENU</p>
+              <div className="grid divide-y">
+                {["Home","Destaques","Tecnologia","Connect TV","Apps","Contact"].map(l => (
+                  <a key={l} href={`#${l.toLowerCase()}`} onClick={()=>setOpen(false)} className="py-4 font-semibold flex justify-between">{l} <span className="text-[#0e8ac2]">→</span></a>
+                ))}
+              </div>
             </div>
-            <div className="sticky top-0 z-50 bg-white border-b border-zinc-200">
-                <header className="max-w-7xl mx-auto flex justify-between items-center px-4 md:px-8 py-3">
-                    <Link href="/"><img src="/connect.png" alt="CONNECT" className="h-6 w-auto" /></Link>
-                    <nav className="hidden lg:flex items-center gap-6 text-[11px] font-semibold tracking-wide text-zinc-600">
-                        <Link href="/" className="hover:text-[#0a2a5e]">Página inicial</Link>
-                        <Link href="#" className="hover:text-[#0a2a5e]">Serviços</Link>
-                        <Link href="#" className="hover:text-[#0a2a5e]">Notícias</Link>
-                        <Link href="#" className="hover:text-[#0a2a5e]">Projectos</Link>
-                    </nav>
-                    <div className="flex items-center gap-2"><Link href="/login" className="px-5 py-2 bg-[#0a2a5e] text-white text-[10px] font-bold tracking-widest">Entrar</Link><button onClick={()=>setMobileOpen(!mobileOpen)} className="lg:hidden w-8 h-8 bg-zinc-900 text-white grid place-items-center">{mobileOpen? "✕" : "☰"}</button></div>
-                </header>
-                {mobileOpen && <div className="lg:hidden border-t border-zinc-200 bg-white p-4 grid gap-3 text-[11px] font-semibold"><Link href="/">Página inicial</Link><Link href="#">Serviços</Link><Link href="#">Notícias</Link></div>}
-            </div>
-        </>
-    );
+          </div>
+        </div>
+      )}
+    </header>
+  );
 }
