@@ -2,12 +2,7 @@
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import Link from 'next/link'
-import { ConnectTVSection } from '@/components/ConnectPlayer'
 
-type Category = { id: string; nome: string; slug: string; cor?: string }
-type Post = { id: string; titulo: string; slug?: string; descricao?: string; conteudo?: string; tipo: string; thumbnail_url?: string; media_url?: string; category_id?: string; views?: number; created_at: string; destaque?: boolean; status: string; }
-
-// BANNER COMPLETO - puxa tudo que vem da API
 type Banner = {
   id: string;
   titulo: string;
@@ -17,16 +12,8 @@ type Banner = {
   imagem_url: string;
   link_url?: string;
   posicao: string;
-  ativo?: boolean;
-  clicks?: number;
-  views?: number;
-  data_inicio?: string;
-  data_fim?: string;
 }
 
-async function getCategories(): Promise<Category[]> {
-  try { const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/categories`, { next: { revalidate: 60 } }); if (!res.ok) return []; return await res.json() } catch { return [] }
-}
 async function getBanners(): Promise<Banner[]> {
   try {
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/banners?ativo=true`, { next: { revalidate: 60 } });
@@ -36,57 +23,66 @@ async function getBanners(): Promise<Banner[]> {
   } catch { return [] }
 }
 
-function isVideoPost(post: Post) { const url = (post.media_url || '').toLowerCase(); return post.tipo === 'video' || url.includes('.mp4') || url.includes('video/upload') }
-function isAudioPost(post: Post) { const url = (post.media_url || '').toLowerCase(); return post.tipo === 'audio' || post.tipo === 'musica' || url.includes('.mp3') }
+function ParceriasSection() {
+  return (
+    <section className="bg-[#f8fafc] py-20 sm:py-28">
+      <div className="mx-auto max-w-7xl px-5 sm:px-8">
+        <div className="mx-auto max-w-3xl text-center">
+          <div className="flex items-center justify-center gap-3">
+            <span className="h-px w-8 bg-[#0e8ac2]" />
+            <p className="text-xs font-bold uppercase tracking-widest text-[#0e8ac2]">PARCERIAS ESTRATÉGICAS</p>
+          </div>
+          <h2 className="mt-6 text-3xl font-semibold tracking-tight text-[#1e293b] sm:text-5xl">Colabore para o Futuro.</h2>
+          <p className="mt-6 text-sm leading-7 text-[#64748b] sm:text-base sm:leading-8">
+            Colaboramos ativamente com organizações de tecnologia, instituições de pesquisa, empresas de software e investidores estratégicos em todo o mundo para acelerar a inovação tecnológica e expandir o acesso global às nossas soluções.
+          </p>
+        </div>
 
-function PostCard({ post, cat }: { post: Post, cat?: Category }) {
-    return (
-        <Link href={`/post/${post.slug || post.id}`} className="group block overflow-hidden rounded-3xl border border-[#e2e8f0] bg-white transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
-            <div className="aspect-16/10 bg-zinc-100 relative overflow-hidden">
-                {post.thumbnail_url || post.media_url ? <img src={post.thumbnail_url || post.media_url} alt={post.titulo} className="w-full h-full object-cover group-hover:scale-105 transition duration-500" /> : <div className="w-full h-full grid place-items-center bg-[#0f172a] text-white font-bold text-xs">{post.tipo.toUpperCase()}</div>}
-                {cat && <span className="absolute left-3 top-3 rounded-full bg-white border px-3 py-1 text-xs font-bold uppercase tracking-wide" style={{ color: cat.cor || '#0e8ac2' }}>{cat.nome}</span>}
+        <div className="mx-auto mt-12 grid max-w-5xl gap-4 sm:grid-cols-3">
+          <div className="rounded-2xl border border-[#e2e8f0] bg-white p-6 text-center shadow-sm">
+            <div className="mx-auto grid h-10 w-10 place-items-center text-[#0e8ac2]">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-7 w-7"><path d="M4 8a2 2 0 0 1 2-2h2V5a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v1h2a2 2 0 0 1 2 2v2h-2V8H4v2H2V8a2 2 0 0 1 2-2ZM2 12h2v6a2 2 0 0 0 2 2h2v-8H2v0ZM10 12v8h4v-8h-4ZM16 12v8h2a2 2 0 0 0 2-2v-6h-4Z"/><path d="M12 7.5a1 1 0 1 0 2 1 1 0 0 0 0-2Z" /></svg>
             </div>
-            <div className="p-5"><h3 className="line-clamp-2 text-sm font-semibold leading-tight text-[#1e293b] group-hover:text-[#0e8ac2]">{post.titulo}</h3>{post.descricao && <p className="mt-2 line-clamp-2 text-xs leading-relaxed text-[#64748b]">{post.descricao}</p>}<div className="mt-3 flex items-center gap-2"><span className="rounded-full border bg-[#f8fafc] px-2.5 py-1 text-xs">{(post as any).views ?? 0} views</span><span className="text-xs text-[#94a3b8]">{new Date(post.created_at).toLocaleDateString('pt-AO')}</span></div></div>
-        </Link>
-    )
-}
+            <h3 className="mt-3 text-sm font-semibold text-[#1e293b]">Integração Corporativa</h3>
+            <p className="mt-1.5 text-xs text-[#94a3b8]">Empresas e Provedores de Tecnologia</p>
+          </div>
 
-function BannerSlot({ banner, pos }: { banner?: Banner, pos: string }) {
-    if (!banner) return null
-    return (<div className="my-8"><p className="mb-2 px-1 text-[10px] tracking-widest text-zinc-400">PUBLICIDADE • {pos.toUpperCase()}</p><a href={banner.link_url} target={banner.link_url ? "_blank" : undefined} className="block overflow-hidden rounded-2xl border bg-white"><img src={banner.imagem_url} alt={banner.titulo} className="h-auto w-full object-cover max-h-40 md:max-h-55" /></a></div>)
+          <div className="rounded-2xl border border-[#e2e8f0] bg-white p-6 text-center shadow-sm">
+            <div className="mx-auto grid h-10 w-10 place-items-center text-[#0e8ac2]">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-7 w-7"><rect x="4" y="4" width="5" height="3" rx="1"/><rect x="15" y="4" width="5" height="3" rx="1"/><rect x="9.5" y="14" width="5" height="3" rx="1"/><path d="M6.5 7v3.5c0 2 2 3.5 5.5 3.5S17.5 12.5 17.5 10.5V7"/><path d="M12 14v-2.5"/></svg>
+            </div>
+            <h3 className="mt-3 text-sm font-semibold text-[#1e293b]">Distribuição Global</h3>
+            <p className="mt-1.5 text-xs text-[#94a3b8]">Distribuidores Regionais de Tecnologia</p>
+          </div>
+
+          <div className="rounded-2xl border border-[#e2e8f0] bg-white p-6 text-center shadow-sm">
+            <div className="mx-auto grid h-10 w-10 place-items-center text-[#0e8ac2]">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-7 w-7"><path d="M3 4v16h18"/><path d="M7 16l4-4 3 2 5-6"/><path d="M15 8h4v4"/></svg>
+            </div>
+            <h3 className="mt-3 text-sm font-semibold text-[#1e293b]">Estratégia de Investimento</h3>
+            <p className="mt-1.5 text-xs text-[#94a3b8]">Capital de Risco e Private Equity</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  )
 }
 
 export default async function Home() {
-    const [postsRaw, apps, categories, banners] = await Promise.all([getPosts(), getApps(), getCategories(), getBanners()])
-    const posts: Post[] = (Array.isArray(postsRaw) ? postsRaw : []).filter((p: any) => p.status === 'published')
-    const destaques = posts.filter(p => (p as any).destaque).slice(0, 4)
-    const principal = destaques[0] || posts[0]
-    const maisLidos = [...posts].sort((a, b) => ((b as any).views || 0) - ((a as any).views || 0)).slice(0, 5)
-    const videos = posts.filter(p => isVideoPost(p) || isAudioPost(p)).slice(0, 6)
-    const recentes = posts.slice(0, 8)
-
+    const banners = await getBanners()
     const bannerTopo = banners.find(b => b.posicao === 'home_topo')
-    const bannerMeio = banners.find(b => b.posicao === 'home_meio')
-    const bannerSidebar = banners.find(b => b.posicao === 'sidebar')
-    const postsByCategory = categories.map(cat => ({ cat, posts: posts.filter(p => p.category_id === cat.id).slice(0, 4) })).filter(g => g.posts.length > 0)
+    const hasBanner = !!bannerTopo
 
-    // HERO 100% DO BANNER - se existir banner, usa tudo dele
-    const heroBanner = bannerTopo
-    const hasBanner = !!heroBanner
-
-    const principalCat = categories.find(c => c.id === principal?.category_id)
-
-    const heroBg = hasBanner ? heroBanner.imagem_url : (principal?.thumbnail_url || "https://files.cdn-files-a.com/uploads/12300315/2000_6a73745adc7ea.png?format=avif")
-    const heroTitle = hasBanner ? heroBanner.titulo : (principal?.titulo || "Uami Ndongadas - AULA 2")
-    const heroDesc = hasBanner ? (heroBanner.descricao || heroBanner.conteudo || heroBanner.subtitulo || "") : (principal?.descricao || "Connect-TICS é uma plataforma de tecnologia dedicada a levar notícias, apps e inovação para todo o país.")
-    const heroLink = hasBanner ? (heroBanner.link_url || "#destaques") : (principal ? `/post/${principal.slug || principal.id}` : "#destaques")
-    const heroKicker = hasBanner ? (heroBanner.subtitulo || "DESTAQUE") : (principalCat?.nome?.toUpperCase() || "INOVAMOS PARA LIDERAR")
+    const heroBg = hasBanner ? bannerTopo.imagem_url : "https://files.cdn-files-a.com/uploads/12300315/2000_6a73745adc7ea.png?format=avif"
+    const heroTitle = hasBanner ? bannerTopo.titulo : "Uami Ndongadas - AULA 2"
+    const heroDesc = hasBanner ? (bannerTopo.descricao || bannerTopo.conteudo || bannerTopo.subtitulo || "") : "Connect-TICS é uma plataforma de tecnologia dedicada a levar notícias, apps e inovação para todo o país."
+    const heroLink = hasBanner ? (bannerTopo.link_url || "#parcerias") : "#parcerias"
+    const heroKicker = hasBanner ? (bannerTopo.subtitulo || "DESTAQUE") : "INOVAMOS PARA LIDERAR"
 
     return (
         <main className="min-h-screen bg-[#f8fafc] text-[#1e293b]">
             <Header />
 
-            {/* HERO 100% DINÂMICO DO BANNER home_topo */}
             <section className="relative isolate flex min-h-[88vh] items-center overflow-hidden bg-[#f1f5f9] pb-20 pt-32 lg:pt-36" style={{ backgroundImage: `url('${heroBg}')`, backgroundSize: "cover", backgroundPosition: "center" }}>
                 <div className="absolute inset-0 bg-white/75 backdrop-blur-sm sm:hidden" />
                 <div className="absolute inset-0 hidden bg-linear-to-r from-white via-white/90 to-white/10 sm:block" />
@@ -96,14 +92,16 @@ export default async function Home() {
                         <h1 className="mt-5 line-clamp-3 text-4xl font-semibold leading-none tracking-tight text-[#1e293b] sm:text-6xl">{heroTitle}</h1>
                         {heroDesc && <p className="mt-5 line-clamp-3 max-w-xl text-sm leading-7 text-[#64748b]">{heroDesc}</p>}
                         <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                            <Link href={heroLink} className="inline-flex min-h-12 items-center justify-center rounded-full bg-[#0e8ac2] px-7 text-sm font-semibold text-white">{hasBanner ? "Explorar Tecnologias" : "Ler mais"}</Link>
-                            <Link href="#categorias" className="inline-flex min-h-12 items-center justify-center rounded-full border border-[#e2e8f0] bg-white px-7 text-sm font-semibold text-[#334155]">Contact Us</Link>
+                            <Link href={heroLink} className="inline-flex min-h-12 items-center justify-center rounded-full bg-[#0e8ac2] px-7 text-sm font-semibold text-white">Explorar Tecnologias</Link>
+                            <Link href="#parcerias" className="inline-flex min-h-12 items-center justify-center rounded-full border border-[#e2e8f0] bg-white px-7 text-sm font-semibold text-[#334155]">Contact Us</Link>
                         </div>
                     </div>
                 </div>
             </section>
 
-
+            <div id="parcerias">
+              <ParceriasSection />
+            </div>
 
             <Footer />
         </main>
