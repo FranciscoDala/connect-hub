@@ -30,8 +30,8 @@ export default function Footer() {
                         <Link href="/" className="flex items-center">
                             <img src="/connect.png" alt="CONNECT" className="h-20 w-auto object-contain" />
                         </Link>
-                        <p className="mt-4 max-w-sm text-sm leading-6 text-[#64748b]">Inovamos para liderar</p>
-                        <p className="mt-4 max-w-sm text-sm leading-6 text-[#64748b]">Tecnologia é a aplicação prática do conhecimento científico para resolver problemas, criar ferramentas e facilitar as tarefas diárias.</p>
+                        <p className="mt-4 max-w-sm text-justify text-sm leading-6 text-[#64748b]">Inovamos para liderar</p>
+                        <p className="mt-4 max-w-sm text-justify text-sm leading-6 text-[#64748b]">Tecnologia é a aplicação prática do conhecimento científico para resolver problemas, criar ferramentas e facilitar as tarefas diárias.</p>
                         <p className="mt-4 flex items-center gap-2 text-xs text-[#64748b]">
                             <span className={`h-2 w-2 rounded-full ${isOpen ? 'bg-green-500' : 'bg-zinc-400'}`} />
                             {isOpen ? 'Aberto agora' : 'Fechado'} • {timeString}
@@ -62,7 +62,6 @@ export default function Footer() {
                     </div>
                 </div>
 
-                {/* BOTTOM - coluna no celular, linha no desktop */}
                 <div className="mt-14 flex flex-col gap-3 border-t border-[#e2e8f0] pt-6 text-xs text-[#94a3b8] sm:flex-row sm:items-center sm:justify-between">
                     <p className="leading-relaxed">© {year} Connect Tics Technologies. All rights reserved. {dateString} • Registration No. MC-2018-0992</p>
                     <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-4">

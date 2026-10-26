@@ -62,24 +62,23 @@ function EquipeSection() {
     return (
         <section id="equipe" className="bg-[#f1f5f9] py-20 sm:py-28">
             <div className="mx-auto max-w-7xl px-5 sm:px-8">
-                {/* Header igual print */}
-                <div className="flex flex-col justify-between gap-6 sm:flex-row sm:items-start">
-                    <div>
-                        <div className="flex items-center gap-3">
-                            <span className="h-px w-8 bg-[#0e8ac2]" />
-                            <p className="text-xs font-bold uppercase tracking-widest text-[#0e8ac2]">LIDERANÇA</p>
-                        </div>
-                        <h2 className="mt-4 text-3xl font-semibold tracking-tight text-[#1e293b] sm:text-4xl">Conheça Nossa Equipe Executiva.</h2>
+                {/* HEADER CENTRALIZADO */}
+                <div className="mx-auto flex max-w-3xl flex-col items-center text-center">
+                    <div className="flex items-center gap-3">
+                        <span className="h-px w-8 bg-[#0e8ac2]" />
+                        <p className="text-xs font-bold uppercase tracking-widest text-[#0e8ac2]">LIDERANÇA</p>
+                        <span className="h-px w-8 bg-[#0e8ac2]" />
                     </div>
-                    <p className="max-w-md text-sm leading-6 text-[#64748b] sm:text-right">
+                    <h2 className="mt-4 text-3xl font-semibold tracking-tight text-[#1e293b] sm:text-4xl">Conheça Nossa Equipe Executiva.</h2>
+                    <p className="mt-4 max-w-xl text-sm leading-6 text-[#64748b]">
                         Guiados por décadas de experiência na indústria de tecnologia, logística global e conformidade regulatória internacional.
                     </p>
                 </div>
 
-                {/* Cards */}
-                <div className="mt-12 grid gap-6 sm:grid-cols-3">
+                {/* CARDS - CENTRALIZA QUANDO 1 OU 2, ALINHA QUANDO 3+ */}
+                <div className="mt-12 flex flex-wrap justify-center gap-6">
                     {/* CEO */}
-                    <div className="rounded-3xl border border-[#e2e8f0] bg-white p-7 shadow-sm">
+                    <div className="flex w-full max-w-[380px] flex-col rounded-3xl border border-[#e2e8f0] bg-white p-7 shadow-sm">
                         <div className="mx-auto h-50 w-50 overflow-hidden rounded-full border-4 border-white shadow">
                             <img src="/team/ceo.jpeg" alt="CEO" className="h-full w-full object-cover" />
                         </div>
@@ -87,7 +86,7 @@ function EquipeSection() {
                             <h3 className="text-base font-semibold text-[#1e293b]">Francisco J.M Dala</h3>
                             <p className="mt-1 text-[11px] font-bold uppercase tracking-widest text-[#0e8ac2]">DIRETOR EXECUTIVO - CEO</p>
                         </div>
-                        <div className="mt-4 space-y-3 text-xs leading-6 text-[#64748b]">
+                        <div className="mt-4 space-y-3 text-justify text-xs leading-6 text-[#64748b]">
                             <p>
                                 Francisco Dala é o Fundador e CEO da Connect Tics. Com formação em Engenharia Informática e mais de 5 anos de liderança em tecnologia em Angola, fundou a empresa em 2021 combinando visão global de negócios com profundo conhecimento do mercado local.
                             </p>
@@ -97,47 +96,37 @@ function EquipeSection() {
                         </div>
                     </div>
 
-                    {/* VP Operations
-                    <div className="rounded-3xl border border-[#e2e8f0] bg-white p-7 shadow-sm">
-                        <div className="mx-auto h-24 w-24 overflow-hidden rounded-full border-4 border-white shadow">
-                            <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=400" alt="VP" className="h-full w-full object-cover" />
+                    {/* VP Operations - descomenta quando tiver */}
+                    {/*
+                    <div className="flex w-full max-w-[380px] flex-col rounded-3xl border border-[#e2e8f0] bg-white p-7 shadow-sm">
+                        <div className="mx-auto h-50 w-50 overflow-hidden rounded-full border-4 border-white shadow">
+                            <img src="/team/vp.jpg" alt="VP" className="h-full w-full object-cover" />
                         </div>
                         <div className="mt-5 text-center">
                             <h3 className="text-base font-semibold text-[#1e293b]">Sofia Mendes</h3>
                             <p className="mt-1 text-[11px] font-bold uppercase tracking-widest text-[#0e8ac2]">VICE-PRESIDENTE DE OPERAÇÕES</p>
                         </div>
-                        <div className="mt-4 space-y-3 text-xs leading-6 text-[#64748b]">
-                            <p>
-                                Sofia supervisiona as operações diárias da sede da Connect Tics. Trazendo quase uma década de experiência em liderança como Gerente Geral no sector de tecnologia, possui ampla experiência em administração, gestão de contas e redes de distribuição.
-                            </p>
-                            <p>
-                                Desempenha um papel crucial na otimização de fluxos de trabalho, fortalecendo o atendimento ao cliente e garantindo operações de cadeia de suprimentos confiáveis, altamente eficientes para entregar serviços de qualidade.
-                            </p>
+                        <div className="mt-4 space-y-3 text-justify text-xs leading-6 text-[#64748b]">
+                            <p>Sofia supervisiona as operações diárias...</p>
                         </div>
                     </div>
                     */}
 
-                    {/* CTO
-                    <div className="rounded-3xl border border-[#e2e8f0] bg-white p-7 shadow-sm">
-                        <div className="mx-auto h-24 w-24 overflow-hidden rounded-full border-4 border-white shadow">
-                            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=400" alt="CTO" className="h-full w-full object-cover" />
+                    {/* CTO - descomenta quando tiver */}
+                    {/*
+                    <div className="flex w-full max-w-[380px] flex-col rounded-3xl border border-[#e2e8f0] bg-white p-7 shadow-sm">
+                        <div className="mx-auto h-50 w-50 overflow-hidden rounded-full border-4 border-white shadow">
+                            <img src="/team/cto.jpg" alt="CTO" className="h-full w-full object-cover" />
                         </div>
                         <div className="mt-5 text-center">
                             <h3 className="text-base font-semibold text-[#1e293b]">David Park</h3>
                             <p className="mt-1 text-[11px] font-bold uppercase tracking-widest text-[#0e8ac2]">DIRETOR DE TECNOLOGIA - CTO</p>
                         </div>
-                        <div className="mt-4 space-y-3 text-xs leading-6 text-[#64748b]">
-                            <p>
-                                David traz mais de 10 anos de experiência em engenharia de sistemas, infraestrutura de alta frequência e design mecânico avançado. Com Mestrado em Engenharia de Sistemas pela Universidade Agostinho Neto, especializa-se em engenharia de precisão e otimização tecnológica.
-                            </p>
-                            <p>
-                                Lidera as inovações técnicas da Connect Tics, aproveitando sua formação multidisciplinar para avançar nossa missão de entregar tecnologias confiáveis e de ponta para todo o país.
-                            </p>
+                        <div className="mt-4 space-y-3 text-justify text-xs leading-6 text-[#64748b]">
+                            <p>David traz mais de 10 anos...</p>
                         </div>
                     </div>
                     */}
-
-
                 </div>
             </div>
         </section>
