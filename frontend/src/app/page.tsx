@@ -10,7 +10,7 @@ type Post = {
     category_id?: string; views?: number; comments_count?: number; shares_count?: number;
     created_at: string; destaque?: boolean; status: string;
 }
-type Banner = { id: string; titulo: string; imagem_url: string; link_url?: string; posicao: string }
+type Banner = { id: string; titulo: string; imagem_url: string; link_url?: string; posicao: string; ativo?: boolean }
 
 async function getCategories(): Promise<Category[]> {
     try {
@@ -84,29 +84,45 @@ export default async function Home() {
     const bannerSidebar = banners.find(b => b.posicao === 'sidebar')
     const postsByCategory = categories.map(cat => ({ cat, posts: posts.filter(p => p.category_id === cat.id).slice(0, 4) })).filter(g => g.posts.length > 0)
 
+    // HERO CARREGA DO BANNER - IGUAL SEU ADMIN
+    const heroBanner = bannerTopo // vem do cadastro: titulo, imagem_url, link_url, posicao home_topo
+    const principalCat = categories.find(c => c.id === principal?.category_id)
+    const heroBg = heroBanner?.imagem_url || "https://files.cdn-files-a.com/uploads/12300315/2000_6a73745adc7ea.png?format=avif"
+    const heroKicker = principalCat?.nome?.toUpperCase() || "INOVAMOS PARA LIDERAR"
+    const heroTitle = principal?.titulo || heroBanner?.titulo || "Uami Ndongadas - AULA 2 (Áudio)"
+    const heroDesc = principal?.descricao || "Connect-TICS é uma plataforma de tecnologia dedicada a levar notícias, apps e inovação para todo o país, com curadoria, velocidade e compliance global."
+
     return (
         <main className="min-h-screen bg-[#f8fafc] text-[#1e293b]">
             <Header />
 
-            {/* HERO MEDICORE - LIGHT */}
+            {/* HERO - CARREGA DA CATEGORIA/BANNER */}
             <section className="relative isolate min-h-[88vh] overflow-hidden px-5 pb-20 pt-32 sm:px-8 lg:pt-36 flex items-center bg-[#f1f5f9]"
-                style={{ backgroundImage: "url('https://files.cdn-files-a.com/uploads/12300315/2000_6a73745adc7ea.png?format=avif')", backgroundSize: "cover", backgroundPosition: "center" }}>
-                <div className="absolute inset-0 bg-white/70 backdrop-blur-[2px] sm:hidden z-[-1]" />
-                <div className="absolute inset-0 bg-gradient-to-r from-white/95 via-white/85 to-white/20 hidden sm:block z-[-1]" />
+                style={{ backgroundImage: `url('${heroBg}')`, backgroundSize: "cover", backgroundPosition: "center" }}>
+                <div className="absolute inset-0 bg-white/75 backdrop-blur-[1px] sm:hidden z-[-1]" />
+                <div className="absolute inset-0 bg-gradient-to-r from-white via-white/90 to-white/10 hidden sm:block z-[-1]" />
 
                 <div className="mx-auto w-full max-w-7xl z-10">
-                    <div className="max-w-3xl">
-                        <p className="section-kicker">INOVAMOS PARA LIDERAR</p>
-                        <h1 className="mt-5 text-5xl font-semibold leading-[0.95] tracking-[-0.02em] text-[#1e293b] sm:text-6xl lg:text-[72px]" style={{ fontFamily: "var(--font-montserrat)" }}>
-                            {principal ? principal.titulo.split(' ').slice(0,3).join(' ') : "Tecnologia que"}<br />{principal ? principal.titulo.split(' ').slice(3,6).join(' ') + "." : "Conecta Angola."}
-                        </h1>
-                        <p className="mt-7 max-w-xl text-[16px] leading-8 text-[#64748b]">
-                            {principal?.descricao || "Connect-TICS é uma plataforma de tecnologia dedicada a levar notícias, apps e inovação para todo o país, com curadoria, velocidade e compliance global."}
-                        </p>
-                        <div className="mt-10 flex flex-col gap-4 sm:flex-row">
-                            <Link href="#destaques" className="inline-flex min-h-12 items-center justify-center rounded-full bg-[#0e8ac2] px-8 text-white text-[14px] font-semibold shadow-[0_8px_20px_rgba(14,138,194,0.25)] hover:bg-[#0c709e] transition">Explorar Tecnologias</Link>
-                            <Link href={principal ? `/post/${principal.slug || principal.id}` : "#categorias"} className="inline-flex min-h-12 items-center justify-center rounded-full border border-[#e2e8f0] bg-white px-8 text-[#334155] text-[14px] font-semibold shadow-sm hover:border-[#0e8ac2] transition">Contact Us</Link>
+                    <div className="max-w-[640px]">
+                        <div className="flex items-center gap-3">
+                            <span className="h-px w-8 bg-[#0e8ac2] hidden sm:block" />
+                            <p className="text-[11px] font-bold tracking-[0.22em] uppercase text-[#0e8ac2]">{heroKicker}</p>
                         </div>
+                        <h1 className="mt-5 text-[34px] font-semibold leading-[0.95] tracking-[-0.02em] text-[#1e293b] sm:text-6xl lg:text-[58px] line-clamp-3" style={{ fontFamily: "var(--font-montserrat)" }}>
+                            {heroTitle}
+                        </h1>
+                        <p className="mt-5 max-w-[520px] text-[14px] leading-7 text-[#64748b] line-clamp-3">
+                            {heroDesc}
+                        </p>
+                        <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                            <Link href={principal ? `/post/${principal.slug || principal.id}` : (heroBanner?.link_url || "#destaques")} className="inline-flex min-h-[48px] items-center justify-center rounded-full bg-[#0e8ac2] px-7 text-white text-[14px] font-semibold shadow-[0_8px_20px_rgba(14,138,194,0.25)] hover:bg-[#0c709e] transition">Explorar Tecnologias</Link>
+                            <Link href="#categorias" className="inline-flex min-h-[48px] items-center justify-center rounded-full border border-[#e2e8f0] bg-white px-7 text-[#334155] text-[14px] font-semibold shadow-sm hover:border-[#0e8ac2] transition">Contact Us</Link>
+                        </div>
+                        {principalCat && (
+                            <div className="mt-6 inline-flex items-center gap-2 rounded-full bg-white border px-3 py-1.5 text-[11px] font-semibold shadow-sm">
+                                <span className="w-2 h-2 rounded-full" style={{ background: principalCat.cor || '#0e8ac2' }} /> {principalCat.nome} {heroBanner ? `• ${heroBanner.posicao}` : ''}
+                            </div>
+                        )}
                     </div>
                 </div>
             </section>
@@ -118,7 +134,7 @@ export default async function Home() {
                         <section id="destaques" className="mb-12">
                             <div className="flex items-end justify-between mb-8">
                                 <div>
-                                    <p className="section-kicker">Destaques</p>
+                                    <p className="text-[11px] font-bold tracking-[0.22em] uppercase text-[#0e8ac2] flex items-center gap-2"><span className="h-px w-6 bg-[#0e8ac2]"/> DESTAQUES</p>
                                     <h2 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl" style={{ fontFamily: "var(--font-montserrat)" }}>Notícias em destaque hoje.</h2>
                                 </div>
                                 <Link href="/posts" className="text-[12px] font-semibold text-[#64748b] hover:text-black">Ver todos →</Link>
