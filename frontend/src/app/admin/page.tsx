@@ -28,6 +28,10 @@ const STATUS = [
     { value: 'draft', label: 'Rascunho' },
     { value: 'archived', label: 'Arquivado' },
 ];
+const STATUS_PLATAFORMA = [
+    { value: 'em_utilizacao', label: '● Em utilização' },
+    { value: 'em_desenvolvimento', label: '● Em desenvolvimento' },
+];
 const POSICOES: { value: BannerPos, label: string }[] = [
     { value: 'home_topo', label: 'Home Topo' },
     { value: 'home_meio', label: 'Home Meio' },
@@ -93,7 +97,8 @@ export default function AdminPage() {
     const [tab, setTab] = useState<Tab>('conteudo');
     const [form, setForm] = useState({
         titulo: "", slug: "", tipo: "noticia", descricao: "", conteudo: "", category_id: "", status: "published", destaque: false, tags: "", media_url: "", thumbnail_url: "", link_url: "",
-        preco: "", preco_promocional: "", estoque: "", sku: "", unidade: "un", em_promocao: false
+        preco: "", preco_promocional: "", estoque: "", sku: "", unidade: "un", em_promocao: false,
+        status_plataforma: "em_desenvolvimento", em_utilizacao: false
     });
     const [files, setFiles] = useState<FileList | null>(null);
     const [thumbFile, setThumbFile] = useState<FileList | null>(null);
@@ -126,14 +131,15 @@ export default function AdminPage() {
 
     function openNewPost() {
         setEditingPost(null);
-        setForm({ titulo: "", slug: "", tipo: "noticia", descricao: "", conteudo: "", category_id: "", status: "published", destaque: false, tags: "", media_url: "", thumbnail_url: "", link_url: "", preco: "", preco_promocional: "", estoque: "1", sku: "", unidade: "un", em_promocao: false });
+        setForm({ titulo: "", slug: "", tipo: "noticia", descricao: "", conteudo: "", category_id: "", status: "published", destaque: false, tags: "", media_url: "", thumbnail_url: "", link_url: "", preco: "", preco_promocional: "", estoque: "1", sku: "", unidade: "un", em_promocao: false, status_plataforma: "em_desenvolvimento", em_utilizacao: false });
         setFiles(null); setThumbFile(null); setTab('conteudo'); setShowPostModal(true);
     }
     function openEditPost(p: Post) {
         setEditingPost(p);
         setForm({
             titulo: p.titulo, slug: p.slug || "", tipo: p.tipo, descricao: p.descricao || "", conteudo: p.conteudo || "", category_id: p.category_id || "", status: p.status, destaque: p.destaque, tags: (p.tags || []).join(", "), media_url: p.media_url || "", thumbnail_url: p.thumbnail_url || "", link_url: p.link_url || "",
-            preco: p.preco?.toString() || "", preco_promocional: p.preco_promocional?.toString() || "", estoque: p.estoque?.toString() || "", sku: p.sku || "", unidade: p.unidade || "un", em_promocao: p.em_promocao || false
+            preco: p.preco?.toString() || "", preco_promocional: p.preco_promocional?.toString() || "", estoque: p.estoque?.toString() || "", sku: p.sku || "", unidade: p.unidade || "un", em_promocao: p.em_promocao || false,
+            status_plataforma: p.status_plataforma || (p.em_utilizacao ? 'em_utilizacao' : 'em_desenvolvimento'), em_utilizacao: p.em_utilizacao || p.status_plataforma === 'em_utilizacao'
         });
         setFiles(null); setThumbFile(null); setTab('conteudo'); setShowPostModal(true);
     }
@@ -174,7 +180,9 @@ export default function AdminPage() {
                 tipo: form.tipo, descricao: form.descricao, conteudo: form.conteudo,
                 category_id: form.category_id || null, status: form.status, destaque: form.destaque,
                 tags: form.tags.split(",").map(t => t.trim()).filter(Boolean),
-                media_url, thumbnail_url, link_url: form.link_url || null, media_type: media_type || form.tipo, media_files
+                media_url, thumbnail_url, link_url: form.link_url || null, media_type: media_type || form.tipo, media_files,
+                status_plataforma: form.status_plataforma,
+                em_utilizacao: form.status_plataforma === 'em_utilizacao' || form.em_utilizacao
             };
 
             if(form.tipo === 'produto'){
@@ -282,9 +290,10 @@ export default function AdminPage() {
                         {filtered.map(p => {
                             const views = p.views ?? p.views_count ?? 0;
                             const catName = cats.find(c => c.id === p.category_id)?.nome || "—";
+                            const platStatus = p.em_utilizacao || p.status_plataforma === 'em_utilizacao' ? '● EM UTILIZAÇÃO' : p.status_plataforma === 'em_desenvolvimento' ? '● EM DESENV' : '';
                             return (
                                 <div key={p.id} className="group border-b p-4 last:border-0 hover:bg-zinc-50/70 md:grid md:grid-cols-12 md:items-center md:px-6 md:py-4">
-                                    <div className="col-span-5 flex items-start gap-3"><div className="h-12 w-12 shrink-0 overflow-hidden rounded-xl border bg-zinc-100">{p.thumbnail_url ? <img src={p.thumbnail_url} className="h-full w-full object-cover" alt="" /> : <div className="grid h-full w-full place-items-center bg-zinc-900 text-xs font-bold text-white">{p.tipo[0].toUpperCase()}</div>}</div><div className="min-w-0 flex-1"><p className="line-clamp-2 text-sm font-semibold leading-tight">{p.titulo}</p><p className="mt-1 text-xs text-zinc-500">{p.tipo} {p.tipo === 'produto' && p.preco ? `• ${p.preco} Kz` : ''} • {new Date(p.created_at).toLocaleDateString()}</p></div></div>
+                                    <div className="col-span-5 flex items-start gap-3"><div className="h-12 w-12 shrink-0 overflow-hidden rounded-xl border bg-zinc-100">{p.thumbnail_url ? <img src={p.thumbnail_url} className="h-full w-full object-cover" alt="" /> : <div className="grid h-full w-full place-items-center bg-zinc-900 text-xs font-bold text-white">{p.tipo[0].toUpperCase()}</div>}</div><div className="min-w-0 flex-1"><p className="line-clamp-2 text-sm font-semibold leading-tight">{p.titulo}</p><p className="mt-1 text-xs text-zinc-500">{p.tipo} {platStatus && `• ${platStatus}`} • {new Date(p.created_at).toLocaleDateString()}</p></div></div>
                                     <div className="hidden col-span-2 md:block"><span className="rounded-full border border-violet-100 bg-violet-50 px-2.5 py-1 text-xs font-medium text-violet-700">{catName}</span></div>
                                     <div className="hidden col-span-1 md:flex"><span className={`rounded-full border px-2.5 py-1 text-xs font-medium ${p.status === 'published' ? 'bg-green-50 text-green-700 border-green-200' : 'bg-zinc-100'}`}>{p.status}</span></div>
                                     <div className="hidden col-span-2 md:flex"><span className="rounded-full border bg-zinc-50 px-2 py-1 text-xs">{views} views</span></div>
@@ -313,10 +322,11 @@ export default function AdminPage() {
                             {tab === 'midia' && <div className="flex flex-col gap-3"><input value={form.media_url} onChange={e => setForm({ ...form, media_url: e.target.value })} placeholder="Media URL" className={inputClass} /><div><p className="mb-1 text-xs font-semibold">Thumbnail (capa) - Recomendado 1280x720</p><input type="file" accept="image/*" onChange={e => setThumbFile(e.target.files)} className="text-sm" /></div><div><p className="mb-1 text-xs font-semibold">Galeria</p><input type="file" multiple onChange={e => setFiles(e.target.files)} className="text-sm" /></div>{previewFinalThumb && <img src={previewFinalThumb} className="h-40 w-full rounded-xl border object-cover" alt="" />}</div>}
                             {tab === 'plataforma' && isPlataforma && (
                                 <div className="flex flex-col gap-3">
-                                    <div className="rounded-2xl bg-blue-50 border border-blue-200 p-3 text-xs text-blue-800">🔗 Configuração de Plataforma / Site - este card vai aparecer na seção arrastável da home</div>
-                                    <div><label className="text-xs font-semibold">Link da Plataforma / App / Site *</label><input value={form.link_url} onChange={e => setForm({ ...form, link_url: e.target.value })} placeholder="https://minhaplataforma.ao ou https://play.google.com/..." className={inputClass} /><p className="mt-1 text-xs text-gray-500">Esse é o link do botão "Explorar" na seção.</p></div>
-                                    <div><label className="text-xs font-semibold">Tags (ex: PRODUTO CONNECT, SAAS, APP)</label><input value={form.tags} onChange={e => setForm({ ...form, tags: e.target.value })} placeholder="PRODUTO CONNECT, SAAS, APP" className={inputClass} /></div>
-                                    <div className="rounded-xl bg-zinc-50 border p-3 text-xs"><p className="font-semibold mb-1">Preview como vai aparecer:</p><p className="text-zinc-600">Tipo: <b>{form.tipo}</b> • Título: <b>{form.titulo || "Sem título"}</b></p><p className="text-zinc-600 truncate">Link: {form.link_url || "Sem link"}</p></div>
+                                    <div className="rounded-2xl bg-blue-50 border border-blue-200 p-3 text-xs text-blue-800">🔗 Configuração de Plataforma - aparece na home</div>
+                                    <div><label className="text-xs font-semibold">Link da Plataforma / App / Site</label><input value={form.link_url} onChange={e => setForm({ ...form, link_url: e.target.value })} placeholder="https://..." className={inputClass} /></div>
+                                    <div><label className="text-xs font-semibold">Status da Plataforma</label><CustomSelect value={form.status_plataforma} onChange={v => setForm({ ...form, status_plataforma: v, em_utilizacao: v === 'em_utilizacao' })} placeholder="Status" options={STATUS_PLATAFORMA} /></div>
+                                    <div><label className="text-xs font-semibold">Tags (ex: SAAS, APP)</label><input value={form.tags} onChange={e => setForm({ ...form, tags: e.target.value })} placeholder="SAAS, APP, SITE" className={inputClass} /></div>
+                                    <div className="rounded-xl bg-zinc-50 border p-3 text-xs"><p className="font-semibold mb-1">Preview:</p><p>Tipo: <b>{form.tipo}</b> • Status: <b>{form.status_plataforma}</b></p><p className="truncate">Link: {form.link_url || "Sem link"}</p></div>
                                 </div>
                             )}
                             {tab === 'produto' && isProduto && (

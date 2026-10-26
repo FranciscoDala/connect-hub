@@ -18,7 +18,7 @@ class Post(Base):
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     titulo: Mapped[str] = mapped_column(String(300), nullable=False)
     slug: Mapped[str] = mapped_column(String(350), unique=True, index=True, nullable=True)
-    tipo: Mapped[str] = mapped_column(String(50), default="noticia") # noticia | produto | video | plataforma | app | site | case | saas
+    tipo: Mapped[str] = mapped_column(String(50), default="noticia")
     descricao: Mapped[str] = mapped_column(Text, default="")
     conteudo: Mapped[str] = mapped_column(Text, default="")
 
@@ -45,6 +45,11 @@ class Post(Base):
     sku: Mapped[str | None] = mapped_column(String(50), nullable=True, index=True)
     unidade: Mapped[str] = mapped_column(String(10), default="un")
     em_promocao: Mapped[bool] = mapped_column(Boolean, default=False)
+
+    # ===== NOVO - PLATAFORMA STATUS =====
+    # para usar no frontend como ● EM UTILIZAÇÃO / ● EM DESENVOLVIMENTO
+    status_plataforma: Mapped[str] = mapped_column(String(30), default="em_desenvolvimento") # em_utilizacao | em_desenvolvimento
+    em_utilizacao: Mapped[bool] = mapped_column(Boolean, default=False)
 
     author_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True)
 

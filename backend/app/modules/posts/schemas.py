@@ -51,13 +51,15 @@ class PostCreate(BaseModel):
     status: str = Field(default="published")
     destaque: bool = False
     tags: Optional[List[str]] = None
-    # produto / saas
     preco: Optional[float] = None
     preco_promocional: Optional[float] = None
     estoque: Optional[int] = 0
     sku: Optional[str] = None
     unidade: Optional[str] = "un"
     em_promocao: bool = False
+    # NOVO
+    status_plataforma: Optional[str] = Field(default="em_desenvolvimento")
+    em_utilizacao: bool = False
 
 class PostUpdate(BaseModel):
     titulo: Optional[str] = None
@@ -80,6 +82,9 @@ class PostUpdate(BaseModel):
     sku: Optional[str] = None
     unidade: Optional[str] = None
     em_promocao: Optional[bool] = None
+    # NOVO
+    status_plataforma: Optional[str] = None
+    em_utilizacao: Optional[bool] = None
 
 class PostResponse(BaseModel):
     id: uuid.UUID
@@ -104,13 +109,15 @@ class PostResponse(BaseModel):
     shares_count: int = 0
     shares: int = 0
     comments_count: int = 0
-    # produto / saas
     preco: Optional[float] = None
     preco_promocional: Optional[float] = None
     estoque: int = 0
     sku: Optional[str] = None
     unidade: str = "un"
     em_promocao: bool = False
+    # NOVO
+    status_plataforma: str = "em_desenvolvimento"
+    em_utilizacao: bool = False
 
     created_at: datetime
     updated_at: datetime
@@ -149,6 +156,8 @@ class PostResponse(BaseModel):
             sku=post.sku,
             unidade=post.unidade or "un",
             em_promocao=post.em_promocao or False,
+            status_plataforma=post.status_plataforma or "em_desenvolvimento",
+            em_utilizacao=post.em_utilizacao or False,
             created_at=post.created_at,
             updated_at=post.updated_at,
             published_at=post.published_at

@@ -42,25 +42,48 @@ export default function PlataformasSection({ posts }: { posts: Post[] }) {
                 ) : (
                     <div className="mt-12 flex snap-x snap-mandatory gap-4 overflow-x-auto lg:grid lg:grid-cols-3 lg:gap-6 lg:overflow-visible" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' } as any}>
                         {lista.map((item: any) => {
-                            const isCase = item.tipo === 'case' || item.category?.nome?.toLowerCase().includes('case')
-                            const tagPrincipal = isCase ? 'CASE CLIENTE' : 'PRODUTO CONNECT'
-                            const tagSec = item.category?.nome?.toUpperCase() || (isCase ? 'Site + Sistema' : 'SaaS')
                             const img = item.thumbnail_url || item.media_url || '/connect.png'
                             const hrefPost = `/post/${item.slug || item.id}`
+
+                            // CATEGORIA REAL DO BACKEND
+                            const categoria = item.category?.nome || item.categoria_nome || item.tipo || 'PLATAFORMA'
+
+                            // STATUS PREPARADO PRO BACKEND - aceita varias formas
+                            // No backend cria um campo: estado / status_plataforma / situacao / em_utilizacao (boolean)
+                            const rawEstado = (item.estado || item.status_plataforma || item.situacao || '').toLowerCase()
+                            const emUtilizacao =
+                                item.em_utilizacao === true ||
+                                item.em_producao === true ||
+                                rawEstado === 'em utilizacao' ||
+                                rawEstado === 'em_utilizacao' ||
+                                rawEstado === 'ativo' ||
+                                rawEstado === 'producao' ||
+                                rawEstado === 'utilizacao'
+
+                            const labelStatus = emUtilizacao ? '● EM UTILIZAÇÃO' : '● EM DESENVOLVIMENTO'
+                            const corStatus = emUtilizacao ? 'bg-emerald-500/90' : 'bg-amber-500/90'
 
                             return (
                                 <div key={item.id} className="group relative flex w-full min-w-full shrink-0 snap-center flex-col overflow-hidden rounded-3xl border border-slate-800 bg-slate-800/50 transition-all hover:-translate-y-1 hover:bg-slate-800 lg:min-w-0">
                                     <Link href={hrefPost} className="relative w-full overflow-hidden bg-slate-800" style={{ aspectRatio: '16 / 10' }}>
                                         <img src={img} alt={item.titulo} className="h-full w-full object-cover opacity-90 transition duration-700 group-hover:scale-105 group-hover:opacity-100" />
-                                        <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/20 to-transparent" />
-                                        <div className="absolute left-4 top-4 flex gap-2">
-                                            <span className={`rounded-full px-2.5 py-1 text-xs font-bold tracking-wide ${isCase ? 'bg-white text-slate-900' : 'bg-sky-500 text-white'}`}>{tagPrincipal}</span>
-                                            <span className="rounded-full bg-slate-900/70 backdrop-blur px-2.5 py-1 text-xs font-semibold text-white">{tagSec}</span>
+                                        <div className="absolute inset-0 bg-linear-to-t from-slate-900 via-slate-900/40 to-transparent" />
+
+                                        {/* BOTTOM - CATEGORIA + STATUS - AGORA VEM DO BACKEND */}
+                                        <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between gap-2">
+                                            <span className="rounded-full bg-slate-900/70 backdrop-blur px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-white border border-white/10">
+                                                {categoria}
+                                            </span>
+                                            <span className={`rounded-full px-3 py-1 text-[10px] font-bold tracking-wide text-white ${corStatus}`}>
+                                                {labelStatus}
+                                            </span>
                                         </div>
-                                        {!isCase && <span className="absolute bottom-4 left-4 rounded-full bg-emerald-500/90 px-2.5 py-1 text-xs font-bold text-white">● ATIVO</span>}
                                     </Link>
+
                                     <div className="flex flex-1 flex-col p-6">
-                                        <Link href={hrefPost}><h3 className="text-base font-semibold text-white group-hover:text-sky-300 line-clamp-1">{item.titulo}</h3></Link>
+                                        <Link href={hrefPost}>
+                                            <h3 className="text-base font-semibold text-white group-hover:text-sky-300 line-clamp-1">{item.titulo}</h3>
+                                        </Link>
                                         <p className="mt-2 line-clamp-2 flex-1 text-sm leading-6 text-slate-400">{item.descricao || ''}</p>
                                         <div className="mt-5 flex items-center justify-between gap-3">
                                             <Link href={hrefPost} className="text-xs font-semibold text-slate-300 group-hover:text-white">Ver plataforma →</Link>
