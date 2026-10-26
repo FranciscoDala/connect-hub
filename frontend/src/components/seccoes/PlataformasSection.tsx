@@ -49,10 +49,10 @@ export default function PlataformasSection({ posts }: { posts: Post[] }) {
                             const hrefPost = `/post/${item.slug || item.id}`
 
                             return (
-                                <div key={item.id} className="group relative flex w-[85%] min-w-[85%] snap-center flex-col overflow-hidden rounded-3xl border border-slate-800 bg-slate-800/50 transition-all hover:-translate-y-1 hover:bg-slate-800 lg:w-full lg:min-w-0">
+                                <div key={item.id} className="group relative flex w-full min-w-full shrink-0 snap-center flex-col overflow-hidden rounded-3xl border border-slate-800 bg-slate-800/50 transition-all hover:-translate-y-1 hover:bg-slate-800 lg:min-w-0">
                                     <Link href={hrefPost} className="relative w-full overflow-hidden bg-slate-800" style={{ aspectRatio: '16 / 10' }}>
                                         <img src={img} alt={item.titulo} className="h-full w-full object-cover opacity-90 transition duration-700 group-hover:scale-105 group-hover:opacity-100" />
-                                        <div className="absolute inset-0 bg-linear-to-t from-slate-900 via-slate-900/20 to-transparent" />
+                                        <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/20 to-transparent" />
                                         <div className="absolute left-4 top-4 flex gap-2">
                                             <span className={`rounded-full px-2.5 py-1 text-xs font-bold tracking-wide ${isCase ? 'bg-white text-slate-900' : 'bg-sky-500 text-white'}`}>{tagPrincipal}</span>
                                             <span className="rounded-full bg-slate-900/70 backdrop-blur px-2.5 py-1 text-xs font-semibold text-white">{tagSec}</span>

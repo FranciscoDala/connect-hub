@@ -35,14 +35,14 @@ export default function ProdutosSection({ posts }: { posts: Post[] }) {
                         <p className="mt-4 text-sm font-semibold text-slate-700">Sem produtos disponíveis</p>
                     </div>
                 ) : (
-                    <div className="mt-12 flex snap-x snap-mandatory gap-0 overflow-x-auto lg:grid lg:grid-cols-4 lg:gap-6 lg:overflow-visible" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' } as any}>
+                    <div className="mt-12 flex snap-x snap-mandatory gap-4 overflow-x-auto lg:grid lg:grid-cols-4 lg:gap-6 lg:overflow-visible" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' } as any}>
                         {produtos.map((item: any) => {
                             const cat = (item.category?.nome || item.category_name || 'PRODUTO').toUpperCase()
                             const img = item.thumbnail_url || item.media_url || '/connect.png'
                             const link = `/post/${item.slug || item.id}`
                             const emPromo = item.em_promocao && item.preco_promocional
                             return (
-                                <Link key={item.id} href={link} className="group flex w-full min-w-full snap-center flex-col overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 transition-all hover:shadow-md lg:min-w-0" style={{ minWidth: '100%' }}>
+                                <Link key={item.id} href={link} className="group flex w-full min-w-full shrink-0 snap-center flex-col overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 transition-all hover:shadow-md lg:min-w-0">
                                     <div className="relative w-full overflow-hidden bg-slate-100" style={{ aspectRatio: '4 / 3' }}>
                                         <img src={img} alt={item.titulo} className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
                                         {emPromo && <span className="absolute left-3 top-3 rounded-full bg-red-500 px-2.5 py-1 text-xs font-bold text-white">PROMO</span>}
