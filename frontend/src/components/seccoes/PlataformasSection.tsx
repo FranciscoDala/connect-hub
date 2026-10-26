@@ -54,11 +54,11 @@ export default function PlataformasSection({ posts }: { posts: Post[] }) {
                                         <div className="absolute inset-0 bg-linear-to-t from-[#10192b] via-[#10192b]/60 to-transparent" />
 
                                         <div className="absolute bottom-3 left-3 flex items-center gap-2">
-                                            <span className="rounded-full bg-slate-900/60 backdrop-blur-md border border-white/10 px-3.5 py-1.5 text-[10px] font-bold uppercase tracking-widest text-white">
+                                            <span className="rounded-full bg-slate-900/60 backdrop-blur-md border border-white/10 px-3.5 py-1.5 text-[10px] font-bold capitalize tracking-widest text-white">
                                                 {categoria}
                                             </span>
                                             <span className={`rounded-full px-3.5 py-1.5 text-[10px] font-bold tracking-wide text-white backdrop-blur-md border border-white/10 ${emUtilizacao ? 'bg-emerald-500' : 'bg-amber-500'}`}>
-                                                {emUtilizacao ? '● EM UTILIZAÇÃO' : '● EM DESENVOLVIMENTO'}
+                                                {emUtilizacao ? '● Em utilização' : '● Em desenvolvimento'}
                                             </span>
                                         </div>
                                     </Link>
