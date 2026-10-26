@@ -130,7 +130,8 @@ function NoticiasSection({ posts }: { posts: Post[] }) {
                     Últimas atualizações da empresa.
                 </h2>
 
-                <div className="mt-10 flex flex-wrap justify-center gap-6 lg:justify-start">
+                {/* MOBILE: scroll-x snap / DESKTOP: grid */}
+                <div className="mt-10 -mx-5 flex snap-x snap-mandatory gap-4 overflow-x-auto px-5 pb-4 lg:mx-0 lg:grid lg:grid-cols-3 lg:gap-6 lg:overflow-visible lg:px-0 lg:pb-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                     {noticias.map(post => {
                         const dataFormatada = new Date(post.created_at).toLocaleDateString('pt-AO', { day: '2-digit', month: 'long', year: 'numeric' })
                         const img = post.thumbnail_url || post.media_url || "/connect.png"
@@ -138,7 +139,7 @@ function NoticiasSection({ posts }: { posts: Post[] }) {
                             <Link
                                 key={post.id}
                                 href={`/post/${post.slug || post.id}`}
-                                className="group flex w-full max-w-sm flex-col overflow-hidden rounded-2xl border border-[#e2e8f0] bg-[#f8fafc] transition-all hover:-translate-y-1 hover:shadow-lg"
+                                className="group flex min-w-full w-full snap-center shrink-0 flex-col overflow-hidden rounded-2xl border border-[#e2e8f0] bg-[#f8fafc] transition-all hover:-translate-y-1 hover:shadow-lg lg:min-w-0"
                             >
                                 <div className="aspect-[16/10] w-full overflow-hidden bg-[#f1f5f9]">
                                     <img src={img} alt={post.titulo} className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
@@ -195,8 +196,10 @@ export default async function Home() {
             </section>
 
             <div id="parcerias"><ParceriasSection /></div>
-            <EquipeSection />
+
             <NoticiasSection posts={posts} />
+
+            <EquipeSection />
 
             <Footer />
         </main>
