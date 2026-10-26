@@ -11,7 +11,7 @@ export default function Footer() {
                     {/* COLUNA 1 - LOGO */}
                     <div className="md:col-span-5">
                         <Link href="/" className="flex items-center">
-                            <img src="/connect.png" alt="CONNECT" className="h-9 w-auto object-contain" />
+                            <img src="/connect.png" alt="CONNECT" className="h-20 w-auto object-contain" />
                         </Link>
                         <p className="mt-4 max-w-sm text-sm leading-6 text-[#64748b]">
                             Your trusted partner in advanced technology and digital excellence.
