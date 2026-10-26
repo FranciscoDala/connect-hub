@@ -103,27 +103,6 @@ export default async function Home() {
                 </div>
             </section>
 
-            <div className="mx-auto w-full max-w-7xl px-5 pb-16 pt-8 sm:px-8">
-                <BannerSlot banner={bannerTopo} pos="home_topo" />
-                <div className="grid grid-cols-12 gap-6 lg:gap-8">
-                    <div className="col-span-12 lg:col-span-8">
-                        <section id="destaques" className="mb-12"><div className="mb-8 flex items-end justify-between"><div><p className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-[#0e8ac2]"><span className="h-px w-6 bg-[#0e8ac2]" /> DESTAQUES</p><h2 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">Notícias em destaque hoje.</h2></div><Link href="/posts" className="text-xs font-semibold text-[#64748b]">Ver todos →</Link></div><div className="grid gap-6 md:grid-cols-3">{recentes.slice(0, 3).map(p => <PostCard key={p.id} post={p} cat={categories.find(c => c.id === p.category_id)} />)}</div></section>
-                        <BannerSlot banner={bannerMeio} pos="home_meio" />
-                        <div id="categorias">{postsByCategory.map(({ cat, posts }) => (<section key={cat.id} className="mb-12"><div className="mb-6 flex items-center gap-3"><span className="h-2 w-2 rounded-full" style={{ background: cat.cor || '#0e8ac2' }} /><h2 className="text-xs font-bold uppercase tracking-widest">{cat.nome}</h2><div className="ml-2 h-px flex-1 bg-[#e2e8f0]" /><Link href={`/categoria/${cat.slug}`} className="text-xs font-semibold text-[#64748b]">Ver tudo</Link></div><div className="grid gap-6 sm:grid-cols-2">{posts.map(p => <PostCard key={p.id} post={p} cat={cat} />)}</div></section>))}</div>
-                        {videos.length > 0 && <div id="videos"><ConnectTVSection videos={videos} /></div>}
-                    </div>
-
-
-
-                    
-                    <div className="col-span-12 space-y-6 lg:col-span-4">
-                        <div className="rounded-3xl border border-[#e2e8f0] bg-white p-6 shadow-sm"><h3 className="mb-5 text-xs font-bold tracking-widest">MAIS LIDOS • 24H</h3><div className="space-y-4">{maisLidos.map((p, i) => (<Link key={p.id} href={`/post/${p.slug || p.id}`} className="flex gap-3 group"><span className="text-2xl font-black leading-none text-[#e2e8f0] group-hover:text-[#1e293b]">{String(i + 1).padStart(2, '0')}</span><div><p className="line-clamp-2 text-sm font-medium leading-tight group-hover:text-[#0e8ac2]">{p.titulo}</p></div></Link>))}</div></div>
-                        {bannerSidebar && <BannerSlot banner={bannerSidebar} pos="sidebar" />}
-                        <div id="apps" className="rounded-3xl border border-[#e2e8f0] bg-white p-6"><h3 className="mb-4 text-xs font-bold tracking-widest">NOSSOS APPS</h3><div className="grid gap-3">{apps.slice(0, 6).map((a: any) => (<div key={a.id} className="flex items-center justify-between rounded-2xl bg-[#0f172a] p-4 text-white"><div><h4 className="text-sm font-bold">{a.nome}</h4><p className="text-xs opacity-60">{a.status || 'ativo'}</p></div><span>→</span></div>))}</div></div>
-                    </div>
-                </div>
-            </div>
-
 
 
             <Footer />
