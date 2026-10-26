@@ -143,7 +143,7 @@ function ProdutosSection({ posts }: { posts: Post[] }) {
                                     <div className="flex flex-1 flex-col p-5">
                                         <span className="text-xs font-bold uppercase tracking-widest text-sky-600">{cat}</span>
                                         <h3 className="mt-2 text-sm font-semibold text-slate-800">{titulo}</h3>
-                                        <p className="mt-2 line-clamp-3 flex-1 text-xs leading-5 text-slate-300">{desc}</p>
+                                        <p className="mt-2 line-clamp-2 flex-1 text-xs leading-5 text-slate-500">{desc}</p>
 
                                         {temPreco && (
                                             <div className="mt-4">
