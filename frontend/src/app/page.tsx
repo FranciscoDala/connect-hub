@@ -80,8 +80,8 @@ function EquipeSection() {
                 <div className="mt-12 grid gap-6 sm:grid-cols-3">
                     {/* CEO */}
                     <div className="rounded-3xl border border-[#e2e8f0] bg-white p-7 shadow-sm">
-                        <div className="mx-auto h-24 w-24 overflow-hidden rounded-full border-4 border-white shadow">
-                            <img src="/team/ceo.jpg" alt="CEO" className="h-full w-full object-cover" />
+                        <div className="mx-auto h-50 w-50 overflow-hidden rounded-full border-4 border-white shadow">
+                            <img src="/team/ceo.jpeg" alt="CEO" className="h-full w-full object-cover" />
                         </div>
                         <div className="mt-5 text-center">
                             <h3 className="text-base font-semibold text-[#1e293b]">Francisco J.M Dala</h3>
