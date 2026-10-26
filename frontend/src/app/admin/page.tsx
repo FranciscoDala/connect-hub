@@ -174,6 +174,8 @@ export default function AdminPage() {
             if (!thumbnail_url && media_url) { const autoThumb = generateCloudinaryThumb(media_url); if (autoThumb) thumbnail_url = autoThumb; }
             if (!thumbnail_url && media_url && media_url.match(/\.(jpg|jpeg|png|webp)/i)) thumbnail_url = media_url;
 
+            const isPlatTipo = TIPOS_PLATAFORMA.includes(form.tipo);
+
             const payload: any = {
                 titulo: form.titulo,
                 slug: form.slug || form.titulo.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
@@ -181,9 +183,12 @@ export default function AdminPage() {
                 category_id: form.category_id || null, status: form.status, destaque: form.destaque,
                 tags: form.tags.split(",").map(t => t.trim()).filter(Boolean),
                 media_url, thumbnail_url, link_url: form.link_url || null, media_type: media_type || form.tipo, media_files,
-                status_plataforma: form.status_plataforma,
-                em_utilizacao: form.status_plataforma === 'em_utilizacao' || form.em_utilizacao
             };
+
+            if (isPlatTipo) {
+                payload.status_plataforma = form.status_plataforma;
+                payload.em_utilizacao = form.status_plataforma === 'em_utilizacao' || form.em_utilizacao;
+            }
 
             if(form.tipo === 'produto'){
                 payload.preco = form.preco ? parseFloat(form.preco) : null;
@@ -290,7 +295,8 @@ export default function AdminPage() {
                         {filtered.map(p => {
                             const views = p.views ?? p.views_count ?? 0;
                             const catName = cats.find(c => c.id === p.category_id)?.nome || "—";
-                            const platStatus = p.em_utilizacao || p.status_plataforma === 'em_utilizacao' ? '● EM UTILIZAÇÃO' : p.status_plataforma === 'em_desenvolvimento' ? '● EM DESENV' : '';
+                            const isPlatList = TIPOS_PLATAFORMA.includes((p.tipo || '').toLowerCase());
+                            const platStatus = isPlatList ? (p.em_utilizacao || p.status_plataforma === 'em_utilizacao' ? '● EM UTILIZAÇÃO' : '● EM DESENV') : '';
                             return (
                                 <div key={p.id} className="group border-b p-4 last:border-0 hover:bg-zinc-50/70 md:grid md:grid-cols-12 md:items-center md:px-6 md:py-4">
                                     <div className="col-span-5 flex items-start gap-3"><div className="h-12 w-12 shrink-0 overflow-hidden rounded-xl border bg-zinc-100">{p.thumbnail_url ? <img src={p.thumbnail_url} className="h-full w-full object-cover" alt="" /> : <div className="grid h-full w-full place-items-center bg-zinc-900 text-xs font-bold text-white">{p.tipo[0].toUpperCase()}</div>}</div><div className="min-w-0 flex-1"><p className="line-clamp-2 text-sm font-semibold leading-tight">{p.titulo}</p><p className="mt-1 text-xs text-zinc-500">{p.tipo} {platStatus && `• ${platStatus}`} • {new Date(p.created_at).toLocaleDateString()}</p></div></div>
