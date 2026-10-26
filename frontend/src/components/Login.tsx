@@ -1,78 +1,74 @@
 "use client";
-import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { API_URL } from "@/lib/api";
 
-export default function Footer() {
-    const [now, setNow] = useState<Date | null>(null);
+export default function LoginModal({ open, onClose }: { open: boolean; onClose: () => void }) {
+    const [email, setEmail] = useState("admin@connect.ao");
+    const [password, setPassword] = useState("");
+    const [show, setShow] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
+    const router = useRouter();
 
-    useEffect(() => {
-        setNow(new Date());
-        const id = setInterval(() => setNow(new Date()), 60000);
-        return () => clearInterval(id);
-    }, []);
+    async function handleLogin(e: React.FormEvent) {
+        e.preventDefault();
+        setLoading(true);
+        setError("");
+        try {
+            const res = await fetch(`${API_URL}/api/v1/auth/login`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email, password }) });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.detail || "Credenciais inválidas");
+            localStorage.setItem("connect_token", data.token || data.access_token);
+            if (data.user) localStorage.setItem("connect_user", JSON.stringify(data.user));
+            onClose();
+            router.push("/admin");
+        } catch (err: any) { setError(err.message); } finally { setLoading(false); }
+    }
 
-    const timeZone = "Africa/Luanda";
-    const timeString = now ? new Intl.DateTimeFormat("pt-AO", { hour: "2-digit", minute: "2-digit", timeZone, timeZoneName: "short" }).format(now) : "--:--";
-    const dateString = now ? new Intl.DateTimeFormat("pt-AO", { day: "2-digit", month: "long", year: "numeric", timeZone }).format(now) : "Carregando...";
-    const weekDayString = now ? new Intl.DateTimeFormat("pt-AO", { weekday: "long", timeZone }).format(now) : "";
-    const isWeekend = now ? [0, 6].includes(now.getDay()) : false;
-    const hourLuanda = now ? parseInt(new Intl.DateTimeFormat("pt-AO", { hour: "2-digit", hour12: false, timeZone }).format(now)) : 0;
-    const isOpen = !isWeekend && hourLuanda >= 9 && hourLuanda < 17;
-    const year = new Date().getFullYear();
-
+    if (!open) return null;
     return (
-        <footer className="border-t border-[#e2e8f0] bg-[#f1f5f9]">
-            <div className="mx-auto max-w-7xl px-5 py-14 sm:px-8">
-                <div className="mb-12 h-px w-full bg-[#e2e8f0]" />
-
-                <div className="grid gap-10 md:grid-cols-12">
-                    <div className="md:col-span-5">
-                        <Link href="/" className="flex items-center">
-                            <img src="/connect.png" alt="CONNECT" className="h-20 w-auto object-contain" />
-                        </Link>
-                        <p className="mt-4 max-w-sm text-sm leading-6 text-[#64748b]">Your trusted partner in advanced technology and digital excellence.</p>
-                        <p className="mt-4 flex items-center gap-2 text-xs text-[#64748b]">
-                            <span className={`h-2 w-2 rounded-full ${isOpen ? 'bg-green-500' : 'bg-zinc-400'}`} />
-                            {isOpen ? 'Aberto agora' : 'Fechado'} • {timeString}
-                        </p>
-                    </div>
-
-                    <div className="md:col-span-3">
-                        <h4 className="text-sm font-bold tracking-widest text-[#334155]">EXPLORE</h4>
-                        <ul className="mt-4 grid gap-2.5 text-sm text-[#64748b]">
-                            <li><a href="#destaques" className="hover:text-black">About the Company</a></li>
-                            <li><a href="#categorias" className="hover:text-black">Our Services</a></li>
-                            <li><a href="#videos" className="hover:text-black">Our Guarantees</a></li>
-                            <li><a href="#apps" className="hover:text-black">Business Inquiries</a></li>
-                        </ul>
-                    </div>
-
-                    <div className="md:col-span-4">
-                        <h4 className="text-sm font-bold tracking-widest text-[#334155]">CONNECT-Tics</h4>
-                        <div className="mt-4 grid gap-1.5 text-sm leading-6 text-[#64748b]">
-                            <p>Talatona, Luanda Sul, Via AL16<br />Luanda, AO • {timeZone}</p>
-                            <div className="mt-3 grid gap-1">
-                                <p className="text-xs font-bold capitalize tracking-widest text-[#334155]">{weekDayString} • {dateString}</p>
-                                <p className="text-sm font-semibold text-[#1e293b]">{timeString} • Luanda</p>
-                                <p className="text-xs">Seg - Sex, 9:00 - 17:00 {isOpen ? '(Aberto)' : '(Fechado)'}</p>
-                            </div>
-                            <a href="mailto:connecttics25@gmail.com" className="mt-2 hover:text-black">connecttics25@gmail.com</a>
-                        </div>
-                    </div>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div className="absolute inset-0 bg-[#0f172a]/40 backdrop-blur-sm" onClick={onClose} />
+            <div className="relative w-full max-w-75 rounded-3xl border bg-white p-5 shadow-2xl">
+                <div className="flex items-center justify-between">
+                    <h2 className="text-base font-semibold tracking-tight">Login</h2>
+                    <button onClick={onClose} className="grid h-8 w-8 place-items-center rounded-full border bg-[#f8fafc] text-xs">✕</button>
                 </div>
 
-                {/* BOTTOM BAR - AGORA SEMPRE EM COLUNA */}
-                <div className="mt-14 flex flex-col gap-3 border-t border-[#e2e8f0] pt-6 text-xs text-[#94a3b8]">
-                    <p className="leading-relaxed">© {year} Connect Tics Technologies. All rights reserved. {dateString} • Registration No. MC-2018-0992</p>
-                    <div className="flex flex-col gap-2">
-                        <div className="flex items-center gap-4">
-                            <Link href="/privacy" className="hover:text-black">Privacy Policy</Link>
-                            <Link href="/legal" className="hover:text-black">Legal</Link>
-                        </div>
-                        <span>Empowering global technology • {timeString}</span>
+                {error && <div className="mt-3 rounded-xl border border-red-200 bg-red-50 p-2.5 text-xs text-red-700">{error}</div>}
+
+                <form onSubmit={handleLogin} className="mt-4 grid gap-2.5">
+                    <input
+                        type="email"
+                        value={email}
+                        onChange={e => setEmail(e.target.value)}
+                        required
+                        className="h-10 w-full rounded-full border border-[#e2e8f0] px-4 text-sm outline-none focus:border-[#0e8ac2]"
+                    />
+
+                    <div className="relative">
+                        <input
+                            type={show ? "text" : "password"}
+                            value={password}
+                            onChange={e => setPassword(e.target.value)}
+                            required
+                            className="h-10 w-full rounded-full border border-[#e2e8f0] px-4 pr-10 text-sm outline-none focus:border-[#0e8ac2]"
+                        />
+                        <button type="button" onClick={() => setShow(!show)} className="absolute right-1 top-1 grid h-8 w-8 place-items-center rounded-full bg-white text-[#64748b]">
+                            {show ? (
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-4 w-4"><path d="M3 3l18 18"/><path d="M10.6 10.6a2 2 0 0 0 2.8 2.8"/><path d="M9.88 5.09A10.94 10.94 0 0 1 12 5c7 0 10 7 10 7a17.2 17.2 0 0 1-3.16 4.19"/><path d="M14.12 14.12A3 3 0 0 1 9.88 9.88"/><path d="M2.39 8.27A17.2 17.2 0 0 0 2 12s3 7 10 7a10.94 10.94 0 0 0 5.39-1.33"/></svg>
+                            ) : (
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-4 w-4"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12Z"/><circle cx="12" cy="12" r="3"/></svg>
+                            )}
+                        </button>
                     </div>
-                </div>
+
+                    <button type="submit" disabled={loading} className="mt-1 flex h-10 w-full items-center justify-center rounded-full bg-[#0e8ac2] text-sm font-semibold text-white disabled:opacity-50">
+                        {loading ? <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" /> : "Entrar"}
+                    </button>
+                </form>
             </div>
-        </footer>
+        </div>
     );
 }

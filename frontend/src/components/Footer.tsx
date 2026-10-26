@@ -12,23 +12,12 @@ export default function Footer() {
     }, []);
 
     const timeZone = "Africa/Luanda";
-
-    const timeString = now
-        ? new Intl.DateTimeFormat("pt-AO", { hour: "2-digit", minute: "2-digit", timeZone, timeZoneName: "short" }).format(now)
-        : "--:--";
-
-    const dateString = now
-        ? new Intl.DateTimeFormat("pt-AO", { day: "2-digit", month: "long", year: "numeric", timeZone }).format(now)
-        : "Carregando...";
-
-    const weekDayString = now
-        ? new Intl.DateTimeFormat("pt-AO", { weekday: "long", timeZone }).format(now)
-        : "";
-
+    const timeString = now ? new Intl.DateTimeFormat("pt-AO", { hour: "2-digit", minute: "2-digit", timeZone, timeZoneName: "short" }).format(now) : "--:--";
+    const dateString = now ? new Intl.DateTimeFormat("pt-AO", { day: "2-digit", month: "long", year: "numeric", timeZone }).format(now) : "Carregando...";
+    const weekDayString = now ? new Intl.DateTimeFormat("pt-AO", { weekday: "long", timeZone }).format(now) : "";
     const isWeekend = now ? [0, 6].includes(now.getDay()) : false;
     const hourLuanda = now ? parseInt(new Intl.DateTimeFormat("pt-AO", { hour: "2-digit", hour12: false, timeZone }).format(now)) : 0;
     const isOpen = !isWeekend && hourLuanda >= 9 && hourLuanda < 17;
-
     const year = new Date().getFullYear();
 
     return (
@@ -37,21 +26,18 @@ export default function Footer() {
                 <div className="mb-12 h-px w-full bg-[#e2e8f0]" />
 
                 <div className="grid gap-10 md:grid-cols-12">
-                    {/* COLUNA 1 - LOGO */}
                     <div className="md:col-span-5">
                         <Link href="/" className="flex items-center">
                             <img src="/connect.png" alt="CONNECT" className="h-20 w-auto object-contain" />
                         </Link>
-                        <p className="mt-4 max-w-sm text-sm leading-6 text-[#64748b]">
-                            Your trusted partner in advanced technology and digital excellence.
-                        </p>
+                        <p className="mt-4 max-w-sm text-sm leading-6 text-[#64748b]">Inovamos para liderar</p>
+                        <p className="mt-4 max-w-sm text-sm leading-6 text-[#64748b]">Tecnologia é a aplicação prática do conhecimento científico para resolver problemas, criar ferramentas e facilitar as tarefas diárias.</p>
                         <p className="mt-4 flex items-center gap-2 text-xs text-[#64748b]">
                             <span className={`h-2 w-2 rounded-full ${isOpen ? 'bg-green-500' : 'bg-zinc-400'}`} />
                             {isOpen ? 'Aberto agora' : 'Fechado'} • {timeString}
                         </p>
                     </div>
 
-                    {/* COLUNA 2 - EXPLORE */}
                     <div className="md:col-span-3">
                         <h4 className="text-sm font-bold tracking-widest text-[#334155]">EXPLORE</h4>
                         <ul className="mt-4 grid gap-2.5 text-sm text-[#64748b]">
@@ -62,30 +48,28 @@ export default function Footer() {
                         </ul>
                     </div>
 
-                    {/* COLUNA 3 - OFFICE DINÂMICO SEM CAIXA BRANCA */}
                     <div className="md:col-span-4">
                         <h4 className="text-sm font-bold tracking-widest text-[#334155]">CONNECT-Tics</h4>
                         <div className="mt-4 grid gap-1.5 text-sm leading-6 text-[#64748b]">
                             <p>Talatona, Luanda Sul, Via AL16<br />Luanda, AO • {timeZone}</p>
-
                             <div className="mt-3 grid gap-1">
-                                <p className="text-xs font-bold uppercase tracking-widest text-[#334155]">{weekDayString} • {dateString}</p>
+                                <p className="text-xs font-bold capitalize tracking-widest text-[#334155]">{weekDayString} • {dateString}</p>
                                 <p className="text-sm font-semibold text-[#1e293b]">{timeString} • Luanda</p>
                                 <p className="text-xs">Seg - Sex, 9:00 - 17:00 {isOpen ? '(Aberto)' : '(Fechado)'}</p>
                             </div>
-
                             <a href="mailto:connecttics25@gmail.com" className="mt-2 hover:text-black">connecttics25@gmail.com</a>
                         </div>
                     </div>
                 </div>
 
-                {/* BOTTOM BAR */}
-                <div className="mt-14 flex flex-col gap-3 border-t border-[#e2e8f0] pt-6 text-xs text-[#94a3b8] sm:flex-row sm:items-center sm:justify-between">
-                    <p>© {year} Connect Tics Technologies. All rights reserved. {dateString} • Registration No. MC-2018-0992</p>
-                    <div className="flex items-center gap-4">
-                        <Link href="/privacy" className="hover:text-black">Privacy Policy</Link>
-                        <Link href="/legal" className="hover:text-black">Legal</Link>
-                        <span className="hidden sm:block">|</span>
+                {/* BOTTOM BAR - AGORA SEMPRE EM COLUNA */}
+                <div className="mt-14 flex flex-col gap-3 border-t border-[#e2e8f0] pt-6 text-xs text-[#94a3b8]">
+                    <p className="leading-relaxed">© {year} Connect Tics Technologies. All rights reserved. {dateString} • Registration No. MC-2018-0992</p>
+                    <div className="flex flex-col gap-2">
+                        <div className="flex items-center gap-4">
+                            <Link href="/privacy" className="hover:text-black">Privacy Policy</Link>
+                            <Link href="/legal" className="hover:text-black">Legal</Link>
+                        </div>
                         <span>Empowering global technology • {timeString}</span>
                     </div>
                 </div>
