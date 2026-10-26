@@ -12,10 +12,30 @@ type Banner = {
     link_url?: string;
     posicao: string;
 }
+type Post = {
+    id: string;
+    titulo: string;
+    slug?: string;
+    descricao?: string;
+    conteudo?: string;
+    tipo: string;
+    thumbnail_url?: string;
+    media_url?: string;
+    created_at: string;
+    status: string;
+}
 
 async function getBanners(): Promise<Banner[]> {
     try {
         const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/banners?ativo=true`, { next: { revalidate: 60 } });
+        if (!res.ok) return [];
+        const data = await res.json();
+        return Array.isArray(data) ? data : [];
+    } catch { return [] }
+}
+async function getPosts(): Promise<Post[]> {
+    try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/posts`, { next: { revalidate: 60 } });
         if (!res.ok) return [];
         const data = await res.json();
         return Array.isArray(data) ? data : [];
@@ -28,11 +48,9 @@ function ParceriasSection() {
             <div className="mx-auto max-w-7xl px-5 sm:px-8">
                 <div className="mx-auto max-w-3xl text-center">
                     <div className="flex items-center justify-center gap-3">
-
                         <span className="h-px w-8 bg-[#0e8ac2]" />
                         <p className="text-xs font-bold uppercase tracking-widest text-[#0e8ac2]">PARCERIAS ESTRATÉGICAS</p>
                         <span className="h-px w-8 bg-[#0e8ac2]" />
-
                     </div>
                     <h2 className="mt-6 text-3xl font-semibold tracking-tight text-[#1e293b] sm:text-5xl">Colabore para o Futuro.</h2>
                     <p className="mt-6 text-sm leading-7 text-[#64748b] sm:text-base sm:leading-8">
@@ -65,7 +83,6 @@ function EquipeSection() {
     return (
         <section id="equipe" className="bg-[#f1f5f9] py-20 sm:py-28">
             <div className="mx-auto max-w-7xl px-5 sm:px-8">
-                {/* HEADER CENTRALIZADO */}
                 <div className="mx-auto flex max-w-3xl flex-col items-center text-center">
                     <div className="flex items-center gap-3">
                         <span className="h-px w-8 bg-[#0e8ac2]" />
@@ -77,10 +94,7 @@ function EquipeSection() {
                         Guiados por décadas de experiência na indústria de tecnologia, logística global e conformidade regulatória internacional.
                     </p>
                 </div>
-
-                {/* CARDS - CENTRALIZA QUANDO 1 OU 2, ALINHA QUANDO 3+ */}
                 <div className="mt-12 flex flex-wrap justify-center gap-6">
-                    {/* CEO */}
                     <div className="flex w-full max-w-sm flex-col rounded-3xl border border-[#e2e8f0] bg-white p-7 shadow-sm">
                         <div className="mx-auto h-50 w-50 overflow-hidden rounded-full border-4 border-white shadow">
                             <img src="/team/ceo.jpeg" alt="CEO" className="h-full w-full object-cover" />
@@ -90,46 +104,59 @@ function EquipeSection() {
                             <p className="mt-1 text-[11px] font-bold uppercase tracking-widest text-[#0e8ac2]">DIRETOR EXECUTIVO - CEO</p>
                         </div>
                         <div className="mt-4 space-y-3 text-justify text-xs leading-6 text-[#64748b]">
-                            <p>
-                                Francisco Dala é o Fundador e CEO da Connect Tics. Com formação em Engenharia Informática e mais de 5 anos de liderança em tecnologia em Angola, fundou a empresa em 2021 combinando visão global de negócios com profundo conhecimento do mercado local.
-                            </p>
-                            <p>
-                                Como CEO, promove uma cultura de colaboração que guia a empresa na entrega de soluções de tecnologia avançada em todo o país, mantendo a reputação por identificar tecnologias emergentes à frente do mercado.
-                            </p>
+                            <p>Francisco Dala é o Fundador e CEO da Connect Tics. Com formação em Engenharia Informática e mais de 5 anos de liderança em tecnologia em Angola, fundou a empresa em 2021 combinando visão global de negócios com profundo conhecimento do mercado local.</p>
+                            <p>Como CEO, promove uma cultura de colaboração que guia a empresa na entrega de soluções de tecnologia avançada em todo o país, mantendo a reputação por identificar tecnologias emergentes à frente do mercado.</p>
                         </div>
                     </div>
+                </div>
+            </div>
+        </section>
+    )
+}
 
-                    {/* VP Operations - descomenta quando tiver */}
-                    {/*
-                    <div className="flex w-full max-w-[380px] flex-col rounded-3xl border border-[#e2e8f0] bg-white p-7 shadow-sm">
-                        <div className="mx-auto h-50 w-50 overflow-hidden rounded-full border-4 border-white shadow">
-                            <img src="/team/vp.jpg" alt="VP" className="h-full w-full object-cover" />
-                        </div>
-                        <div className="mt-5 text-center">
-                            <h3 className="text-base font-semibold text-[#1e293b]">Sofia Mendes</h3>
-                            <p className="mt-1 text-[11px] font-bold uppercase tracking-widest text-[#0e8ac2]">VICE-PRESIDENTE DE OPERAÇÕES</p>
-                        </div>
-                        <div className="mt-4 space-y-3 text-justify text-xs leading-6 text-[#64748b]">
-                            <p>Sofia supervisiona as operações diárias...</p>
-                        </div>
-                    </div>
-                    */}
+function NoticiasSection({ posts }: { posts: Post[] }) {
+    const noticias = posts.filter(p => p.status === 'published' && p.tipo === 'noticia').slice(0, 3)
 
-                    {/* CTO - descomenta quando tiver */}
-                    {/*
-                    <div className="flex w-full max-w-[380px] flex-col rounded-3xl border border-[#e2e8f0] bg-white p-7 shadow-sm">
-                        <div className="mx-auto h-50 w-50 overflow-hidden rounded-full border-4 border-white shadow">
-                            <img src="/team/cto.jpg" alt="CTO" className="h-full w-full object-cover" />
-                        </div>
-                        <div className="mt-5 text-center">
-                            <h3 className="text-base font-semibold text-[#1e293b]">David Park</h3>
-                            <p className="mt-1 text-[11px] font-bold uppercase tracking-widest text-[#0e8ac2]">DIRETOR DE TECNOLOGIA - CTO</p>
-                        </div>
-                        <div className="mt-4 space-y-3 text-justify text-xs leading-6 text-[#64748b]">
-                            <p>David traz mais de 10 anos...</p>
-                        </div>
-                    </div>
-                    */}
+    if (noticias.length === 0) return null
+
+    return (
+        <section id="noticias" className="bg-white py-20 sm:py-28">
+            <div className="mx-auto max-w-7xl px-5 sm:px-8">
+                <div className="flex items-center gap-3">
+                    <span className="h-px w-8 bg-[#0e8ac2]" />
+                    <p className="text-xs font-bold uppercase tracking-widest text-[#0e8ac2]">NOTÍCIAS E MÍDIA</p>
+                </div>
+                <h2 className="mt-4 max-w-xl text-3xl font-semibold leading-tight tracking-tight text-[#1e293b] sm:text-4xl">
+                    Últimas atualizações da empresa.
+                </h2>
+
+                <div className="mt-10 flex flex-wrap justify-center gap-6 lg:justify-start">
+                    {noticias.map(post => {
+                        const dataFormatada = new Date(post.created_at).toLocaleDateString('pt-AO', { day: '2-digit', month: 'long', year: 'numeric' })
+                        const img = post.thumbnail_url || post.media_url || "/connect.png"
+                        return (
+                            <Link
+                                key={post.id}
+                                href={`/post/${post.slug || post.id}`}
+                                className="group flex w-full max-w-sm flex-col overflow-hidden rounded-2xl border border-[#e2e8f0] bg-[#f8fafc] transition-all hover:-translate-y-1 hover:shadow-lg"
+                            >
+                                <div className="aspect-[16/10] w-full overflow-hidden bg-[#f1f5f9]">
+                                    <img src={img} alt={post.titulo} className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
+                                </div>
+                                <div className="flex flex-1 flex-col p-6">
+                                    <span className="text-[11px] font-medium text-[#0e8ac2]">{dataFormatada}</span>
+                                    <h3 className="mt-2 line-clamp-3 text-sm font-semibold leading-5 text-[#1e293b] group-hover:text-[#0e8ac2]">
+                                        {post.titulo}
+                                    </h3>
+                                    {post.descricao && (
+                                        <p className="mt-3 line-clamp-3 text-justify text-xs leading-5 text-[#64748b]">
+                                            {post.descricao}
+                                        </p>
+                                    )}
+                                </div>
+                            </Link>
+                        )
+                    })}
                 </div>
             </div>
         </section>
@@ -137,7 +164,7 @@ function EquipeSection() {
 }
 
 export default async function Home() {
-    const banners = await getBanners()
+    const [banners, posts] = await Promise.all([getBanners(), getPosts()])
     const bannerTopo = banners.find(b => b.posicao === 'home_topo')
     const hasBanner = !!bannerTopo
 
@@ -167,11 +194,9 @@ export default async function Home() {
                 </div>
             </section>
 
-            <div id="parcerias">
-                <ParceriasSection />
-            </div>
-
+            <div id="parcerias"><ParceriasSection /></div>
             <EquipeSection />
+            <NoticiasSection posts={posts} />
 
             <Footer />
         </main>
