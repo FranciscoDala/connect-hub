@@ -13,8 +13,16 @@ type Post = {
 }
 
 export default function NoticiasSection({ posts }: { posts: Post[] }) {
-    const noticias = posts.filter(p => p.status === 'published' && p.tipo === 'noticia').slice(0, 8)
+    const noticias = posts
+        .filter(p => {
+            const status = (p.status || '').toLowerCase()
+            const tipo = (p.tipo || '').toLowerCase()
+            return status === 'published' && tipo === 'noticia'
+        })
+        .slice(0, 8)
+
     if (noticias.length === 0) return null
+
     return (
         <section id="noticias" className="bg-white py-20 sm:py-28">
             <div className="mx-auto max-w-7xl px-5 sm:px-8">
@@ -27,8 +35,9 @@ export default function NoticiasSection({ posts }: { posts: Post[] }) {
                     {noticias.map(post => {
                         const dataFormatada = new Date(post.created_at).toLocaleDateString('pt-AO', { day: '2-digit', month: 'long', year: 'numeric' })
                         const img = post.thumbnail_url || post.media_url || "/connect.png"
+                        const href = `/post/${post.slug || post.id}`
                         return (
-                            <Link key={post.id} href={`/post/${post.slug || post.id}`} className="group flex w-full min-w-full snap-center shrink-0 flex-col overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 transition-all hover:-translate-y-1 hover:shadow-lg lg:min-w-0" style={{ minWidth: '100%' }}>
+                            <Link key={post.id} href={href} className="group flex w-full min-w-full snap-center shrink-0 flex-col overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 transition-all hover:-translate-y-1 hover:shadow-lg lg:min-w-0" style={{ minWidth: '100%' }}>
                                 <div className="w-full overflow-hidden bg-slate-100" style={{ aspectRatio: '16 / 10' }}>
                                     <img src={img} alt={post.titulo} className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
                                 </div>
@@ -36,6 +45,7 @@ export default function NoticiasSection({ posts }: { posts: Post[] }) {
                                     <span className="text-xs font-medium text-sky-600">{dataFormatada}</span>
                                     <h3 className="mt-2 line-clamp-3 text-sm font-semibold leading-5 text-slate-800 group-hover:text-sky-600">{post.titulo}</h3>
                                     {post.descricao && (<p className="mt-3 line-clamp-3 text-justify text-xs leading-5 text-slate-500">{post.descricao}</p>)}
+                                    <span className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-slate-500 group-hover:text-sky-600">Ler mais <span>→</span></span>
                                 </div>
                             </Link>
                         )

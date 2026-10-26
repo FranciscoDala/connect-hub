@@ -2,14 +2,20 @@ import Link from 'next/link'
 
 type Post = any
 
-
 function formatKz(v?: number | null) {
     if (v === null || v === undefined) return null
     return Number(v).toLocaleString('pt-AO', { minimumFractionDigits: 0 }) + ' Kz'
 }
 
 export default function ProdutosSection({ posts }: { posts: Post[] }) {
-    const produtos = posts.filter(p => p.status === 'published' && (p.tipo === 'produto' || p.tipo === 'product')).slice(0, 8)
+    const produtos = posts
+        .filter(p => {
+            const status = (p.status || '').toLowerCase()
+            const tipo = (p.tipo || '').toLowerCase()
+            return status === 'published' && (tipo === 'produto' || tipo === 'product')
+        })
+        .slice(0, 8)
+
     return (
         <section id="produtos" className="bg-white py-20 sm:py-28">
             <div className="mx-auto max-w-7xl px-5 sm:px-8">
@@ -31,9 +37,9 @@ export default function ProdutosSection({ posts }: { posts: Post[] }) {
                 ) : (
                     <div className="mt-12 flex snap-x snap-mandatory gap-0 overflow-x-auto lg:grid lg:grid-cols-4 lg:gap-6 lg:overflow-visible" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' } as any}>
                         {produtos.map((item: any) => {
-                            const cat = (item.category?.nome || 'PRODUTO').toUpperCase()
+                            const cat = (item.category?.nome || item.category_name || 'PRODUTO').toUpperCase()
                             const img = item.thumbnail_url || item.media_url || '/connect.png'
-                            const link = `/produto/${item.slug || item.id}`
+                            const link = `/post/${item.slug || item.id}`
                             const emPromo = item.em_promocao && item.preco_promocional
                             return (
                                 <Link key={item.id} href={link} className="group flex w-full min-w-full snap-center flex-col overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 transition-all hover:shadow-md lg:min-w-0" style={{ minWidth: '100%' }}>
@@ -43,9 +49,9 @@ export default function ProdutosSection({ posts }: { posts: Post[] }) {
                                     </div>
                                     <div className="flex flex-1 flex-col p-5">
                                         <span className="text-xs font-bold uppercase tracking-widest text-sky-600">{cat}</span>
-                                        <h3 className="mt-2 text-sm font-semibold text-slate-800">{item.titulo}</h3>
+                                        <h3 className="mt-2 text-sm font-semibold text-slate-800 line-clamp-2">{item.titulo}</h3>
                                         <p className="mt-2 line-clamp-2 flex-1 text-xs leading-5 text-slate-500">{item.descricao || ''}</p>
-                                        {item.preco && <div className="mt-4 text-sm font-bold">{emPromo ? <><span className="text-red-600">{formatKz(item.preco_promocional)}</span> <span className="text-xs line-through text-slate-400">{formatKz(item.preco)}</span></> : <span>{formatKz(item.preco)}</span>}</div>}
+                                        {item.preco && <div className="mt-4 text-sm font-bold">{emPromo ? <><span className="text-red-600">{formatKz(item.preco_promocional)}</span> <span className="ml-2 text-xs line-through text-slate-400">{formatKz(item.preco)}</span></> : <span>{formatKz(item.preco)}</span>}</div>}
                                         <span className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-slate-600 group-hover:text-sky-600">Ver detalhes <span>→</span></span>
                                     </div>
                                 </Link>

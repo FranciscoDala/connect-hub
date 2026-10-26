@@ -1,12 +1,17 @@
 // app/post/[slug]/page.tsx
 import Link from 'next/link'
 import Header from '@/components/Header'
+import Footer from '@/components/Footer'
 import { notFound } from 'next/navigation'
 
 const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 
+function formatKz(v?: number | null) {
+    if (v == null) return null
+    return Number(v).toLocaleString('pt-AO') + ' Kz'
+}
+
 async function getPost(slug: string) {
-    // tenta por slug primeiro, depois por id, depois varrendo a lista (fallback)
     try {
         let res = await fetch(`${API}/api/v1/posts/slug/${slug}`, { next: { revalidate: 30 } })
         if (res.ok) return await res.json()
@@ -15,9 +20,8 @@ async function getPost(slug: string) {
         let res = await fetch(`${API}/api/v1/posts/${slug}`, { next: { revalidate: 30 } })
         if (res.ok) return await res.json()
     } catch { }
-    // fallback: busca lista e encontra por slug
     try {
-        let res = await fetch(`${API}/api/v1/posts`, { next: { revalidate: 30 } })
+        let res = await fetch(`${API}/api/v1/posts?limit=100`, { next: { revalidate: 30 } })
         if (res.ok) {
             const all = await res.json()
             return all.find((p: any) => p.slug === slug || p.id === slug)
@@ -28,7 +32,7 @@ async function getPost(slug: string) {
 
 async function getRelated(category_id: string, currentId: string) {
     try {
-        const res = await fetch(`${API}/api/v1/posts?category_id=${category_id}&limit=4`, { next: { revalidate: 60 } })
+        const res = await fetch(`${API}/api/v1/posts?category_id=${category_id}&limit=6`, { next: { revalidate: 60 } })
         if (!res.ok) return []
         const data = await res.json()
         return data.filter((p: any) => p.id !== currentId).slice(0, 4)
@@ -51,25 +55,9 @@ async function getBanners() {
     } catch { return [] }
 }
 
-// Componente client para views e share
-function PostActions({ post }: { post: any }) {
-    return (
-        <div className="post-actions-client">
-            <script dangerouslySetInnerHTML={{
-                __html: `
-        (function(){
-          try {
-            fetch('${API}/api/v1/posts/${post.id}/view', { method: 'POST' }).catch(()=>{})
-            fetch('${API}/api/v1/posts/${post.id}/views', { method: 'POST' }).catch(()=>{})
-          } catch {}
-        })()
-      `}} />
-        </div>
-    )
-}
-
-export default async function PostPage({ params }: { params: { slug: string } }) {
-    const post = await getPost(params.slug)
+export default async function PostPage({ params }: { params: Promise<{ slug: string }> }) {
+    const { slug } = await params
+    const post = await getPost(slug)
     if (!post) return notFound()
 
     const categories = await getCategories()
@@ -77,102 +65,124 @@ export default async function PostPage({ params }: { params: { slug: string } })
     const related = post.category_id ? await getRelated(post.category_id, post.id) : []
     const cat = categories.find((c: any) => c.id === post.category_id)
 
-    const views = post.views ?? post.views_count ?? 0
+    const isProduto = (post.tipo || '').toLowerCase() === 'produto' || (post.tipo || '').toLowerCase() === 'product'
+    const views = post.views ?? 0
     const comments = post.comments_count ?? 0
-    const shares = post.shares_count ?? post.shares ?? 0
+    const shares = post.shares_count ?? 0
     const bannerDentro = banners.find((b: any) => b.posicao === 'dentro_post')
     const bannerSidebar = banners.find((b: any) => b.posicao === 'sidebar')
 
     return (
-        <main className="min-h-screen bg-[#fcfcfc] text-zinc-900">
+        <main className="min-h-screen bg-white text-slate-800">
             <Header />
-            <PostActions post={post} />
 
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-10">
+            {/* Breadcrumb estilo home */}
+            <div className="mx-auto max-w-7xl px-5 sm:px-8 pt-24 pb-6">
+                <div className="flex items-center gap-2 text-[11px] font-medium tracking-wide">
+                    <Link href="/" className="text-slate-400 hover:text-slate-700">Início</Link>
+                    <span className="text-slate-300">/</span>
+                    {cat && (
+                        <>
+                            <Link href={`/#${cat.slug}`} className="font-bold uppercase tracking-widest text-sky-700">{cat.nome}</Link>
+                            <span className="text-slate-300">/</span>
+                        </>
+                    )}
+                    <span className="text-slate-500 truncate max-w-50">{isProduto ? 'Produto' : post.tipo}</span>
+                </div>
+            </div>
+
+            <div className="mx-auto max-w-7xl px-5 sm:px-8 pb-20 sm:pb-28">
                 <div className="grid grid-cols-12 gap-6 lg:gap-8">
                     {/* CONTEÚDO */}
                     <article className="col-span-12 lg:col-span-8">
-                        <div className="mb-4 flex items-center gap-2 text-[11px]">
-                            <Link href="/" className="text-zinc-500 hover:text-black">Início</Link>
-                            <span className="text-zinc-300">/</span>
-                            {cat && <Link href={`/categoria/${cat.slug}`} className="font-bold" style={{ color: cat.cor || '#7c3aed' }}>{cat.nome}</Link>}
-                            <span className="text-zinc-300">/</span>
-                            <span className="text-zinc-400 truncate max-w-[180px]">{post.tipo}</span>
-                        </div>
-
-                        <div className="bg-white border border-zinc-200 rounded-[24px] overflow-hidden">
-                            <div className="p-6 md:p-8">
-                                <div className="flex flex-wrap items-center gap-2 mb-4">
-                                    {cat && <span className="text-[10px] px-3 py-1 rounded-full bg-violet-50 text-violet-700 border border-violet-100 font-bold tracking-widest">{cat.nome.toUpperCase()}</span>}
-                                    <span className={`text-[10px] px-3 py-1 rounded-full border font-bold tracking-widest ${post.status === 'published' ? 'bg-green-50 text-green-700 border-green-200' : 'bg-zinc-100'}`}>{post.status?.toUpperCase()}</span>
-                                    <span className="text-[11px] text-zinc-500">{new Date(post.created_at).toLocaleDateString('pt-AO', { day: '2-digit', month: 'long', year: 'numeric' })}</span>
+                        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-slate-50">
+                            <div className="p-6 sm:p-8 bg-white">
+                                <div className="flex flex-wrap items-center gap-2">
+                                    <span className="h-px w-8 bg-sky-600" />
+                                    <span className="text-[11px] font-bold uppercase tracking-widest text-sky-800">{cat?.nome || (isProduto ? 'PRODUTO' : 'NOTÍCIA')}</span>
+                                    <span className={`ml-2 rounded-full border px-2.5 py-1 text-[10px] font-bold tracking-widest ${post.status === 'published' ? 'bg-green-50 text-green-700 border-green-200' : 'bg-slate-100 text-slate-600'}`}>{post.status?.toUpperCase()}</span>
+                                    <span className="text-[11px] text-slate-400 ml-auto">{new Date(post.created_at).toLocaleDateString('pt-AO', { day: '2-digit', month: 'long', year: 'numeric' })}</span>
                                 </div>
 
-                                <h1 className="text-[26px] md:text-[38px] font-black leading-[0.95] tracking-tight">{post.titulo}</h1>
-                                {post.descricao && <p className="mt-4 text-[15px] md:text-[17px] leading-relaxed text-zinc-600">{post.descricao}</p>}
+                                <h1 className="mt-5 text-[28px] sm:text-[40px] font-semibold tracking-tight text-slate-700 leading-[0.95]">{post.titulo}</h1>
+                                {post.descricao && <p className="mt-4 max-w-3xl text-[14px] sm:text-[16px] leading-6 text-slate-500">{post.descricao}</p>}
 
-                                <div className="mt-6 grid grid-cols-3 gap-2 md:flex md:gap-2">
-                                    <span className="flex items-center justify-center gap-1.5 bg-zinc-50 border border-zinc-200 px-3 py-2.5 rounded-full text-[12px] font-medium w-full md:w-auto">👁 {views} visualizações</span>
-                                    <span className="flex items-center justify-center gap-1.5 bg-zinc-50 border border-zinc-200 px-3 py-2.5 rounded-full text-[12px] font-medium w-full md:w-auto">💬 {comments} comentários</span>
-                                    <span className="flex items-center justify-center gap-1.5 bg-zinc-50 border border-zinc-200 px-3 py-2.5 rounded-full text-[12px] font-medium w-full md:w-auto">↗ {shares} partilhas</span>
+                                {isProduto && post.preco && (
+                                    <div className="mt-6 flex items-baseline gap-3">
+                                        <span className="text-[28px] font-bold tracking-tight text-slate-800">{formatKz(post.preco_promocional || post.preco)}</span>
+                                        {post.em_promocao && post.preco_promocional && <span className="text-sm line-through text-slate-400">{formatKz(post.preco)}</span>}
+                                        {post.em_promocao && <span className="rounded-full bg-red-500 px-2.5 py-1 text-[11px] font-bold text-white">PROMO</span>}
+                                    </div>
+                                )}
+
+                                <div className="mt-6 flex flex-wrap gap-2">
+                                    <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3 py-2 text-[12px] font-medium text-slate-600">👁 {views} visualizações</span>
+                                    <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3 py-2 text-[12px] font-medium text-slate-600">💬 {comments}</span>
+                                    <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3 py-2 text-[12px] font-medium text-slate-600">↗ {shares}</span>
+                                    {isProduto && post.estoque != null && <span className="inline-flex rounded-full border border-green-200 bg-green-50 px-3 py-2 text-[12px] font-bold text-green-700">Estoque: {post.estoque}</span>}
                                 </div>
                             </div>
 
                             {(post.thumbnail_url || post.media_url) && (
-                                <div className="w-full bg-zinc-100 border-y border-zinc-200">
-                                    <img src={post.thumbnail_url || post.media_url} alt={post.titulo} className="w-full h-auto max-h-[560px] object-cover mx-auto" />
+                                <div className="border-y border-slate-200 bg-slate-100">
+                                    <img src={post.thumbnail_url || post.media_url} alt={post.titulo} className="mx-auto h-auto max-h-155 w-full object-cover sm:object-contain bg-white" />
                                 </div>
                             )}
 
-                            <div className="p-6 md:p-8">
-                                <div className="prose prose-zinc max-w-none prose-p:leading-relaxed prose-p:text-[15px] prose-headings:font-bold prose-a:text-violet-600">
-                                    {post.conteudo ? (
-                                        <div dangerouslySetInnerHTML={{ __html: post.conteudo }} />
-                                    ) : (
-                                        <p className="text-zinc-600">{post.descricao || 'Conteúdo em breve.'}</p>
-                                    )}
+                            <div className="p-6 sm:p-8 bg-white">
+                                <div className="prose prose-slate max-w-none prose-p:text-[14px] prose-p:leading-6 prose-p:text-slate-600 prose-headings:font-semibold prose-headings:tracking-tight prose-headings:text-slate-700 prose-a:text-sky-700">
+                                    {post.conteudo ? <div dangerouslySetInnerHTML={{ __html: post.conteudo }} /> : <p>{post.descricao || 'Conteúdo em breve.'}</p>}
                                 </div>
 
-                                {post.tags && post.tags.length > 0 && (
-                                    <div className="mt-8 flex flex-wrap gap-1.5">
+                                {post.tags?.length > 0 && (
+                                    <div className="mt-8 flex flex-wrap gap-2">
                                         {post.tags.map((tag: string) => (
-                                            <span key={tag} className="px-3 py-1 rounded-full bg-zinc-50 border text-[11px] font-medium">#{tag}</span>
+                                            <span key={tag} className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-[11px] font-medium text-slate-600">#{tag}</span>
                                         ))}
                                     </div>
                                 )}
 
                                 {bannerDentro && (
-                                    <div className="mt-8">
-                                        <p className="text-[10px] tracking-widest text-zinc-400 mb-2">PUBLICIDADE</p>
-                                        <a href={bannerDentro.link_url} target="_blank" className="block rounded-[16px] overflow-hidden border">
-                                            <img src={bannerDentro.imagem_url} alt={bannerDentro.titulo} className="w-full h-auto" />
+                                    <div className="mt-10">
+                                        <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-slate-400">Publicidade</p>
+                                        <a href={bannerDentro.link_url} target="_blank" className="block overflow-hidden rounded-2xl border border-slate-200">
+                                            <img src={bannerDentro.imagem_url} alt={bannerDentro.titulo} className="w-full" />
                                         </a>
                                     </div>
                                 )}
 
-                                <div className="mt-10 p-4 rounded-[16px] bg-zinc-50 border border-zinc-200 flex flex-col sm:flex-row items-center justify-between gap-3">
-                                    <p className="text-[12px] font-medium">Gostou? Partilha com teus amigos</p>
-                                    <div className="flex gap-2 w-full sm:w-auto">
-                                        <a href={`https://wa.me/?text=${encodeURIComponent(`${post.titulo} - ${API.replace('/api', '')}/post/${post.slug || post.id}`)}`} target="_blank" className="flex-1 sm:flex-none px-4 py-2.5 rounded-full bg-green-500 text-white text-[12px] font-bold text-center">WhatsApp</a>
-                                        <a href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(`https://connect-uuo9.onrender.com/post/${post.slug || post.id}`)}`} target="_blank" className="flex-1 sm:flex-none px-4 py-2.5 rounded-full bg-blue-600 text-white text-[12px] font-bold text-center">Facebook</a>
-                                        <button onClick={() => navigator.clipboard.writeText(window.location.href)} className="flex-1 sm:flex-none px-4 py-2.5 rounded-full bg-zinc-900 text-white text-[12px] font-bold">Copiar Link</button>
+                                <div className="mt-10 rounded-2xl border border-slate-200 bg-slate-50 p-4 sm:p-5">
+                                    <p className="text-[13px] font-semibold text-slate-700">{isProduto ? 'Interessado neste produto?' : 'Gostou? Partilha com teus amigos'}</p>
+                                    <div className="mt-3 grid grid-cols-1 gap-2 sm:flex">
+                                        {isProduto ? (
+                                            <a href={`https://wa.me/244000000000?text=${encodeURIComponent(`Olá, quero ${post.titulo} - https://connect-uuo9.onrender.com/post/${post.slug}`)}`} target="_blank" className="rounded-full bg-slate-900 px-5 py-3 text-center text-[12px] font-bold text-white">Encomendar no WhatsApp</a>
+                                        ) : (
+                                            <>
+                                                <a href={`https://wa.me/?text=${encodeURIComponent(`${post.titulo} - https://connect-uuo9.onrender.com/post/${post.slug || post.id}`)}`} target="_blank" className="rounded-full bg-[#25D366] px-5 py-3 text-center text-[12px] font-bold text-white">WhatsApp</a>
+                                                <a href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(`https://connect-uuo9.onrender.com/post/${post.slug || post.id}`)}`} target="_blank" className="rounded-full bg-[#1877F2] px-5 py-3 text-center text-[12px] font-bold text-white">Facebook</a>
+                                            </>
+                                        )}
+                                        <Link href="/" className="rounded-full border border-slate-200 bg-white px-5 py-3 text-center text-[12px] font-bold text-slate-700">Voltar ao início</Link>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
                         {related.length > 0 && (
-                            <div className="mt-10">
-                                <h3 className="text-[12px] font-bold tracking-[0.2em] mb-4">RELACIONADOS • {cat?.nome?.toUpperCase()}</h3>
-                                <div className="grid sm:grid-cols-2 gap-4">
+                            <div className="mt-12">
+                                <div className="flex items-center gap-3">
+                                    <span className="h-px w-8 bg-sky-600" />
+                                    <h3 className="text-xs font-bold uppercase tracking-widest text-sky-800">Relacionados • {cat?.nome?.toUpperCase()}</h3>
+                                </div>
+                                <div className="mt-6 grid gap-4 sm:grid-cols-2">
                                     {related.map((r: any) => (
-                                        <Link key={r.id} href={`/post/${r.slug || r.id}`} className="bg-white border rounded-[16px] p-3 flex gap-3 hover:shadow-md transition">
-                                            <div className="w-20 h-20 rounded-[10px] bg-zinc-100 overflow-hidden shrink-0">
-                                                {r.thumbnail_url || r.media_url ? <img src={r.thumbnail_url || r.media_url} className="w-full h-full object-cover" alt="" /> : <div className="grid place-items-center h-full text-[10px] font-bold">IMG</div>}
+                                        <Link key={r.id} href={`/post/${r.slug || r.id}`} className="group flex gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-3 transition hover:shadow-md">
+                                            <div className="h-20 w-20 shrink-0 overflow-hidden rounded-xl bg-white border">
+                                                {r.thumbnail_url || r.media_url ? <img src={r.thumbnail_url || r.media_url} className="h-full w-full object-cover transition group-hover:scale-105" alt="" /> : <div className="grid h-full place-items-center text-[10px] font-bold text-slate-400">IMG</div>}
                                             </div>
                                             <div className="min-w-0">
-                                                <p className="text-[13px] font-semibold line-clamp-2 leading-tight">{r.titulo}</p>
-                                                <p className="text-[11px] text-zinc-500 mt-1">👁 {r.views || 0} • 💬 {r.comments_count || 0}</p>
+                                                <p className="line-clamp-2 text-[13px] font-semibold leading-tight text-slate-700">{r.titulo}</p>
+                                                <p className="mt-1 text-[11px] text-slate-500">👁 {r.views || 0} • {r.tipo}</p>
                                             </div>
                                         </Link>
                                     ))}
@@ -181,26 +191,30 @@ export default async function PostPage({ params }: { params: { slug: string } })
                         )}
                     </article>
 
-                    {/* SIDEBAR */}
+                    {/* SIDEBAR - estilo home */}
                     <aside className="col-span-12 lg:col-span-4 space-y-6">
                         {bannerSidebar && (
-                            <div className="bg-white border rounded-[20px] overflow-hidden p-3">
-                                <p className="text-[10px] tracking-widest text-zinc-400 mb-2">PUBLICIDADE</p>
-                                <a href={bannerSidebar.link_url} target="_blank"><img src={bannerSidebar.imagem_url} alt="" className="w-full rounded-[12px]" /></a>
+                            <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white p-3">
+                                <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-slate-400">Publicidade</p>
+                                <a href={bannerSidebar.link_url} target="_blank"><img src={bannerSidebar.imagem_url} alt="" className="w-full rounded-xl" /></a>
                             </div>
                         )}
-                        <div className="bg-white border rounded-[20px] p-5">
-                            <h4 className="text-[11px] font-bold tracking-widest mb-3">SOBRE ESTA NOTÍCIA</h4>
-                            <div className="space-y-2 text-[12px]">
-                                <p><span className="text-zinc-500">Categoria:</span> <span className="font-semibold">{cat?.nome || 'Geral'}</span></p>
-                                <p><span className="text-zinc-500">Tipo:</span> <span className="font-semibold">{post.tipo}</span></p>
-                                <p><span className="text-zinc-500">Publicado:</span> <span className="font-semibold">{new Date(post.created_at).toLocaleString('pt-AO')}</span></p>
-                                <p><span className="text-zinc-500">ID:</span> <span className="font-mono text-[11px]">{post.id.slice(0, 8)}...</span></p>
+                        <div className="rounded-2xl border border-slate-200 bg-white p-6">
+                            <div className="flex items-center gap-2">
+                                <span className="h-px w-6 bg-sky-600" />
+                                <h4 className="text-[11px] font-bold uppercase tracking-widest text-sky-800">Sobre</h4>
+                            </div>
+                            <div className="mt-4 space-y-3 text-[12px]">
+                                <p className="flex justify-between"><span className="text-slate-400">Categoria</span><span className="font-semibold text-slate-700">{cat?.nome || 'Geral'}</span></p>
+                                <p className="flex justify-between"><span className="text-slate-400">Tipo</span><span className="font-semibold text-slate-700 capitalize">{post.tipo}</span></p>
+                                <p className="flex justify-between"><span className="text-slate-400">Data</span><span className="font-semibold text-slate-700">{new Date(post.created_at).toLocaleDateString('pt-AO')}</span></p>
+                                {post.sku && <p className="flex justify-between"><span className="text-slate-400">SKU</span><span className="font-mono text-[11px] font-semibold">{post.sku}</span></p>}
                             </div>
                         </div>
                     </aside>
                 </div>
             </div>
+            <Footer />
         </main>
     )
 }
