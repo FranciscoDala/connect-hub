@@ -28,18 +28,45 @@ export default function LoginModal({ open, onClose }: { open: boolean; onClose: 
 
     if (!open) return null;
     return (
-        <div className="fixed inset-0 z-90 flex items-end justify-center p-0 sm:items-center sm:p-6">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <div className="absolute inset-0 bg-[#0f172a]/40 backdrop-blur-sm" onClick={onClose} />
-            <div className="relative w-full bg-white rounded-t-4xl border shadow-2xl sm:max-w-lg sm:rounded-3xl p-7">
-                <div className="mb-2 flex items-start justify-between">
-                    <div><h2 className="text-xl font-semibold tracking-tight">Acesso administrativo</h2><p className="mt-1 text-sm text-[#64748b]">Connect.ao</p></div>
-                    <button onClick={onClose} className="h-9 w-9 rounded-full border bg-[#f8fafc] grid place-items-center">✕</button>
+            <div className="relative w-full max-w-75 rounded-3xl border bg-white p-5 shadow-2xl">
+                <div className="flex items-center justify-between">
+                    <h2 className="text-base font-semibold tracking-tight">Login</h2>
+                    <button onClick={onClose} className="grid h-8 w-8 place-items-center rounded-full border bg-[#f8fafc] text-xs">✕</button>
                 </div>
-                {error && <div className="my-4 rounded-xl border border-red-200 bg-red-50 p-3 text-xs text-red-700">{error}</div>}
-                <form onSubmit={handleLogin} className="mt-6 grid gap-5">
-                    <div><label className="mb-2 block text-xs font-bold uppercase tracking-widest text-[#475569]">Corporate Email</label><input type="email" value={email} onChange={e => setEmail(e.target.value)} required className="h-11 w-full rounded-full border border-[#e2e8f0] px-5 text-sm outline-none focus:border-[#0e8ac2]" /></div>
-                    <div><label className="mb-2 block text-xs font-bold uppercase tracking-widest text-[#475569]">Password</label><div className="relative"><input type={show ? "text" : "password"} value={password} onChange={e => setPassword(e.target.value)} required className="h-11 w-full rounded-full border border-[#e2e8f0] px-5 pr-11 text-sm outline-none focus:border-[#0e8ac2]" /><button type="button" onClick={() => setShow(!show)} className="absolute right-1.5 top-1/2 grid h-8 w-8 -translate-y-1/2 place-items-center rounded-full border bg-white text-xs">{show ? "—" : "O"}</button></div></div>
-                    <button type="submit" disabled={loading} className="flex h-11 w-full items-center justify-center rounded-full bg-[#0e8ac2] text-sm font-semibold text-white disabled:opacity-50">{loading ? <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" /> : "Entrar"}</button>
+
+                {error && <div className="mt-3 rounded-xl border border-red-200 bg-red-50 p-2.5 text-xs text-red-700">{error}</div>}
+
+                <form onSubmit={handleLogin} className="mt-4 grid gap-2.5">
+                    <input
+                        type="email"
+                        value={email}
+                        onChange={e => setEmail(e.target.value)}
+                        required
+                        className="h-10 w-full rounded-full border border-[#e2e8f0] px-4 text-sm outline-none focus:border-[#0e8ac2]"
+                    />
+
+                    <div className="relative">
+                        <input
+                            type={show ? "text" : "password"}
+                            value={password}
+                            onChange={e => setPassword(e.target.value)}
+                            required
+                            className="h-10 w-full rounded-full border border-[#e2e8f0] px-4 pr-10 text-sm outline-none focus:border-[#0e8ac2]"
+                        />
+                        <button type="button" onClick={() => setShow(!show)} className="absolute right-1 top-1 grid h-8 w-8 place-items-center rounded-full bg-white text-[#64748b]">
+                            {show ? (
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-4 w-4"><path d="M3 3l18 18"/><path d="M10.6 10.6a2 2 0 0 0 2.8 2.8"/><path d="M9.88 5.09A10.94 10.94 0 0 1 12 5c7 0 10 7 10 7a17.2 17.2 0 0 1-3.16 4.19"/><path d="M14.12 14.12A3 3 0 0 1 9.88 9.88"/><path d="M2.39 8.27A17.2 17.2 0 0 0 2 12s3 7 10 7a10.94 10.94 0 0 0 5.39-1.33"/></svg>
+                            ) : (
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-4 w-4"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12Z"/><circle cx="12" cy="12" r="3"/></svg>
+                            )}
+                        </button>
+                    </div>
+
+                    <button type="submit" disabled={loading} className="mt-1 flex h-10 w-full items-center justify-center rounded-full bg-[#0e8ac2] text-sm font-semibold text-white disabled:opacity-50">
+                        {loading ? <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" /> : "Entrar"}
+                    </button>
                 </form>
             </div>
         </div>
