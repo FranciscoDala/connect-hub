@@ -91,17 +91,7 @@ function formatKz(v?: number | null) {
 }
 
 function ProdutosSection({ posts }: { posts: Post[] }) {
-    const produtosReais = posts.filter(p => p.status === 'published' && (p.tipo === 'produto' || p.tipo === 'product')).slice(0, 8)
-
-    const mock = [
-        { id: '1', categoria: 'REABILITAÇÃO', titulo: 'ExoRehab Pro', desc: 'Exoesqueleto robótico avançado projetado para acelerar a recuperação motora e restaurar a mobilidade.', img: 'https://images.unsplash.com/photo-1579154204601-01588f351e67?w=600', preco: null, preco_promocional: null },
-        { id: '2', categoria: 'NEUROCIRURGIA', titulo: 'NeuroNav Elite', desc: 'Sistema de navegação robótica de alta precisão para procedimentos neurocirúrgicos minimamente invasivos e complexos.', img: 'https://images.unsplash.com/photo-1559757175-5700dde675bc?w=600', preco: null, preco_promocional: null },
-        { id: '3', categoria: 'CUIDADOS INTENSIVOS', titulo: 'ECMO RespiraCare', desc: 'Ventilador de última geração e sistema completo de suporte à vida para unidades de terapia intensiva.', img: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=600', preco: null, preco_promocional: null },
-        { id: '4', categoria: 'ONCOLOGIA', titulo: 'ProBeam Oncology', desc: 'Sistema de terapia de prótons de última geração que fornece radiação ultraprecisa para atingir tumores específicos.', img: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=600', preco: null, preco_promocional: null },
-    ]
-
-    const usarMock = produtosReais.length === 0
-    const lista: any[] = usarMock ? mock : produtosReais
+    const produtos = posts.filter(p => p.status === 'published' && (p.tipo === 'produto' || p.tipo === 'product')).slice(0, 8)
 
     return (
         <section id="produtos" className="bg-white py-20 sm:py-28">
@@ -111,66 +101,72 @@ function ProdutosSection({ posts }: { posts: Post[] }) {
                         <span className="h-px w-10 bg-sky-600" />
                         <p className="text-xs font-bold uppercase tracking-widest text-sky-800">APRESENTAÇÃO DE PRODUTOS</p>
                     </div>
-                    <h2 className="mt-4 text-3xl font-semibold tracking-tight text-slate-700 sm:text-4xl">Sistemas Médicos Avançados.</h2>
+                    <h2 className="mt-4 text-3xl font-semibold tracking-tight text-slate-700 sm:text-4xl">Produtos com tecnologias de ponta.</h2>
                     <p className="mx-auto mt-4 max-w-2xl text-sm leading-6 text-slate-500">
                         Descubra nossos dispositivos de ponta, projetados para aprimorar sua prática com tecnologia inovadora e resultados clínicos comprovados.
                     </p>
                 </div>
 
-                <div
-                    className="mt-12 flex snap-x snap-mandatory gap-0 overflow-x-auto lg:grid lg:grid-cols-4 lg:gap-6 lg:overflow-visible"
-                    style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' } as any}
-                >
-                    {lista.map((item: any) => {
-                        const isMock = usarMock
-                        const cat = isMock ? item.categoria : (item.category?.nome || 'PRODUTO').toUpperCase()
-                        const titulo = item.titulo
-                        const desc = isMock ? item.desc : (item.descricao || '')
-                        const img = isMock ? item.img : (item.thumbnail_url || item.media_url || '/connect.png')
-                        const link = isMock ? '#produtos' : `/produto/${item.slug || item.id}`
-                        const preco = isMock ? null : item.preco
-                        const promo = isMock ? null : item.preco_promocional
-                        const temPreco = preco != null
-                        const emPromo = item.em_promocao && promo != null
+                {produtos.length === 0 ? (
+                    <div className="mt-16 flex flex-col items-center justify-center rounded-3xl border border-dashed border-slate-200 bg-slate-50 py-20">
+                        <div className="grid h-12 w-12 place-items-center rounded-full bg-white border text-slate-400">📦</div>
+                        <p className="mt-4 text-sm font-semibold text-slate-700">Sem produtos disponíveis</p>
+                    </div>
+                ) : (
+                    <div
+                        className="mt-12 flex snap-x snap-mandatory gap-0 overflow-x-auto lg:grid lg:grid-cols-4 lg:gap-6 lg:overflow-visible"
+                        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' } as any}
+                    >
+                        {produtos.map((item: any) => {
+                            const cat = (item.category?.nome || 'PRODUTO').toUpperCase()
+                            const titulo = item.titulo
+                            const desc = item.descricao || ''
+                            const img = item.thumbnail_url || item.media_url || '/connect.png'
+                            const link = `/produto/${item.slug || item.id}`
+                            const preco = item.preco
+                            const promo = item.preco_promocional
+                            const temPreco = preco != null
+                            const emPromo = item.em_promocao && promo != null
 
-                        return (
-                            <Link
-                                key={item.id}
-                                href={link}
-                                className="group flex w-full min-w-full snap-center flex-col overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 transition-all hover:shadow-md lg:min-w-0"
-                                style={{ minWidth: '100%' }}
-                            >
-                                <div className="relative w-full overflow-hidden bg-slate-100" style={{ aspectRatio: '4 / 3' }}>
-                                    <img src={img} alt={titulo} className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
-                                    {emPromo && <span className="absolute left-3 top-3 rounded-full bg-red-500 px-2.5 py-1 text-xs font-bold text-white">PROMO</span>}
-                                    {isMock === false && item.estoque === 0 && <span className="absolute right-3 top-3 rounded-full bg-slate-800 px-2.5 py-1 text-xs font-bold text-white">ESGOTADO</span>}
-                                </div>
-                                <div className="flex flex-1 flex-col p-5">
-                                    <span className="text-xs font-bold uppercase tracking-widest text-sky-600">{cat}</span>
-                                    <h3 className="mt-2 text-sm font-semibold text-slate-800">{titulo}</h3>
-                                    <p className="mt-2 line-clamp-3 flex-1 text-xs leading-5 text-slate-500">{desc}</p>
+                            return (
+                                <Link
+                                    key={item.id}
+                                    href={link}
+                                    className="group flex w-full min-w-full snap-center flex-col overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 transition-all hover:shadow-md lg:min-w-0"
+                                    style={{ minWidth: '100%' }}
+                                >
+                                    <div className="relative w-full overflow-hidden bg-slate-100" style={{ aspectRatio: '4 / 3' }}>
+                                        <img src={img} alt={titulo} className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
+                                        {emPromo && <span className="absolute left-3 top-3 rounded-full bg-red-500 px-2.5 py-1 text-xs font-bold text-white">PROMO</span>}
+                                        {item.estoque === 0 && <span className="absolute right-3 top-3 rounded-full bg-slate-800 px-2.5 py-1 text-xs font-bold text-white">ESGOTADO</span>}
+                                    </div>
+                                    <div className="flex flex-1 flex-col p-5">
+                                        <span className="text-xs font-bold uppercase tracking-widest text-sky-600">{cat}</span>
+                                        <h3 className="mt-2 text-sm font-semibold text-slate-800">{titulo}</h3>
+                                        <p className="mt-2 line-clamp-3 flex-1 text-xs leading-5 text-slate-300">{desc}</p>
 
-                                    {temPreco && (
-                                        <div className="mt-4">
-                                            {emPromo ? (
-                                                <div className="flex items-center gap-2">
-                                                    <span className="text-sm font-bold text-red-600">{formatKz(promo)}</span>
-                                                    <span className="text-xs line-through text-slate-400">{formatKz(preco)}</span>
-                                                </div>
-                                            ) : (
-                                                <span className="text-sm font-bold text-slate-800">{formatKz(preco)}</span>
-                                            )}
-                                        </div>
-                                    )}
+                                        {temPreco && (
+                                            <div className="mt-4">
+                                                {emPromo ? (
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="text-sm font-bold text-red-600">{formatKz(promo)}</span>
+                                                        <span className="text-xs line-through text-slate-400">{formatKz(preco)}</span>
+                                                    </div>
+                                                ) : (
+                                                    <span className="text-sm font-bold text-slate-800">{formatKz(preco)}</span>
+                                                )}
+                                            </div>
+                                        )}
 
-                                    <span className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-slate-600 group-hover:text-sky-600">
-                                        {temPreco ? 'Ver detalhes' : 'Solicite um orçamento'} <span>→</span>
-                                    </span>
-                                </div>
-                            </Link>
-                        )
-                    })}
-                </div>
+                                        <span className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-slate-600 group-hover:text-sky-600">
+                                            {temPreco ? 'Ver detalhes' : 'Solicite um orçamento'} <span>→</span>
+                                        </span>
+                                    </div>
+                                </Link>
+                            )
+                        })}
+                    </div>
+                )}
             </div>
             <style>{`#produtos div::-webkit-scrollbar{display:none}`}</style>
         </section>
