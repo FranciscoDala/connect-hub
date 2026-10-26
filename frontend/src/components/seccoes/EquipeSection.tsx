@@ -1,4 +1,3 @@
-
 export default function EquipeSection() {
     return (
         <section id="equipe" className="bg-slate-100 py-20 sm:py-28">

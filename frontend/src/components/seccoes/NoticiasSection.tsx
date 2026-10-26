@@ -1,3 +1,17 @@
+import Link from 'next/link'
+
+type Post = {
+    id: string;
+    titulo: string;
+    slug?: string;
+    descricao?: string;
+    tipo: string;
+    thumbnail_url?: string;
+    media_url?: string;
+    created_at: string;
+    status: string;
+}
+
 export default function NoticiasSection({ posts }: { posts: Post[] }) {
     const noticias = posts.filter(p => p.status === 'published' && p.tipo === 'noticia').slice(0, 8)
     if (noticias.length === 0) return null
