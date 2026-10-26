@@ -11,7 +11,7 @@ export default function PlataformasSection({ posts }: { posts: Post[] }) {
     const lista = posts.filter((p: any) => {
         const status = (p.status || '').toLowerCase()
         const tipo = (p.tipo || '').toLowerCase()
-        return status === 'published' && ['plataforma','app','site','sistema','saas','projeto','case'].includes(tipo)
+        return status === 'published' && ['plataforma', 'app', 'site', 'sistema', 'saas', 'projeto', 'case'].includes(tipo)
     }).slice(0, 6)
 
     return (
@@ -39,13 +39,13 @@ export default function PlataformasSection({ posts }: { posts: Post[] }) {
                         {lista.map((item: any) => {
                             const img = item.thumbnail_url || item.media_url || '/connect.png'
                             const hrefPost = `/post/${item.slug || item.id}`
-                            const categoria = (item.categoria?.nome || item.category?.nome || item.categoria_nome || item.tipo || 'APP').toUpperCase()
+                            const categoria = (item.categoria?.nome || item.category?.nome || item.categoria_nome || item.tipo || 'App').toLowerCase()
 
                             const rawEstado = (item.estado || item.status_plataforma || item.situacao || '').toLowerCase()
                             const emUtilizacao =
                                 item.em_utilizacao === true ||
                                 item.em_producao === true ||
-                                ['em utilizacao','em_utilizacao','ativo','producao','utilizacao'].includes(rawEstado)
+                                ['em utilizacao', 'em_utilizacao', 'ativo', 'producao', 'utilizacao'].includes(rawEstado)
 
                             return (
                                 <div key={item.id} className="group relative flex w-full min-w-full shrink-0 snap-center flex-col overflow-hidden rounded-[28px] border border-slate-800 bg-[#1a2336] transition-all duration-300 hover:-translate-y-1.5 hover:border-slate-700 hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.5)] lg:min-w-0">
@@ -54,11 +54,12 @@ export default function PlataformasSection({ posts }: { posts: Post[] }) {
                                         <div className="absolute inset-0 bg-linear-to-t from-[#10192b] via-[#10192b]/60 to-transparent" />
 
                                         <div className="absolute bottom-3 left-3 flex items-center gap-2">
+                                            
                                             <span className="rounded-full bg-slate-900/60 backdrop-blur-md border border-white/10 px-3.5 py-1.5 text-[10px] font-bold capitalize tracking-widest text-white">
-                                                {categoria}
+                                                {categoria.toLowerCase()}
                                             </span>
                                             <span className={`rounded-full px-3.5 py-1.5 text-[10px] font-bold tracking-wide text-white backdrop-blur-md border border-white/10 ${emUtilizacao ? 'bg-emerald-500' : 'bg-amber-500'}`}>
-                                                {emUtilizacao ? '● Em utilização' : '● Em desenvolvimento'}
+                                                {emUtilizacao ? 'Em Utilização' : 'Em Desenvolvimento'}
                                             </span>
                                         </div>
                                     </Link>
