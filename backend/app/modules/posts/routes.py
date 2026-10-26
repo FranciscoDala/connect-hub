@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 from typing import Optional, List
 import uuid, re
 
@@ -82,19 +83,19 @@ def list_posts(
 ):
     query = db.query(Post)
     if tipo:
-        tipos = [t.strip() for t in tipo.split(",") if t.strip()]
+        tipos = [t.strip().lower() for t in tipo.split(",") if t.strip()]
         if len(tipos) > 1:
-            query = query.filter(Post.tipo.in_(tipos))
+            query = query.filter(func.lower(Post.tipo).in_(tipos))
         else:
-            query = query.filter(Post.tipo == tipos[0])
+            query = query.filter(func.lower(Post.tipo) == tipos[0])
     if category_id: query = query.filter(Post.category_id == category_id)
-    if status: query = query.filter(Post.status == status)
+    if status: query = query.filter(func.lower(Post.status) == status.lower())
     if destaque is not None: query = query.filter(Post.destaque == destaque)
     if q: query = query.filter(Post.titulo.ilike(f"%{q}%"))
     posts = query.order_by(Post.created_at.desc()).offset(offset).limit(limit).all()
     return [to_post_response(p, db) for p in posts]
 
-# ========== POSTS - POR SLUG (TEM QUE VIR ANTES DO {post_id}) ==========
+# ========== POSTS - POR SLUG ==========
 @router.get("/posts/slug/{slug}", response_model=PostResponse)
 def get_post_by_slug(slug: str, db: Session=Depends(get_db)):
     post = db.query(Post).filter(Post.slug == slug).first()
@@ -115,7 +116,11 @@ def create_post(data: PostCreate, admin=Depends(get_current_admin), db: Session=
     final_slug = data.slug or slugify(data.titulo)
     if db.query(Post).filter(Post.slug == final_slug).first():
         final_slug = f"{final_slug}-{uuid.uuid4().hex[:4]}"
-    post = Post(**data.model_dump(exclude={"slug"}), slug=final_slug, author_id=admin.id)
+    # garante sempre minusculo no banco
+    payload = data.model_dump(exclude={"slug"})
+    if payload.get("tipo"): payload["tipo"] = payload["tipo"].lower()
+    if payload.get("status"): payload["status"] = payload["status"].lower()
+    post = Post(**payload, slug=final_slug, author_id=admin.id)
     db.add(post); db.commit(); db.refresh(post)
     return to_post_response(post, db)
 
@@ -126,6 +131,8 @@ def update_post(post_id: uuid.UUID, data: PostUpdate, admin=Depends(get_current_
     payload = data.model_dump(exclude_unset=True)
     if "titulo" in payload and not payload.get("slug"):
         payload["slug"] = slugify(payload["titulo"])
+    if "tipo" in payload and payload["tipo"]: payload["tipo"] = payload["tipo"].lower()
+    if "status" in payload and payload["status"]: payload["status"] = payload["status"].lower()
     for k, v in payload.items():
         setattr(post, k, v)
     db.commit(); db.refresh(post)
@@ -138,7 +145,7 @@ def delete_post(post_id: uuid.UUID, admin=Depends(get_current_admin), db: Sessio
     db.delete(post); db.commit()
     return {"ok": True}
 
-# ========== VIEWS & SHARES - PÚBLICO ==========
+# ========== VIEWS & SHARES ==========
 @router.post("/posts/{post_id}/view")
 def add_view(post_id: uuid.UUID, db: Session=Depends(get_db)):
     post = db.query(Post).filter(Post.id == post_id).first()
