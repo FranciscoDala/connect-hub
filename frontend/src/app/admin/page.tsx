@@ -7,12 +7,13 @@ import { API_URL, getToken, clearAuth, authHeader } from "../../lib/api";
 
 type Category = { id: string; nome: string; slug: string; cor?: string; descricao?: string };
 type Post = any;
-type Tab = 'conteudo' | 'midia' | 'config';
+type Tab = 'conteudo' | 'midia' | 'produto' | 'config';
 type BannerPos = 'home_topo' | 'home_meio' | 'sidebar' | 'dentro_post' | 'footer';
 type Banner = { id: string; titulo: string; imagem_url: string; link_url?: string; posicao: BannerPos; ativo: boolean; clicks?: number; views?: number; data_inicio?: string; data_fim?: string };
 
 const TIPOS = [
     { value: 'noticia', label: 'Notícia' },
+    { value: 'produto', label: 'Produto' },
     { value: 'video', label: 'Vídeo' },
     { value: 'imagem', label: 'Imagem' },
     { value: 'audio', label: 'Áudio' },
@@ -85,7 +86,10 @@ export default function AdminPage() {
     const [editingCat, setEditingCat] = useState<Category | null>(null);
     const [editingBanner, setEditingBanner] = useState<Banner | null>(null);
     const [tab, setTab] = useState<Tab>('conteudo');
-    const [form, setForm] = useState({ titulo: "", slug: "", tipo: "noticia", descricao: "", conteudo: "", category_id: "", status: "published", destaque: false, tags: "", media_url: "", thumbnail_url: "" });
+    const [form, setForm] = useState({
+        titulo: "", slug: "", tipo: "noticia", descricao: "", conteudo: "", category_id: "", status: "published", destaque: false, tags: "", media_url: "", thumbnail_url: "",
+        preco: "", preco_promocional: "", estoque: "", sku: "", unidade: "un", em_promocao: false
+    });
     const [files, setFiles] = useState<FileList | null>(null);
     const [thumbFile, setThumbFile] = useState<FileList | null>(null);
     const [loading, setLoading] = useState(false);
@@ -115,8 +119,19 @@ export default function AdminPage() {
         }
     }
 
-    function openNewPost() { setEditingPost(null); setForm({ titulo: "", slug: "", tipo: "noticia", descricao: "", conteudo: "", category_id: "", status: "published", destaque: false, tags: "", media_url: "", thumbnail_url: "" }); setFiles(null); setThumbFile(null); setTab('conteudo'); setShowPostModal(true); }
-    function openEditPost(p: Post) { setEditingPost(p); setForm({ titulo: p.titulo, slug: p.slug || "", tipo: p.tipo, descricao: p.descricao || "", conteudo: p.conteudo || "", category_id: p.category_id || "", status: p.status, destaque: p.destaque, tags: (p.tags || []).join(", "), media_url: p.media_url || "", thumbnail_url: p.thumbnail_url || "" }); setFiles(null); setThumbFile(null); setTab('conteudo'); setShowPostModal(true); }
+    function openNewPost() {
+        setEditingPost(null);
+        setForm({ titulo: "", slug: "", tipo: "noticia", descricao: "", conteudo: "", category_id: "", status: "published", destaque: false, tags: "", media_url: "", thumbnail_url: "", preco: "", preco_promocional: "", estoque: "1", sku: "", unidade: "un", em_promocao: false });
+        setFiles(null); setThumbFile(null); setTab('conteudo'); setShowPostModal(true);
+    }
+    function openEditPost(p: Post) {
+        setEditingPost(p);
+        setForm({
+            titulo: p.titulo, slug: p.slug || "", tipo: p.tipo, descricao: p.descricao || "", conteudo: p.conteudo || "", category_id: p.category_id || "", status: p.status, destaque: p.destaque, tags: (p.tags || []).join(", "), media_url: p.media_url || "", thumbnail_url: p.thumbnail_url || "",
+            preco: p.preco?.toString() || "", preco_promocional: p.preco_promocional?.toString() || "", estoque: p.estoque?.toString() || "", sku: p.sku || "", unidade: p.unidade || "un", em_promocao: p.em_promocao || false
+        });
+        setFiles(null); setThumbFile(null); setTab('conteudo'); setShowPostModal(true);
+    }
 
     async function savePost() {
         if (!form.titulo) return toast.error("Título obrigatório");
@@ -147,7 +162,25 @@ export default function AdminPage() {
             }
             if (!thumbnail_url && media_url) { const autoThumb = generateCloudinaryThumb(media_url); if (autoThumb) thumbnail_url = autoThumb; }
             if (!thumbnail_url && media_url && media_url.match(/\.(jpg|jpeg|png|webp)/i)) thumbnail_url = media_url;
-            const payload = { titulo: form.titulo, slug: form.slug || form.titulo.toLowerCase().replace(/[^a-z0-9]+/g, "-"), tipo: form.tipo, descricao: form.descricao, conteudo: form.conteudo, category_id: form.category_id || null, status: form.status, destaque: form.destaque, tags: form.tags.split(",").map(t => t.trim()).filter(Boolean), media_url, thumbnail_url, media_type: media_type || form.tipo, media_files };
+
+            const payload: any = {
+                titulo: form.titulo,
+                slug: form.slug || form.titulo.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
+                tipo: form.tipo, descricao: form.descricao, conteudo: form.conteudo,
+                category_id: form.category_id || null, status: form.status, destaque: form.destaque,
+                tags: form.tags.split(",").map(t => t.trim()).filter(Boolean),
+                media_url, thumbnail_url, media_type: media_type || form.tipo, media_files
+            };
+
+            if(form.tipo === 'produto'){
+                payload.preco = form.preco ? parseFloat(form.preco) : null;
+                payload.preco_promocional = form.preco_promocional ? parseFloat(form.preco_promocional) : null;
+                payload.estoque = form.estoque ? parseInt(form.estoque) : 0;
+                payload.sku = form.sku || null;
+                payload.unidade = form.unidade || "un";
+                payload.em_promocao = form.em_promocao;
+            }
+
             const method = editingPost ? "PUT" : "POST";
             const url = editingPost ? `${API_URL}/api/v1/posts/${editingPost.id}` : `${API_URL}/api/v1/posts`;
             const res = await fetch(url, { method, body: JSON.stringify(payload), headers: { "Content-Type": "application/json", ...authHeader() } as any });
@@ -183,23 +216,21 @@ export default function AdminPage() {
     const filtered = posts.filter(p => p.titulo.toLowerCase().includes(filter.toLowerCase()));
     const filteredBanners = banners.filter(b => b.titulo.toLowerCase().includes(filter.toLowerCase()));
     const inputClass = "w-full h-11 bg-white border border-gray-200 rounded-xl px-3 text-sm text-black placeholder:text-black/40 focus:outline-none focus:border-black focus:ring-1 focus:ring-black/10 transition";
-    const TabBtn = ({ id, label }: { id: Tab, label: string }) => (<button type="button" onClick={() => setTab(id)} className={`px-3.5 py-2 text-sm font-medium rounded-full transition border shrink-0 ${tab === id ? 'bg-black text-white border-black' : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'}`}>{label}</button>);
+    const TabBtn = ({ id, label, show = true }: { id: Tab, label: string, show?: boolean }) => {
+        if(!show) return null;
+        return (<button type="button" onClick={() => setTab(id)} className={`px-3.5 py-2 text-sm font-medium rounded-full transition border shrink-0 ${tab === id ? 'bg-black text-white border-black' : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'}`}>{label}</button>)
+    };
     const previewAutoThumb = form.media_url ? generateCloudinaryThumb(form.media_url) : "";
     const previewFinalThumb = form.thumbnail_url || previewAutoThumb || form.media_url;
+    const isProduto = form.tipo === 'produto';
 
     return (
         <main className="min-h-screen bg-[#f8fafc] text-zinc-900 font-sans">
             <Toaster richColors position="top-center" />
-            {/* HEADER IGUAL DA PAGE INICIAL */}
             <header className="fixed left-0 right-0 top-0 z-40 border-b border-[#e2e8f0] bg-white/80 backdrop-blur-xl">
                 <nav className="mx-auto flex max-w-7xl items-center justify-between px-5 py-2.5 sm:px-8">
-                    <Link href="/" className="flex items-center">
-                        <img src="/connect.png" alt="CONNECT" className="h-9 sm:h-10 w-auto object-contain" />
-                    </Link>
-                    <div className="flex items-center gap-3">
-                        <span className="hidden text-xs font-bold tracking-widest sm:block">ADMIN • CONNECT.AO</span>
-                        <button onClick={() => { clearAuth(); router.replace("/"); }} className="rounded-full bg-[#0e8ac2] px-6 py-2.5 text-sm font-semibold text-white hover:bg-[#0c709e]">SAIR</button>
-                    </div>
+                    <Link href="/" className="flex items-center"><img src="/connect.png" alt="CONNECT" className="h-9 sm:h-10 w-auto object-contain" /></Link>
+                    <div className="flex items-center gap-3"><span className="hidden text-xs font-bold tracking-widest sm:block">ADMIN • CONNECT.AO</span><button onClick={() => { clearAuth(); router.replace("/"); }} className="rounded-full bg-[#0e8ac2] px-6 py-2.5 text-sm font-semibold text-white hover:bg-[#0c709e]">SAIR</button></div>
                 </nav>
             </header>
 
@@ -234,9 +265,7 @@ export default function AdminPage() {
                                     <button onClick={openNewCat} className="h-10 flex-1 rounded-full border border-zinc-200 bg-white px-5 text-xs font-semibold hover:bg-zinc-50 md:flex-none">+ CATEGORIA</button>
                                     <button onClick={openNewPost} className="h-10 flex-1 rounded-full bg-zinc-900 px-5 text-xs font-semibold text-white hover:bg-black md:flex-none">+ NOVO POST</button>
                                 </>
-                            ) : (
-                                <button onClick={openNewBanner} className="h-10 rounded-full bg-zinc-900 px-5 text-xs font-semibold text-white hover:bg-black">+ NOVO BANNER</button>
-                            )}
+                            ) : (<button onClick={openNewBanner} className="h-10 rounded-full bg-zinc-900 px-5 text-xs font-semibold text-white hover:bg-black">+ NOVO BANNER</button>)}
                         </div>
                     </div>
                 </div>
@@ -249,7 +278,7 @@ export default function AdminPage() {
                             const catName = cats.find(c => c.id === p.category_id)?.nome || "—";
                             return (
                                 <div key={p.id} className="group border-b p-4 last:border-0 hover:bg-zinc-50/70 md:grid md:grid-cols-12 md:items-center md:px-6 md:py-4">
-                                    <div className="col-span-5 flex items-start gap-3"><div className="h-12 w-12 shrink-0 overflow-hidden rounded-xl border bg-zinc-100">{p.thumbnail_url ? <img src={p.thumbnail_url} className="h-full w-full object-cover" alt="" /> : <div className="grid h-full w-full place-items-center bg-zinc-900 text-xs font-bold text-white">{p.tipo[0].toUpperCase()}</div>}</div><div className="min-w-0 flex-1"><p className="line-clamp-2 text-sm font-semibold leading-tight">{p.titulo}</p><p className="mt-1 text-xs text-zinc-500">{p.tipo} • {new Date(p.created_at).toLocaleDateString()}</p></div></div>
+                                    <div className="col-span-5 flex items-start gap-3"><div className="h-12 w-12 shrink-0 overflow-hidden rounded-xl border bg-zinc-100">{p.thumbnail_url ? <img src={p.thumbnail_url} className="h-full w-full object-cover" alt="" /> : <div className="grid h-full w-full place-items-center bg-zinc-900 text-xs font-bold text-white">{p.tipo[0].toUpperCase()}</div>}</div><div className="min-w-0 flex-1"><p className="line-clamp-2 text-sm font-semibold leading-tight">{p.titulo}</p><p className="mt-1 text-xs text-zinc-500">{p.tipo} {p.tipo === 'produto' && p.preco ? `• ${p.preco} Kz` : ''} • {new Date(p.created_at).toLocaleDateString()}</p></div></div>
                                     <div className="hidden col-span-2 md:block"><span className="rounded-full border border-violet-100 bg-violet-50 px-2.5 py-1 text-xs font-medium text-violet-700">{catName}</span></div>
                                     <div className="hidden col-span-1 md:flex"><span className={`rounded-full border px-2.5 py-1 text-xs font-medium ${p.status === 'published' ? 'bg-green-50 text-green-700 border-green-200' : 'bg-zinc-100'}`}>{p.status}</span></div>
                                     <div className="hidden col-span-2 md:flex"><span className="rounded-full border bg-zinc-50 px-2 py-1 text-xs">{views} views</span></div>
@@ -267,33 +296,41 @@ export default function AdminPage() {
                 )}
             </div>
 
-            {/* MODAIS - SEM [px] */}
             {showPostModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
                     <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
                     <div className="relative flex max-h-[90vh] w-full max-w-xl flex-col overflow-hidden rounded-3xl bg-white shadow-2xl">
                         <div className="flex h-18 shrink-0 items-start justify-between bg-blue-50 px-5 pt-5"><div className="grid h-9 w-9 place-items-center rounded-full border bg-white shadow-sm text-sm">📄</div><button onClick={() => setShowPostModal(false)} className="grid h-8 w-8 place-items-center rounded-full border bg-white">×</button></div>
-                        <div className="border-b px-6 pb-3 pt-5"><h3 className="text-lg font-bold">{editingPost ? 'Editar Post' : 'Novo Post'}</h3><div className="mt-4 flex gap-1.5"><TabBtn id="conteudo" label="Conteúdo" /><TabBtn id="midia" label="Mídia" /><TabBtn id="config" label="Config" /></div></div>
+                        <div className="border-b px-6 pb-3 pt-5"><h3 className="text-lg font-bold">{editingPost ? 'Editar' : 'Novo'} {isProduto ? 'Produto' : 'Post'}</h3><div className="mt-4 flex gap-1.5 flex-wrap"><TabBtn id="conteudo" label="Conteúdo" /><TabBtn id="midia" label="Mídia" /><TabBtn id="produto" label="Preço" show={isProduto} /><TabBtn id="config" label="Config" /></div></div>
                         <div className="flex-1 overflow-y-auto px-6 py-4">
-                            {tab === 'conteudo' && <div className="flex flex-col gap-3"><input value={form.titulo} onChange={e => setForm({ ...form, titulo: e.target.value })} placeholder="Título *" className={inputClass} /><div className="grid gap-2 md:grid-cols-2"><CustomSelect value={form.category_id} onChange={v => setForm({ ...form, category_id: v })} placeholder="Categoria" options={cats.map(c => ({ value: c.id, label: c.nome }))} /><CustomSelect value={form.tipo} onChange={v => setForm({ ...form, tipo: v })} placeholder="Tipo" options={TIPOS} /></div><textarea value={form.descricao} onChange={e => setForm({ ...form, descricao: e.target.value })} rows={2} placeholder="Descrição curta" className="w-full rounded-xl border border-gray-200 px-3 py-3 text-sm focus:outline-none focus:border-black" /></div>}
-                            {tab === 'midia' && <div className="flex flex-col gap-3"><input value={form.media_url} onChange={e => setForm({ ...form, media_url: e.target.value })} placeholder="Media URL" className={inputClass} /><input type="file" onChange={e => setFiles(e.target.files)} className="text-sm" />{previewFinalThumb && <img src={previewFinalThumb} className="h-40 w-full rounded-xl border object-cover" alt="" />}</div>}
-                            {tab === 'config' && <div className="flex flex-col gap-3"><CustomSelect value={form.status} onChange={v => setForm({ ...form, status: v })} placeholder="Status" options={STATUS} /><input value={form.tags} onChange={e => setForm({ ...form, tags: e.target.value })} placeholder="Tags" className={inputClass} /></div>}
+                            {tab === 'conteudo' && <div className="flex flex-col gap-3"><input value={form.titulo} onChange={e => setForm({ ...form, titulo: e.target.value })} placeholder={isProduto ? "Nome do produto *" : "Título *"} className={inputClass} /><div className="grid gap-2 md:grid-cols-2"><CustomSelect value={form.category_id} onChange={v => setForm({ ...form, category_id: v })} placeholder="Categoria" options={cats.map(c => ({ value: c.id, label: c.nome }))} /><CustomSelect value={form.tipo} onChange={v => { setForm({ ...form, tipo: v }); if(v==='produto') setTab('produto'); }} placeholder="Tipo" options={TIPOS} /></div><textarea value={form.descricao} onChange={e => setForm({ ...form, descricao: e.target.value })} rows={3} placeholder={isProduto ? "Descrição curta do produto" : "Descrição curta"} className="w-full rounded-xl border border-gray-200 px-3 py-3 text-sm focus:outline-none focus:border-black" /><textarea value={form.conteudo} onChange={e => setForm({ ...form, conteudo: e.target.value })} rows={5} placeholder={isProduto ? "Ficha técnica / conteúdo detalhado" : "Conteúdo completo"} className="w-full rounded-xl border border-gray-200 px-3 py-3 text-sm focus:outline-none focus:border-black" /></div>}
+                            {tab === 'midia' && <div className="flex flex-col gap-3"><input value={form.media_url} onChange={e => setForm({ ...form, media_url: e.target.value })} placeholder="Media URL" className={inputClass} /><div><p className="mb-1 text-xs font-semibold">Thumbnail (capa)</p><input type="file" accept="image/*" onChange={e => setThumbFile(e.target.files)} className="text-sm" /></div><div><p className="mb-1 text-xs font-semibold">Galeria</p><input type="file" multiple onChange={e => setFiles(e.target.files)} className="text-sm" /></div>{previewFinalThumb && <img src={previewFinalThumb} className="h-40 w-full rounded-xl border object-cover" alt="" />}</div>}
+                            {tab === 'produto' && isProduto && (
+                                <div className="flex flex-col gap-3">
+                                    <div className="rounded-2xl bg-amber-50 border border-amber-200 p-3 text-xs text-amber-800">💰 Configuração de Produto - estes campos só aparecem para tipo Produto</div>
+                                    <div className="grid gap-3 md:grid-cols-2">
+                                        <div><label className="text-xs font-semibold">Preço (Kz) *</label><input value={form.preco} onChange={e => setForm({ ...form, preco: e.target.value })} type="number" placeholder="150000" className={inputClass} /></div>
+                                        <div><label className="text-xs font-semibold">Preço Promocional (Kz)</label><input value={form.preco_promocional} onChange={e => setForm({ ...form, preco_promocional: e.target.value })} type="number" placeholder="129000" className={inputClass} /></div>
+                                    </div>
+                                    <div className="grid gap-3 md:grid-cols-3">
+                                        <div><label className="text-xs font-semibold">Estoque</label><input value={form.estoque} onChange={e => setForm({ ...form, estoque: e.target.value })} type="number" placeholder="10" className={inputClass} /></div>
+                                        <div><label className="text-xs font-semibold">SKU</label><input value={form.sku} onChange={e => setForm({ ...form, sku: e.target.value })} placeholder="EXO-001" className={inputClass} /></div>
+                                        <div><label className="text-xs font-semibold">Unidade</label><CustomSelect value={form.unidade} onChange={v => setForm({ ...form, unidade: v })} placeholder="Unidade" options={[{value:'un',label:'Unidade'},{value:'cx',label:'Caixa'},{value:'kit',label:'Kit'},{value:'mês',label:'Mês'}]} /></div>
+                                    </div>
+                                    <label className="flex items-center gap-2 rounded-xl border p-3 cursor-pointer hover:bg-zinc-50"><input type="checkbox" checked={form.em_promocao} onChange={e => setForm({ ...form, em_promocao: e.target.checked })} /><span className="text-sm font-medium">Em promoção?</span></label>
+                                </div>
+                            )}
+                            {tab === 'config' && <div className="flex flex-col gap-3"><CustomSelect value={form.status} onChange={v => setForm({ ...form, status: v })} placeholder="Status" options={STATUS} /><input value={form.tags} onChange={e => setForm({ ...form, tags: e.target.value })} placeholder="Tags separadas por vírgula" className={inputClass} /><input value={form.slug} onChange={e => setForm({ ...form, slug: e.target.value })} placeholder="Slug (opcional)" className={inputClass} /><label className="flex items-center gap-2"><input type="checkbox" checked={form.destaque} onChange={e => setForm({ ...form, destaque: e.target.checked })} /> Destaque na home</label></div>}
                         </div>
                         <div className="flex gap-2 border-t bg-white px-6 py-4"><button onClick={() => setShowPostModal(false)} className="flex-1 h-11 rounded-full border">×</button><button onClick={savePost} disabled={loading} className="flex-1 h-11 rounded-full bg-black text-white font-semibold disabled:opacity-50">{loading ? "…" : editingPost ? 'ATUALIZAR' : 'CRIAR'}</button></div>
                     </div>
                 </div>
             )}
             {showBannerModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
-                    <div className="relative w-full max-w-md overflow-hidden rounded-3xl bg-white shadow-2xl"><div className="flex h-18 items-start justify-between bg-amber-50 px-5 pt-5"><div className="grid h-9 w-9 place-items-center rounded-full border bg-white">📢</div><button onClick={() => setShowBannerModal(false)} className="grid h-8 w-8 place-items-center rounded-full border bg-white">×</button></div><div className="p-6 space-y-3"><input value={bannerForm.titulo} onChange={e => setBannerForm({ ...bannerForm, titulo: e.target.value })} placeholder="Título banner" className={inputClass} /><CustomSelect value={bannerForm.posicao} onChange={v => setBannerForm({ ...bannerForm, posicao: v as BannerPos })} placeholder="Posição" options={POSICOES} /><input type="file" accept="image/*" onChange={e => setBannerFile(e.target.files)} className="text-sm" /><div className="flex gap-2"><button onClick={() => setShowBannerModal(false)} className="flex-1 h-11 rounded-full border">×</button><button onClick={saveBanner} disabled={loading} className="flex-1 h-11 rounded-full bg-black text-white">SALVAR</button></div></div></div>
-                </div>
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4"><div className="absolute inset-0 bg-black/60 backdrop-blur-sm" /><div className="relative w-full max-w-md overflow-hidden rounded-3xl bg-white shadow-2xl"><div className="flex h-18 items-start justify-between bg-amber-50 px-5 pt-5"><div className="grid h-9 w-9 place-items-center rounded-full border bg-white">📢</div><button onClick={() => setShowBannerModal(false)} className="grid h-8 w-8 place-items-center rounded-full border bg-white">×</button></div><div className="p-6 space-y-3"><input value={bannerForm.titulo} onChange={e => setBannerForm({ ...bannerForm, titulo: e.target.value })} placeholder="Título banner" className={inputClass} /><CustomSelect value={bannerForm.posicao} onChange={v => setBannerForm({ ...bannerForm, posicao: v as BannerPos })} placeholder="Posição" options={POSICOES} /><input type="file" accept="image/*" onChange={e => setBannerFile(e.target.files)} className="text-sm" /><div className="flex gap-2"><button onClick={() => setShowBannerModal(false)} className="flex-1 h-11 rounded-full border">×</button><button onClick={saveBanner} disabled={loading} className="flex-1 h-11 rounded-full bg-black text-white">SALVAR</button></div></div></div></div>
             )}
             {showCatModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
-                    <div className="relative w-full max-w-sm rounded-3xl bg-white p-6 shadow-2xl"><h3 className="text-lg font-bold">{editingCat ? "Editar" : "Nova"} Categoria</h3><div className="mt-4 space-y-3"><input value={catForm.nome} onChange={e => setCatForm({ ...catForm, nome: e.target.value })} placeholder="Nome" className={inputClass} /><div className="flex items-center gap-3 rounded-xl border px-3"><input type="color" value={catForm.cor} onChange={e => setCatForm({ ...catForm, cor: e.target.value })} className="h-8 w-8" /><span className="text-sm">{catForm.cor}</span></div></div><div className="mt-6 flex gap-2"><button onClick={() => setShowCatModal(false)} className="flex-1 h-11 rounded-full border">×</button><button onClick={saveCat} className="flex-1 h-11 rounded-full bg-violet-600 text-white">SALVAR</button></div></div>
-                </div>
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4"><div className="absolute inset-0 bg-black/60 backdrop-blur-sm" /><div className="relative w-full max-w-sm rounded-3xl bg-white p-6 shadow-2xl"><h3 className="text-lg font-bold">{editingCat ? "Editar" : "Nova"} Categoria</h3><div className="mt-4 space-y-3"><input value={catForm.nome} onChange={e => setCatForm({ ...catForm, nome: e.target.value })} placeholder="Nome" className={inputClass} /><div className="flex items-center gap-3 rounded-xl border px-3"><input type="color" value={catForm.cor} onChange={e => setCatForm({ ...catForm, cor: e.target.value })} className="h-8 w-8" /><span className="text-sm">{catForm.cor}</span></div></div><div className="mt-6 flex gap-2"><button onClick={() => setShowCatModal(false)} className="flex-1 h-11 rounded-full border">×</button><button onClick={saveCat} className="flex-1 h-11 rounded-full bg-violet-600 text-white">SALVAR</button></div></div></div>
             )}
         </main>
     );
