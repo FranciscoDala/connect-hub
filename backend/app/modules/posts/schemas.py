@@ -27,6 +27,11 @@ class CategoryResponse(BaseModel):
 class CommentCreate(BaseModel):
     nome: Optional[str] = "Anónimo"
     conteudo: str
+    client_id: Optional[str] = None
+
+class CommentUpdate(BaseModel):
+    nome: Optional[str] = None
+    conteudo: Optional[str] = None
 
 class CommentResponse(BaseModel):
     id: uuid.UUID
@@ -34,7 +39,12 @@ class CommentResponse(BaseModel):
     nome: str
     conteudo: str
     created_at: datetime
+    updated_at: datetime
     class Config: from_attributes = True
+
+class ReactionCreate(BaseModel):
+    type: str = Field(..., pattern="^(like|dislike)$")
+    client_id: str = Field(..., min_length=2)
 
 class PostCreate(BaseModel):
     titulo: str = Field(..., max_length=300)
@@ -57,7 +67,6 @@ class PostCreate(BaseModel):
     sku: Optional[str] = None
     unidade: Optional[str] = "un"
     em_promocao: bool = False
-    # NOVO
     status_plataforma: Optional[str] = Field(default="em_desenvolvimento")
     em_utilizacao: bool = False
 
@@ -82,7 +91,6 @@ class PostUpdate(BaseModel):
     sku: Optional[str] = None
     unidade: Optional[str] = None
     em_promocao: Optional[bool] = None
-    # NOVO
     status_plataforma: Optional[str] = None
     em_utilizacao: Optional[bool] = None
 
@@ -108,6 +116,8 @@ class PostResponse(BaseModel):
     views_count: int = 0
     shares_count: int = 0
     shares: int = 0
+    likes_count: int = 0
+    dislikes_count: int = 0
     comments_count: int = 0
     preco: Optional[float] = None
     preco_promocional: Optional[float] = None
@@ -115,14 +125,11 @@ class PostResponse(BaseModel):
     sku: Optional[str] = None
     unidade: str = "un"
     em_promocao: bool = False
-    # NOVO
     status_plataforma: str = "em_desenvolvimento"
     em_utilizacao: bool = False
-
     created_at: datetime
     updated_at: datetime
     published_at: Optional[datetime] = None
-
     class Config: from_attributes = True
 
     @classmethod
@@ -149,6 +156,8 @@ class PostResponse(BaseModel):
             views_count=post.views or 0,
             shares_count=post.shares_count or 0,
             shares=post.shares_count or 0,
+            likes_count=post.likes_count or 0,
+            dislikes_count=post.dislikes_count or 0,
             comments_count=comments_count,
             preco=float(post.preco) if post.preco else None,
             preco_promocional=float(post.preco_promocional) if post.preco_promocional else None,

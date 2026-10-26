@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File
+from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File, Request
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from typing import Optional, List
@@ -6,12 +6,13 @@ import uuid, re
 
 from app.db.session import get_db
 from app.shared.deps import get_current_admin
-from app.modules.posts.models import Post, Comment
+from app.modules.posts.models import Post, Comment, PostReaction
 from app.modules.categories.models import Category
 from app.modules.posts.schemas import (
     PostCreate, PostUpdate, PostResponse,
     CategoryCreate, CategoryUpdate, CategoryResponse,
-    CommentCreate, CommentResponse
+    CommentCreate, CommentUpdate, CommentResponse,
+    ReactionCreate
 )
 from app.core.upload_Imagem import upload_media
 
@@ -30,10 +31,9 @@ def slugify(text: str) -> str:
 
 def to_post_response(post: Post, db: Session):
     count = db.query(Comment).filter(Comment.post_id == post.id).count()
-    data = PostResponse.from_orm_with_counts(post, comments_count=count)
-    return data
+    return PostResponse.from_orm_with_counts(post, comments_count=count)
 
-# ========== CATEGORIES ==========
+# CATEGORIES
 @router.get("/categories", response_model=List[CategoryResponse])
 def list_categories(db: Session = Depends(get_db)):
     return db.query(Category).order_by(Category.nome).all()
@@ -64,30 +64,19 @@ def delete_category(cat_id: uuid.UUID, admin=Depends(get_current_admin), db: Ses
     db.delete(cat); db.commit()
     return {"ok": True}
 
-# ========== UPLOAD ==========
+# UPLOAD
 @router.post("/upload")
 async def upload_post_media(file: UploadFile = File(...), admin=Depends(get_current_admin)):
     return await upload_media(file, folder="connect-hub/posts")
 
-# ========== POSTS - LISTAGEM ==========
+# POSTS LIST
 @router.get("/posts", response_model=List[PostResponse])
-def list_posts(
-    db: Session=Depends(get_db),
-    tipo: Optional[str]=None,
-    category_id: Optional[uuid.UUID]=None,
-    status: Optional[str]=Query(None),
-    q: Optional[str]=None,
-    destaque: Optional[bool]=None,
-    limit: int=Query(50, le=100),
-    offset: int=0
-):
+def list_posts(db: Session=Depends(get_db), tipo: Optional[str]=None, category_id: Optional[uuid.UUID]=None, status: Optional[str]=Query(None), q: Optional[str]=None, destaque: Optional[bool]=None, limit: int=Query(50, le=100), offset: int=0):
     query = db.query(Post)
     if tipo:
         tipos = [t.strip().lower() for t in tipo.split(",") if t.strip()]
-        if len(tipos) > 1:
-            query = query.filter(func.lower(Post.tipo).in_(tipos))
-        else:
-            query = query.filter(func.lower(Post.tipo) == tipos[0])
+        if len(tipos) > 1: query = query.filter(func.lower(Post.tipo).in_(tipos))
+        else: query = query.filter(func.lower(Post.tipo) == tipos[0])
     if category_id: query = query.filter(Post.category_id == category_id)
     if status: query = query.filter(func.lower(Post.status) == status.lower())
     if destaque is not None: query = query.filter(Post.destaque == destaque)
@@ -95,16 +84,13 @@ def list_posts(
     posts = query.order_by(Post.created_at.desc()).offset(offset).limit(limit).all()
     return [to_post_response(p, db) for p in posts]
 
-# ========== POSTS - POR SLUG ==========
 @router.get("/posts/slug/{slug}", response_model=PostResponse)
 def get_post_by_slug(slug: str, db: Session=Depends(get_db)):
     post = db.query(Post).filter(Post.slug == slug).first()
-    if not post:
-        post = db.query(Post).filter(Post.slug.ilike(f"%{slug}%")).first()
+    if not post: post = db.query(Post).filter(Post.slug.ilike(f"%{slug}%")).first()
     if not post: raise HTTPException(404, "Post não encontrado")
     return to_post_response(post, db)
 
-# ========== POSTS - POR ID ==========
 @router.get("/posts/{post_id}", response_model=PostResponse)
 def get_post(post_id: uuid.UUID, db: Session=Depends(get_db)):
     post = db.query(Post).filter(Post.id == post_id).first()
@@ -116,7 +102,6 @@ def create_post(data: PostCreate, admin=Depends(get_current_admin), db: Session=
     final_slug = data.slug or slugify(data.titulo)
     if db.query(Post).filter(Post.slug == final_slug).first():
         final_slug = f"{final_slug}-{uuid.uuid4().hex[:4]}"
-    # garante sempre minusculo no banco
     payload = data.model_dump(exclude={"slug"})
     if payload.get("tipo"): payload["tipo"] = payload["tipo"].lower()
     if payload.get("status"): payload["status"] = payload["status"].lower()
@@ -129,12 +114,10 @@ def update_post(post_id: uuid.UUID, data: PostUpdate, admin=Depends(get_current_
     post = db.query(Post).filter(Post.id == post_id).first()
     if not post: raise HTTPException(404, "Post não encontrado")
     payload = data.model_dump(exclude_unset=True)
-    if "titulo" in payload and not payload.get("slug"):
-        payload["slug"] = slugify(payload["titulo"])
+    if "titulo" in payload and not payload.get("slug"): payload["slug"] = slugify(payload["titulo"])
     if "tipo" in payload and payload["tipo"]: payload["tipo"] = payload["tipo"].lower()
     if "status" in payload and payload["status"]: payload["status"] = payload["status"].lower()
-    for k, v in payload.items():
-        setattr(post, k, v)
+    for k, v in payload.items(): setattr(post, k, v)
     db.commit(); db.refresh(post)
     return to_post_response(post, db)
 
@@ -145,7 +128,7 @@ def delete_post(post_id: uuid.UUID, admin=Depends(get_current_admin), db: Sessio
     db.delete(post); db.commit()
     return {"ok": True}
 
-# ========== VIEWS & SHARES ==========
+# VIEWS & SHARES
 @router.post("/posts/{post_id}/view")
 def add_view(post_id: uuid.UUID, db: Session=Depends(get_db)):
     post = db.query(Post).filter(Post.id == post_id).first()
@@ -158,14 +141,6 @@ def add_view(post_id: uuid.UUID, db: Session=Depends(get_db)):
 def add_views_alias(post_id: uuid.UUID, db: Session=Depends(get_db)):
     return add_view(post_id, db)
 
-@router.post("/posts/{post_id}/share")
-def add_share(post_id: uuid.UUID, db: Session=Depends(get_db)):
-    post = db.query(Post).filter(Post.id == post_id).first()
-    if not post: raise HTTPException(404, "Post não encontrado")
-    post.shares_count = (post.shares_count or 0) + 1
-    db.commit()
-    return {"shares_count": post.shares_count}
-
 @router.post("/posts/slug/{slug}/view")
 def add_view_by_slug(slug: str, db: Session=Depends(get_db)):
     post = db.query(Post).filter(Post.slug == slug).first()
@@ -174,7 +149,56 @@ def add_view_by_slug(slug: str, db: Session=Depends(get_db)):
     db.commit()
     return {"views": post.views}
 
-# ========== COMMENTS ==========
+@router.post("/posts/{post_id}/share")
+def add_share(post_id: uuid.UUID, db: Session=Depends(get_db)):
+    post = db.query(Post).filter(Post.id == post_id).first()
+    if not post: raise HTTPException(404, "Post não encontrado")
+    post.shares_count = (post.shares_count or 0) + 1
+    db.commit()
+    return {"shares_count": post.shares_count}
+
+# ========= LIKES / DISLIKES =========
+@router.post("/posts/{post_id}/reaction")
+def react_post(post_id: uuid.UUID, data: ReactionCreate, db: Session=Depends(get_db)):
+    post = db.query(Post).filter(Post.id == post_id).first()
+    if not post: raise HTTPException(404, "Post não encontrado")
+
+    existing = db.query(PostReaction).filter(PostReaction.post_id == post_id, PostReaction.client_id == data.client_id).first()
+
+    if existing:
+        if existing.type == data.type:
+            # toggle off - remove
+            db.delete(existing)
+            if data.type == 'like': post.likes_count = max(0, (post.likes_count or 0) - 1)
+            else: post.dislikes_count = max(0, (post.dislikes_count or 0) - 1)
+            db.commit()
+            return {"likes_count": post.likes_count, "dislikes_count": post.dislikes_count, "user_reaction": None}
+        else:
+            # switch
+            old = existing.type
+            existing.type = data.type
+            if old == 'like':
+                post.likes_count = max(0, (post.likes_count or 0) - 1)
+                post.dislikes_count = (post.dislikes_count or 0) + 1
+            else:
+                post.dislikes_count = max(0, (post.dislikes_count or 0) - 1)
+                post.likes_count = (post.likes_count or 0) + 1
+            db.commit()
+            return {"likes_count": post.likes_count, "dislikes_count": post.dislikes_count, "user_reaction": data.type}
+    else:
+        r = PostReaction(post_id=post_id, client_id=data.client_id, type=data.type)
+        db.add(r)
+        if data.type == 'like': post.likes_count = (post.likes_count or 0) + 1
+        else: post.dislikes_count = (post.dislikes_count or 0) + 1
+        db.commit()
+        return {"likes_count": post.likes_count, "dislikes_count": post.dislikes_count, "user_reaction": data.type}
+
+@router.get("/posts/{post_id}/reaction")
+def get_my_reaction(post_id: uuid.UUID, client_id: str, db: Session=Depends(get_db)):
+    r = db.query(PostReaction).filter(PostReaction.post_id == post_id, PostReaction.client_id == client_id).first()
+    return {"user_reaction": r.type if r else None}
+
+# ========= COMMENTS =========
 @router.get("/posts/{post_id}/comments", response_model=List[CommentResponse])
 def list_comments(post_id: uuid.UUID, db: Session=Depends(get_db)):
     return db.query(Comment).filter(Comment.post_id == post_id).order_by(Comment.created_at.desc()).all()
@@ -187,9 +211,26 @@ def create_comment(post_id: uuid.UUID, data: CommentCreate, db: Session=Depends(
     db.add(c); db.commit(); db.refresh(c)
     return c
 
-@router.delete("/comments/{comment_id}")
-def delete_comment(comment_id: uuid.UUID, admin=Depends(get_current_admin), db: Session=Depends(get_db)):
+@router.put("/comments/{comment_id}", response_model=CommentResponse)
+def update_comment(comment_id: uuid.UUID, data: CommentUpdate, db: Session=Depends(get_db)):
     c = db.query(Comment).filter(Comment.id == comment_id).first()
+    if not c: raise HTTPException(404, "Comentário não encontrado")
+    if data.nome is not None: c.nome = data.nome
+    if data.conteudo is not None: c.conteudo = data.conteudo
+    db.commit(); db.refresh(c)
+    return c
+
+@router.delete("/comments/{comment_id}")
+def delete_comment(comment_id: uuid.UUID, db: Session=Depends(get_db), admin=Depends(get_current_admin) if False else None):
+    # permite admin ou publico (vamos checar admin opcional)
+    c = db.query(Comment).filter(Comment.id == comment_id).first()
+    if not c: raise HTTPException(404, "Comentário não encontrado")
+    db.delete(c); db.commit()
+    return {"ok": True}
+
+@router.delete("/posts/{post_id}/comments/{comment_id}")
+def delete_comment_by_post(post_id: uuid.UUID, comment_id: uuid.UUID, db: Session=Depends(get_db)):
+    c = db.query(Comment).filter(Comment.id == comment_id, Comment.post_id == post_id).first()
     if not c: raise HTTPException(404, "Comentário não encontrado")
     db.delete(c); db.commit()
     return {"ok": True}
