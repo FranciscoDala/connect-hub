@@ -144,10 +144,8 @@ function ProdutosSection({ posts }: { posts: Post[] }) {
 }
 
 function PlataformasSection({ posts }: { posts: Post[] }) {
-    // Busca do backend: tipo = plataforma, app, site, sistema, saas, projeto
-    const plataformasBackend = posts.filter(p => p.status === 'published' && ['plataforma','app','site','sistema','saas','projeto','case'].includes(p.tipo)).slice(0, 6)
+    const plataformasBackend = posts.filter(p => p.status === 'published' && ['plataforma', 'app', 'site', 'sistema', 'saas', 'projeto', 'case'].includes(p.tipo)).slice(0, 6)
 
-    // Se ainda não cadastrou nada, usa esses exemplos reais da Connect
     const exemplos: Post[] = [
         { id: 'plat1', titulo: 'Connect Clinic', slug: 'connect-clinic', descricao: 'SaaS completo para gestão de clínicas, consultas, estoque e faturação. +120 clínicas ativas.', tipo: 'saas', thumbnail_url: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800', created_at: new Date().toISOString(), status: 'published', category: { nome: 'SaaS Próprio' }, tags: ['PRODUTO CONNECT', 'Web + App'] } as any,
         { id: 'plat2', titulo: 'Connect Educa', slug: 'connect-educa', descricao: 'Plataforma EAD com video-aulas, certificados e pagamentos integrados via Multicaixa Express.', tipo: 'plataforma', thumbnail_url: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800', created_at: new Date().toISOString(), status: 'published', category: { nome: 'SaaS Próprio' }, tags: ['PRODUTO CONNECT', 'LMS'] } as any,
@@ -169,7 +167,7 @@ function PlataformasSection({ posts }: { posts: Post[] }) {
                         <h2 className="mt-4 text-3xl font-semibold leading-tight tracking-tight text-white sm:text-4xl">Apps e sites que criamos e mantemos.</h2>
                         <p className="mt-4 text-sm leading-6 text-slate-400">Da ideia ao deploy. Produtos próprios em produção e projetos entregues para clientes em Angola.</p>
                     </div>
-                    <div className="flex gap-2">
+                    <div className="hidden gap-2 lg:flex">
                         <span className="rounded-full border border-slate-700 bg-slate-800 px-3 py-1.5 text-xs font-semibold text-slate-300">TODOS</span>
                         <span className="rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-slate-900">PRODUTOS PRÓPRIOS</span>
                         <span className="rounded-full border border-slate-700 bg-slate-800 px-3 py-1.5 text-xs font-semibold text-slate-300">CASES</span>
@@ -182,7 +180,10 @@ function PlataformasSection({ posts }: { posts: Post[] }) {
                         <p className="mt-1 text-xs text-slate-400">Cadastre com tipo plataforma, app ou site no admin.</p>
                     </div>
                 ) : (
-                    <div className="mt-12 grid gap-6 lg:grid-cols-3">
+                    <div
+                        className="mt-12 flex snap-x snap-mandatory gap-0 overflow-x-auto lg:grid lg:grid-cols-3 lg:gap-6 lg:overflow-visible"
+                        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' } as any}
+                    >
                         {lista.map((item: any) => {
                             const isCase = item.tipo === 'case' || item.category?.nome?.toLowerCase().includes('case') || (item.tags && item.tags[0]?.includes('CASE'))
                             const tagPrincipal = isCase ? 'CASE CLIENTE' : 'PRODUTO CONNECT'
@@ -191,7 +192,13 @@ function PlataformasSection({ posts }: { posts: Post[] }) {
                             const link = isCase ? (item.link_url || `/plataforma/${item.slug || item.id}`) : `/plataforma/${item.slug || item.id}`
 
                             return (
-                                <Link key={item.id} href={link} target={isCase && item.link_url ? '_blank' : undefined} className="group relative flex flex-col overflow-hidden rounded-3xl border border-slate-800 bg-slate-800/50 transition-all hover:-translate-y-1 hover:bg-slate-800">
+                                <Link
+                                    key={item.id}
+                                    href={link}
+                                    target={isCase && item.link_url ? '_blank' : undefined}
+                                    className="group relative flex w-full min-w-full snap-center flex-col overflow-hidden rounded-3xl border border-slate-800 bg-slate-800/50 transition-all hover:-translate-y-1 hover:bg-slate-800 lg:min-w-0"
+                                    style={{ minWidth: '100%' }}
+                                >
                                     <div className="relative w-full overflow-hidden bg-slate-800" style={{ aspectRatio: '16 / 10' }}>
                                         <img src={img} alt={item.titulo} className="h-full w-full object-cover opacity-90 transition duration-700 group-hover:scale-105 group-hover:opacity-100" />
                                         <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/20 to-transparent" />
@@ -219,9 +226,11 @@ function PlataformasSection({ posts }: { posts: Post[] }) {
                     <p className="mt-8 text-center text-xs text-slate-500">↑ Exemplos visuais. Cadastre no admin com tipo "plataforma", "app" ou "case" que eles substituem automaticamente.</p>
                 )}
             </div>
+            <style>{`#plataformas div::-webkit-scrollbar{display:none}`}</style>
         </section>
     )
 }
+
 
 function EquipeSection() {
     return (
