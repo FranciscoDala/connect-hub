@@ -17,21 +17,24 @@ export default function ProdutosRelated({ posts }: { posts: Post[] }) {
         .slice(0, 8)
 
     return (
-        <section id="produtos" className="bg-white py-20 sm:py-28">
+        <section id="produtos" className="py-2 sm:py-28">
             <div className="mx-auto max-w-7xl px-5 sm:px-8">
                 <div className="flex items-center gap-3">
                     <span className="h-px w-8 bg-sky-600" />
                     <p className="text-xs font-bold uppercase tracking-widest text-sky-800">APRESENTAÇÃO DE PRODUTOS</p>
                 </div>
-                <h2 className="mt-4 max-w-xl text-3xl font-semibold leading-tight tracking-tight text-slate-700 sm:text-4xl">Produtos com tecnologias de ponta.</h2>
+                <h2 className="mt-4 max-w-xl text-2xl font-semibold leading-tight tracking-tight text-slate-700 sm:text-4xl">Produtos com tecnologias de ponta.</h2>
+                <p className="mt-4 max-w-2xl text-sm leading-6 text-slate-500">
+                    Descubra nossos dispositivos de ponta, projetados para aprimorar sua prática com tecnologia inovadora e resultados clínicos comprovados.
+                </p>
 
                 {produtos.length === 0 ? (
-                    <div className="mt-10 flex flex-col items-center justify-center rounded-[28px] border border-dashed border-slate-200 bg-slate-50 py-20">
-                        <div className="grid size-12 place-items-center rounded-full border bg-white text-slate-400">📦</div>
+                    <div className="mt-10 flex flex-col items-center justify-center rounded-3xl border border-dashed border-slate-200 bg-slate-50 py-20">
+                        <div className="grid h-12 w-12 place-items-center rounded-full border bg-white text-slate-400">📦</div>
                         <p className="mt-4 text-sm font-semibold text-slate-700">Sem produtos disponíveis</p>
                     </div>
                 ) : (
-                    <div className="mt-10 flex snap-x snap-mandatory gap-4 overflow-x-auto lg:grid lg:grid-cols-3 lg:gap-6 lg:overflow-visible" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' } as any}>
+                    <div className="mt-10 flex snap-x snap-mandatory gap-4 overflow-x-auto lg:grid lg:grid-cols-3 lg:gap-6 lg:overflow-visible" style={{ scrollbarWidth: 'none' }}>
                         {produtos.map((item: any) => {
                             const img = item.thumbnail_url || item.media_url || '/connect.png'
                             const link = `/post/${item.slug || item.id}`
@@ -42,30 +45,25 @@ export default function ProdutosRelated({ posts }: { posts: Post[] }) {
                             const week = d.toLocaleString('en-US', { weekday: 'short' }).toUpperCase()
 
                             return (
-                                <Link key={item.id} href={link} className="group relative flex w-full min-w-full shrink-0 snap-center overflow-hidden rounded-[28px] bg-[#0e7a98] lg:min-w-0" style={{ aspectRatio: '3 / 4.2' }}>
-                                    {/* IMAGEM */}
-                                    <img src={img} alt={item.titulo} className="absolute inset-0 size-full object-cover object-top" />
-
-                                    {/* 1 - TINTA AZUL QUE PEGA O CARD TODO - CORRIGE O BRANCO DO TOPO */}
-                                    <div className="absolute inset-0 bg-[#0e7a98]/35" />
-
-                                    {/* 2 - DEGRADÊ FORTE EM BAIXO PARA LEITURA */}
-                                    <div className="absolute inset-0 bg-gradient-to-t from-[#0b5f77] from-0% via-[#0e7a98]/95 via-45% to-transparent to-75%" />
+                                <Link key={item.id} href={link} className="group relative flex w-full min-w-full shrink-0 snap-center overflow-hidden rounded-3xl lg:min-w-0" style={{ aspectRatio: '3 / 4.2', backgroundColor: '#0e7a98' }}>
+                                    <img src={img} alt={item.titulo} className="absolute inset-0 h-full w-full object-cover object-top" />
+                                    <div className="absolute inset-0" style={{ backgroundColor: 'rgba(14,122,152,0.35)' }} />
+                                    <div className="absolute inset-0" style={{ backgroundImage: 'linear-gradient(to top, #0b5f77 0%, rgba(14,122,152,0.95) 45%, transparent 75%)' }} />
 
                                     <div className="relative mt-auto flex w-full flex-col p-3.5">
-                                        <h3 className="mb-3 line-clamp-2 min-h-[38px] text-[15px] font-semibold leading-[1.2] text-white">
+                                        <h3 className="mb-3 line-clamp-2 min-h-9.5 text-[15px] font-semibold leading-[1.2] text-white">
                                             {item.titulo}
                                         </h3>
 
                                         <div className="flex items-center gap-2">
-                                            <div className="flex w-[44px] shrink-0 flex-col overflow-hidden rounded-[9px] bg-white text-center shadow-sm">
-                                                <span className="bg-[#083a4a] py-[3px] text-[8px] font-bold leading-none text-white">{month}</span>
-                                                <span className="py-[2px] text-[15px] font-extrabold leading-none text-black">{day}</span>
-                                                <span className="pb-[3px] text-[7px] font-bold leading-none text-neutral-500">{week}</span>
+                                            <div className="flex w-11 shrink-0 flex-col overflow-hidden rounded-lg bg-white text-center shadow-sm">
+                                                <span className="py-1 text-[8px] font-bold leading-none text-white" style={{ backgroundColor: '#083a4a' }}>{month}</span>
+                                                <span className="py-1 text-[15px] font-extrabold leading-none text-black">{day}</span>
+                                                <span className="pb-1 text-[7px] font-bold leading-none text-neutral-500">{week}</span>
                                             </div>
                                             <div className="min-w-0 flex-1">
-                                                <p className="truncate text-[11px] font-semibold leading-none text-white">Loja Connect</p>
-                                                <p className="mt-[3px] truncate text-[10px] leading-none text-white/80">
+                                                <p className="truncate text-[11px] font-semibold leading-none text-white">P.Unitário</p>
+                                                <p className="mt-1 truncate text-[10px] leading-none text-white/80">
                                                     {emPromo ? formatKz(item.preco_promocional) : item.preco ? formatKz(item.preco) : 'Disponível'}
                                                 </p>
                                             </div>
