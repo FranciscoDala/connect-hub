@@ -59,7 +59,7 @@ export default function PostRelacionados({ posts: initialPosts, categoryId, curr
                         href={`/post/${r.slug || r.id}`}
                         className="group flex flex-none w-[48%] flex-col items-center sm:w-auto"
                     >
-                        <div className="h-36 w-36 shrink-0 overflow-hidden rounded-full border border-slate-200 bg-white shadow-sm transition group-hover:ring-4 group-hover:ring-black/10 sm:h-40 sm:w-40 lg:h-46 lg:w-46">
+                        <div className="h-30 w-30 shrink-0 overflow-hidden rounded-full border border-slate-200 bg-white shadow-sm transition group-hover:ring-4 group-hover:ring-black/10 sm:h-40 sm:w-40 lg:h-46 lg:w-46">
                             <img
                                 src={r.thumbnail_url || r.media_url || "/placeholder.jpg"}
                                 alt={r.titulo}
