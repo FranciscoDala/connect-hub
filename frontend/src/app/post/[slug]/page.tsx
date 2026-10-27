@@ -26,6 +26,12 @@ function getClientId() {
     return id;
 }
 
+function isSameText(a?: string, b?: string) {
+    if (!a || !b) return false;
+    const clean = (s: string) => s.replace(/<[^>]*>/g, "").trim().toLowerCase();
+    return clean(a) === clean(b);
+}
+
 export default function PostPage() {
     const params = useParams();
     const slug = params?.slug as string;
@@ -120,6 +126,9 @@ export default function PostPage() {
     const cat = categories.find((c: any) => c.id === post.category_id);
     const bannerDentro = banners.find((b: any) => b.posicao === "dentro_post");
 
+    const conteudoDuplicado = isSameText(post.descricao, post.conteudo);
+    const mostrarConteudo = post.conteudo && !conteudoDuplicado;
+
     return (
         <main className="min-h-screen bg-stone-50 text-slate-800">
             <Header />
@@ -154,9 +163,12 @@ export default function PostPage() {
                             </div>
 
                             <div className="border-t border-slate-100 p-6 sm:p-8">
-                                <div className="prose max-w-none prose-p:text-sm prose-p:leading-7 prose-p:text-slate-600 sm:prose-p:text-base">
-                                    {post.conteudo ? <div dangerouslySetInnerHTML={{ __html: post.conteudo }} /> : <p>{post.descricao}</p>}
-                                </div>
+                                {mostrarConteudo && (
+                                    <div className="prose max-w-none prose-p:text-sm prose-p:leading-7 prose-p:text-slate-600 sm:prose-p:text-base">
+                                        <div dangerouslySetInnerHTML={{ __html: post.conteudo }} />
+                                    </div>
+                                )}
+
                                 {bannerDentro && <div className="mt-8 rounded-xl border bg-slate-50 p-3"><a href={bannerDentro.link_url} target="_blank"><img src={bannerDentro.imagem_url} className="w-full rounded-lg" alt="" /></a></div>}
 
                                 <PostComments postId={post.id} onCountChange={setCommentCount} />
