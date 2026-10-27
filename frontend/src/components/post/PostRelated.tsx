@@ -43,41 +43,41 @@ export default function ProdutosRelated({ posts }: { posts: Post[] }) {
                                 <Link
                                     key={item.id}
                                     href={link}
-                                    className="group flex w-full min-w-[280px] max-w-[360px] shrink-0 snap-center flex-col overflow-hidden rounded-[32px] bg-white shadow-[0_12px_40px_rgba(0,0,0,0.08)] transition-all hover:-translate-y-1 lg:min-w-0 lg:max-w-none"
+                                    className="group flex w-full min-w-70 max-w-90 shrink-0 snap-center flex-col overflow-hidden rounded-3xl bg-white shadow-lg transition-all hover:-translate-y-1 lg:min-w-0 lg:max-w-none"
                                     style={{ aspectRatio: '1 / 1.08' }}
                                 >
-                                    {/* IMAGEM QUADRADA IGUAL PRINT */}
-                                    <div className="relative w-full overflow-hidden rounded-t-[32px]" style={{ backgroundColor: '#ffd88f', aspectRatio: '1 / 1' }}>
+                                    {/* IMAGEM QUADRADA 1/1 */}
+                                    <div className="relative w-full overflow-hidden rounded-t-3xl" style={{ backgroundColor: '#ffd88f', aspectRatio: '1 / 1' }}>
                                         <img src={img} alt={item.titulo} className="h-full w-full object-cover" />
                                     </div>
 
-                                    {/* CONTEUDO BRANCO */}
-                                    <div className="flex flex-1 flex-col bg-[#fffcf5] px-5 pb-4 pt-4">
-                                        <h3 className="line-clamp-1 text-[18px] font-bold leading-tight text-[#1f1f1f]">{item.titulo}</h3>
+                                    {/* CONTEUDO */}
+                                    <div className="flex flex-1 flex-col px-5 pb-4 pt-4" style={{ backgroundColor: '#fffcf5' }}>
+                                        <h3 className="line-clamp-1 text-lg font-bold leading-tight" style={{ color: '#1f1f1f' }}>{item.titulo}</h3>
 
                                         <div className="mt-1.5 flex flex-wrap gap-x-4 gap-y-1">
-                                            <span className="text-[11px] text-neutral-400">{cat}</span>
-                                            <span className="text-[11px] text-neutral-400">{emPromo ? 'Em promoção' : 'Novo'}</span>
-                                            <span className="text-[11px] text-neutral-400">Original</span>
+                                            <span className="text-xs text-neutral-400">{cat}</span>
+                                            <span className="text-xs text-neutral-400">{emPromo ? 'Em promoção' : 'Novo'}</span>
+                                            <span className="text-xs text-neutral-400">Original</span>
                                         </div>
 
-                                        <p className="mt-3 line-clamp-1 text-[12px] leading-5 text-neutral-500">
+                                        <p className="mt-3 line-clamp-1 text-xs leading-5 text-neutral-500">
                                             {item.descricao || 'Produto original com garantia e entrega rápida.'}
                                         </p>
 
                                         <div className="mt-2.5 flex items-center gap-2">
-                                            <span className="text-[11px] text-neutral-500">Tags</span>
-                                            <span className="rounded-full border border-neutral-200 bg-white px-3 py-0.5 text-[10px] text-neutral-600">{cat}</span>
-                                            <span className="rounded-full border border-neutral-200 bg-white px-3 py-0.5 text-[10px] text-neutral-600">Top</span>
+                                            <span className="text-xs text-neutral-500">Tags</span>
+                                            <span className="rounded-full border border-neutral-200 bg-white px-3 py-0.5 text-xs text-neutral-600">{cat}</span>
+                                            <span className="rounded-full border border-neutral-200 bg-white px-3 py-0.5 text-xs text-neutral-600">Top</span>
                                         </div>
 
                                         <div className="mt-auto flex items-end justify-between gap-3 pt-3">
                                             <div className="leading-none">
-                                                <p className="text-[18px] font-bold text-[#d49a1e]">{preco ? formatKz(preco) : '$10.00'}</p>
-                                                <p className="mt-1 text-[10px] text-neutral-500">+ entrega</p>
+                                                <p className="text-lg font-bold" style={{ color: '#d49a1e' }}>{preco ? formatKz(preco) : '$10.00'}</p>
+                                                <p className="mt-1 text-xs text-neutral-500">+ entrega</p>
                                             </div>
 
-                                            <span className="rounded-full bg-[#fbbf24] px-5 py-2 text-[12px] font-bold text-[#1f1f1f] shadow-sm transition group-hover:bg-[#f5b60f]">
+                                            <span className="rounded-full px-5 py-2 text-xs font-bold shadow-sm transition" style={{ backgroundColor: '#fbbf24', color: '#1f1f1f' }}>
                                                 Add to cart
                                             </span>
                                         </div>
