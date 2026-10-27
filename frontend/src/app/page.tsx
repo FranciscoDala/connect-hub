@@ -86,11 +86,13 @@ export default async function Home() {
                     </div>
                 </div>
             </section>
-            
+
             <EventosSection posts={posts} />
 
             <ProdutosSection posts={posts} />
+            
             <PlataformasSection posts={posts} />
+
             <div id="parcerias"><ParceriasSection /></div>
             <NoticiasSection posts={posts} />
             <EquipeSection />
