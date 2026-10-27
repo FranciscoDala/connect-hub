@@ -104,8 +104,14 @@ export default function PostPage() {
                     <article className="col-span-12 lg:col-span-8">
                         <div className="overflow-hidden rounded-none border-0">
                             {(post.thumbnail_url || post.media_url) && (
-                                <div className="relative select-none cursor-pointer overflow-hidden bg-black" onDoubleClick={handleDoubleClick} onTouchEnd={handleTouchEnd}>
-                                    <img src={post.thumbnail_url || post.media_url} alt={post.titulo} className="max-h-140 w-full" draggable={false} />
+                                <div className="relative select-none cursor-pointer rounded-none overflow-hidden bg-black" onDoubleClick={handleDoubleClick} onTouchEnd={handleTouchEnd}>
+                                    <img
+                                        src={post.thumbnail_url || post.media_url}
+                                        alt={post.titulo}
+                                        className="block w-full rounded-none object-cover"
+                                        style={{ maxHeight: '560px' }}
+                                        draggable={false}
+                                    />
                                     {myReaction === "like" && (
                                         <div className="absolute right-3 top-3 grid size-8 place-items-center rounded-full bg-white/90 shadow backdrop-blur">
                                             <svg className="size-5 fill-red-600" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>

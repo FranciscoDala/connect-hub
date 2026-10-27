@@ -40,43 +40,44 @@ export default function ProdutosRelated({ posts }: { posts: Post[] }) {
                             const cat = item.category?.nome || 'Produto'
 
                             return (
-                                <Link key={item.id} href={link} className="group flex w-full min-w-full shrink-0 snap-center flex-col overflow-hidden rounded-[36px] bg-[#fffaf0] shadow-[0_12px_40px_rgba(0,0,0,0.08)] transition-all hover:-translate-y-1 lg:min-w-0">
-                                    {/* IMAGEM TOPO AMARELA IGUAL PRINT */}
-                                    <div className="relative w-full overflow-hidden" style={{ backgroundColor: '#ffd88f', aspectRatio: '4 / 3' }}>
+                                <Link
+                                    key={item.id}
+                                    href={link}
+                                    className="group flex w-full min-w-[280px] max-w-[360px] shrink-0 snap-center flex-col overflow-hidden rounded-[32px] bg-white shadow-[0_12px_40px_rgba(0,0,0,0.08)] transition-all hover:-translate-y-1 lg:min-w-0 lg:max-w-none"
+                                    style={{ aspectRatio: '1 / 1.08' }}
+                                >
+                                    {/* IMAGEM QUADRADA IGUAL PRINT */}
+                                    <div className="relative w-full overflow-hidden rounded-t-[32px]" style={{ backgroundColor: '#ffd88f', aspectRatio: '1 / 1' }}>
                                         <img src={img} alt={item.titulo} className="h-full w-full object-cover" />
                                     </div>
 
                                     {/* CONTEUDO BRANCO */}
-                                    <div className="flex flex-1 flex-col bg-white px-5 pb-5 pt-4">
-                                        <h3 className="line-clamp-1 text-[22px] font-bold leading-tight text-[#1f1f1f]">{item.titulo}</h3>
+                                    <div className="flex flex-1 flex-col bg-[#fffcf5] px-5 pb-4 pt-4">
+                                        <h3 className="line-clamp-1 text-[18px] font-bold leading-tight text-[#1f1f1f]">{item.titulo}</h3>
 
-                                        {/* TAGS PEQUENAS IGUAL VEGAN GLUTEN FREE */}
-                                        <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1">
+                                        <div className="mt-1.5 flex flex-wrap gap-x-4 gap-y-1">
                                             <span className="text-[11px] text-neutral-400">{cat}</span>
                                             <span className="text-[11px] text-neutral-400">{emPromo ? 'Em promoção' : 'Novo'}</span>
                                             <span className="text-[11px] text-neutral-400">Original</span>
                                         </div>
 
-                                        <p className="mt-4 line-clamp-2 text-[13px] leading-5 text-neutral-500">
-                                            {item.descricao || 'Produto original com garantia e entrega rápida em todo o país.'}
+                                        <p className="mt-3 line-clamp-1 text-[12px] leading-5 text-neutral-500">
+                                            {item.descricao || 'Produto original com garantia e entrega rápida.'}
                                         </p>
 
-                                        {/* TOPPINGS PILLS */}
-                                        <div className="mt-3 flex items-center gap-2">
+                                        <div className="mt-2.5 flex items-center gap-2">
                                             <span className="text-[11px] text-neutral-500">Tags</span>
-                                            <span className="rounded-full border border-neutral-200 bg-white px-3 py-1 text-[11px] text-neutral-600">{cat}</span>
-                                            <span className="rounded-full border border-neutral-200 bg-white px-3 py-1 text-[11px] text-neutral-600">Top</span>
+                                            <span className="rounded-full border border-neutral-200 bg-white px-3 py-0.5 text-[10px] text-neutral-600">{cat}</span>
+                                            <span className="rounded-full border border-neutral-200 bg-white px-3 py-0.5 text-[10px] text-neutral-600">Top</span>
                                         </div>
 
-                                        {/* PREÇO + BOTÃO IGUAL PRINT */}
-                                        <div className="mt-5 flex items-end justify-between gap-3">
+                                        <div className="mt-auto flex items-end justify-between gap-3 pt-3">
                                             <div className="leading-none">
-                                                <p className="text-[22px] font-bold text-[#d49a1e]">{preco ? formatKz(preco) : '$10.00'}</p>
-                                                {emPromo && <p className="mt-1 text-[11px] line-through text-neutral-400">{formatKz(item.preco)}</p>}
-                                                <p className="mt-1 text-[11px] text-neutral-500">+ entrega</p>
+                                                <p className="text-[18px] font-bold text-[#d49a1e]">{preco ? formatKz(preco) : '$10.00'}</p>
+                                                <p className="mt-1 text-[10px] text-neutral-500">+ entrega</p>
                                             </div>
 
-                                            <span className="rounded-full bg-[#fbbf24] px-6 py-2.5 text-[13px] font-bold text-[#1f1f1f] shadow-sm transition group-hover:bg-[#f5b60f]">
+                                            <span className="rounded-full bg-[#fbbf24] px-5 py-2 text-[12px] font-bold text-[#1f1f1f] shadow-sm transition group-hover:bg-[#f5b60f]">
                                                 Add to cart
                                             </span>
                                         </div>
