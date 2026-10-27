@@ -56,23 +56,8 @@ export default function ProdutosRelated({ posts }: { posts: Post[] }) {
 
                                         <div className="mt-1.5 flex flex-wrap gap-x-4 gap-y-1">
                                             <span className="rounded-full border border-neutral-200 bg-white px-3 py-0.5 text-xs text-neutral-600">{emPromo ? 'Em promoção' : 'Novo'}</span>
-                                            <span className="rounded-full border border-neutral-200 bg-white px-3 py-0.5 text-xs text-neutral-600">Original</span>
                                         </div>
 
-                                        <p className="mt-3 line-clamp-1 text-xs leading-5 text-neutral-500">
-                                            {item.descricao || 'Produto original com garantia e entrega rápida.'}
-                                        </p>
-
-                                        <div className="mt-2.5 flex items-center gap-2">
-                                            <span className="rounded-full border border-neutral-200 bg-white px-3 py-0.5 text-xs text-neutral-600">{cat}</span>
-                                        </div>
-
-                                        <div className="mt-auto flex items-end justify-between gap-3 pt-4">
-                                            <div className="leading-none">
-                                                <p className="text-lg font-bold leading-tight" style={{ color: '#d49a1e' }}>{preco ? formatKz(preco) : '56 000 Kz'}</p>
-                                                <p className="mt-1 text-xs text-neutral-500">+ entrega</p>
-                                            </div>
-                                        </div>
                                     </div>
                                 </Link>
                             )
