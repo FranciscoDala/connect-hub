@@ -16,11 +16,11 @@ export default function Header() {
                             <img src="/connect.png" alt="CONNECT" className="h-9 w-auto object-contain sm:h-10" />
                         </Link>
                         <div className="hidden items-center gap-6 text-sm font-semibold text-[#475569] lg:flex">
-                            <Link href="/" className="hover:text-black">INÍCIO</Link>
+                            <Link href="/" className="hover:text-black">Início</Link>
                             <Link href="/eventos" className="hover:text-black">Eventos</Link>
-                            <a href="#categorias" className="hover:text-black">Tecnologia</a>
-                            <a href="#videos" className="hover:text-black">Connect TV</a>
-                            <a href="#apps" className="hover:text-black">Apps</a>
+                            <Link href="/tecnologia" className="hover:text-black">Tecnologia</Link>
+                            <Link href="/videos" className="hover:text-black">Connect TV</Link>
+                            <Link href="/apps" className="hover:text-black">Apps</Link>
                             <button onClick={() => setLoginOpen(true)} className="ml-2 rounded-full bg-[#0e8ac2] px-6 py-2.5 text-sm text-white">Login</button>
                         </div>
                         <div className="flex items-center gap-2 lg:hidden">
@@ -40,9 +40,9 @@ export default function Header() {
                                 <div className="grid divide-y text-sm font-semibold">
                                     <Link href="/" onClick={() => setOpen(false)} className="flex justify-between py-4">Início <span className="text-[#0e8ac2]">→</span></Link>
                                     <Link href="/eventos" onClick={() => setOpen(false)} className="flex justify-between py-4">Eventos <span className="text-[#0e8ac2]">→</span></Link>
-                                    <a href="#categorias" onClick={() => setOpen(false)} className="flex justify-between py-4">Tecnologia <span className="text-[#0e8ac2]">→</span></a>
-                                    <a href="#videos" onClick={() => setOpen(false)} className="flex justify-between py-4">Connect TV <span className="text-[#0e8ac2]">→</span></a>
-                                    <a href="#apps" onClick={() => setOpen(false)} className="flex justify-between py-4">Apps <span className="text-[#0e8ac2]">→</span></a>
+                                    <Link href="/tecnologia" onClick={() => setOpen(false)} className="flex justify-between py-4">Tecnologia <span className="text-[#0e8ac2]">→</span></Link>
+                                    <Link href="/videos" onClick={() => setOpen(false)} className="flex justify-between py-4">Connect TV <span className="text-[#0e8ac2]">→</span></Link>
+                                    <Link href="/apps" onClick={() => setOpen(false)} className="flex justify-between py-4">Apps <span className="text-[#0e8ac2]">→</span></Link>
                                     <button onClick={() => { setOpen(false); setLoginOpen(true); }} className="flex w-full justify-between py-4 text-left">Login <span className="text-[#0e8ac2]">→</span></button>
                                 </div>
                             </div>
