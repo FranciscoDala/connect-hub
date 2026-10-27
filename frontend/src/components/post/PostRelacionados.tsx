@@ -67,7 +67,7 @@ export default function PostRelacionados({ posts: initialPosts, categoryId, curr
             <div className="mt-8 grid grid-cols-2 gap-6 sm:grid-cols-4 sm:gap-8">
                 {limited.map((r) => (
                     <Link key={r.id} href={`/post/${r.slug || r.id}`} className="group">
-                        <div className="mx-auto h-35 w-35 overflow-hidden rounded-full border border-slate-200 bg-slate-100 shadow-sm transition group-hover:ring-4 group-hover:ring-black/10 sm:h-42 sm:w-42 lg:h-46 lg:w-46">
+                        <div className="mx-auto h-30 w-30 overflow-hidden rounded-full border border-slate-200 bg-slate-100 shadow-sm transition group-hover:ring-4 group-hover:ring-black/10 sm:h-42 sm:w-42 lg:h-46 lg:w-46">
                             <img
                                 src={r.thumbnail_url || r.media_url || "/placeholder.jpg"}
                                 alt={r.titulo}
