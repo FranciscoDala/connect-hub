@@ -8,6 +8,7 @@ import ProdutosSection from '@/components/seccoes/ProdutosSection'
 import PlataformasSection from '@/components/seccoes/PlataformasSection'
 import EquipeSection from '@/components/seccoes/EquipeSection'
 import NoticiasSection from '@/components/seccoes/NoticiasSection'
+import EventosSection from '@/components/seccoes/EventosSection'
 
 type Banner = {
     id: string;
@@ -85,6 +86,8 @@ export default async function Home() {
                     </div>
                 </div>
             </section>
+            
+            <EventosSection posts={posts} />
 
             <ProdutosSection posts={posts} />
             <PlataformasSection posts={posts} />
