@@ -39,10 +39,8 @@ export default function EventosSection({ posts }: { posts: Post[] }) {
     const handleMove = (x: number, y: number, e?: any) => {
         if (!isDragging.current || startX.current === null || startY.current === null) return
         currentX.current = x
-
         const diffX = Math.abs(x - startX.current)
         const diffY = Math.abs(y - startY.current)
-
         if (diffX > 10 && diffX > diffY) {
             isHorizontal.current = true
             if (e && e.cancelable) e.preventDefault()
@@ -66,6 +64,14 @@ export default function EventosSection({ posts }: { posts: Post[] }) {
         currentX.current = null
         isDragging.current = false
         isHorizontal.current = false
+    }
+
+    // OFFSET CIRCULAR - garante 2 pra cada lado
+    const getCircularOffset = (i: number, active: number, len: number) => {
+        let offset = i - active
+        offset = ((offset % len) + len) % len
+        if (offset > len / 2) offset -= len
+        return offset
     }
 
     if (eventos.length === 0) {
@@ -121,12 +127,12 @@ export default function EventosSection({ posts }: { posts: Post[] }) {
                     onMouseLeave={handleEnd}
                 >
                     {eventos.map((item, i) => {
-                        const offset = i - active
+                        const offset = getCircularOffset(i, active, eventos.length)
                         const absOffset = Math.abs(offset)
-                        const isActive = i === active
+                        const isActive = offset === 0
 
                         let transform = ''
-                        let zIndex = 10 - absOffset
+                        let zIndex = 20 - absOffset
                         let opacity = 1
                         let filter = ''
 
@@ -143,23 +149,24 @@ export default function EventosSection({ posts }: { posts: Post[] }) {
                             filter = 'brightness(0.9)'
                         } else if (offset === -2) {
                             transform = `translateX(-280px) scale(0.78) rotateY(25deg)`
-                            opacity = 0.7
+                            opacity = 0.75
                             filter = 'brightness(0.8)'
                         } else if (offset === 2) {
                             transform = `translateX(280px) scale(0.78) rotateY(-25deg)`
-                            opacity = 0.7
+                            opacity = 0.75
                             filter = 'brightness(0.8)'
                         } else {
-                            transform = `translateX(${offset * 140}px) scale(0.65)`
+                            // esconde o resto mas mantém circular
+                            transform = `translateX(${offset * 140}px) scale(0.6)`
                             opacity = 0
                         }
 
                         const isMobile = typeof window !== 'undefined' && window.innerWidth < 640
                         if (isMobile) {
-                            if (offset === -1) transform = `translateX(-90px) scale(0.85) rotateY(15deg)`
-                            if (offset === 1) transform = `translateX(90px) scale(0.85) rotateY(-15deg)`
-                            if (offset === -2) transform = `translateX(-170px) scale(0.7) rotateY(20deg)`
-                            if (offset === 2) transform = `translateX(170px) scale(0.7) rotateY(-20deg)`
+                            if (offset === -1) transform = `translateX(-95px) scale(0.85) rotateY(15deg)`
+                            if (offset === 1) transform = `translateX(95px) scale(0.85) rotateY(-15deg)`
+                            if (offset === -2) transform = `translateX(-175px) scale(0.7) rotateY(20deg)`
+                            if (offset === 2) transform = `translateX(175px) scale(0.7) rotateY(-20deg)`
                         }
 
                         const img = item.thumbnail_url || item.media_url || '/connect.png'
@@ -177,10 +184,12 @@ export default function EventosSection({ posts }: { posts: Post[] }) {
                                 <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent" />
                                 <div className="absolute bottom-0 left-0 right-0 p-5">
                                     <div className="flex items-center gap-2">
-                                        <span className="h-3 w-3 rounded-full bg-white shrink-0" />
                                         <p className="text-sm font-bold text-white leading-tight line-clamp-1">{item.titulo}</p>
+                                        <span className="h-3 w-3 rounded-full bg-white shrink-0" />
                                     </div>
-                                    <p className="mt-1.5 text-[11px] text-white/70">Clique para saber mais</p>
+                                    <p className="mt-1.5 text-[11px] text-white/70 truncate">
+                                        📍 {item.local_evento || item.cidade || 'Local a confirmar'}
+                                    </p>
                                 </div>
                                 {item.data_inicio && (
                                     <span className="absolute top-4 left-4 rounded-full bg-white/90 px-3 py-1 text-[10px] font-bold backdrop-blur">
