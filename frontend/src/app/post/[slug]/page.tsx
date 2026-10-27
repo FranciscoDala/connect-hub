@@ -7,7 +7,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PostRelacionados from "@/components/post/PostRelacionados";
 import PostSidebar from "@/components/post/PostSidebar";
-import ProdutosSection from '@/components/seccoes/ProdutosSection'
+import ProdutosRelated from '@/components/post/PostRelated'
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
@@ -155,7 +155,7 @@ export default function PostPage() {
 
                         <PostRelacionados categoryId={post.category_id} currentPostId={post.id} posts={related} />
 
-                        <ProdutosSection posts={related} />
+                        <ProdutosRelated posts={related} />
 
                     </article>
                     <PostSidebar postId={post.id} categoryId={post.category_id} />
