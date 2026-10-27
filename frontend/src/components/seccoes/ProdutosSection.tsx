@@ -47,7 +47,9 @@ export default function ProdutosSection({ posts }: { posts: Post[] }) {
                                         {emPromo && <span className="absolute left-3 top-3 rounded-full bg-red-500 px-2.5 py-1 text-xs font-bold text-white">PROMO</span>}
                                     </div>
                                     <div className="flex flex-1 flex-col p-5">
+                                        {/*<span className="text-xs font-bold uppercase tracking-widest text-sky-600">{cat}</span>*/}
                                         <h3 className="mt-2 text-sm font-semibold text-slate-800 line-clamp-2">{item.titulo}</h3>
+                                        {/*<p className="mt-2 line-clamp-2 flex-1 text-xs leading-5 text-slate-500">{item.descricao || ''}</p>*/}
                                         {item.preco && <div className="mt-4 text-sm font-bold">{emPromo ? <><span className="text-red-600">{formatKz(item.preco_promocional)}</span> <span className="ml-2 text-xs line-through text-slate-400">{formatKz(item.preco)}</span></> : <span>{formatKz(item.preco)}</span>}</div>}
                                         <span className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-slate-600 group-hover:text-sky-600">Ver detalhes <span>→</span></span>
                                     </div>
