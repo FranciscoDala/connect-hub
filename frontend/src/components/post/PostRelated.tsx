@@ -42,32 +42,33 @@ export default function ProdutosRelated({ posts }: { posts: Post[] }) {
                             const week = d.toLocaleString('en-US', { weekday: 'short' }).toUpperCase()
 
                             return (
-                                <Link key={item.id} href={link} className="group relative flex w-full min-w-full shrink-0 snap-center overflow-hidden rounded-[28px] bg-[#e9eef2] lg:min-w-0" style={{ aspectRatio: '3 / 4.2' }}>
-                                    <img src={img} alt={item.titulo} className="absolute inset-0 size-full object-cover" />
+                                <Link key={item.id} href={link} className="group relative flex w-full min-w-full shrink-0 snap-center overflow-hidden rounded-[28px] bg-[#0e7a98] lg:min-w-0" style={{ aspectRatio: '3 / 4.2' }}>
+                                    {/* IMAGEM */}
+                                    <img src={img} alt={item.titulo} className="absolute inset-0 size-full object-cover object-top" />
 
-                                    {/* FUNDO CORRIGIDO - cobre 65% do card, nome nunca fica no branco */}
-                                    <div className="absolute inset-0 bg-gradient-to-t from-[#0e7a98] from-0% via-[#0e7a98]/90 via-35% to-[#0e7a98]/0 to-70%" />
+                                    {/* 1 - TINTA AZUL QUE PEGA O CARD TODO - CORRIGE O BRANCO DO TOPO */}
+                                    <div className="absolute inset-0 bg-[#0e7a98]/35" />
+
+                                    {/* 2 - DEGRADÊ FORTE EM BAIXO PARA LEITURA */}
+                                    <div className="absolute inset-0 bg-gradient-to-t from-[#0b5f77] from-0% via-[#0e7a98]/95 via-45% to-transparent to-75%" />
 
                                     <div className="relative mt-auto flex w-full flex-col p-3.5">
-                                        {/* NOME PEQUENO E CORTADO */}
-                                        <h3 className="mb-3 line-clamp-2 min-h-[40px] text-[16px] font-semibold leading-[1.15] text-white">
+                                        <h3 className="mb-3 line-clamp-2 min-h-[38px] text-[15px] font-semibold leading-[1.2] text-white">
                                             {item.titulo}
                                         </h3>
 
                                         <div className="flex items-center gap-2">
-                                            <div className="flex w-[46px] shrink-0 flex-col overflow-hidden rounded-[9px] bg-white text-center">
+                                            <div className="flex w-[44px] shrink-0 flex-col overflow-hidden rounded-[9px] bg-white text-center shadow-sm">
                                                 <span className="bg-[#083a4a] py-[3px] text-[8px] font-bold leading-none text-white">{month}</span>
-                                                <span className="py-[2px] text-[16px] font-extrabold leading-none text-black">{day}</span>
+                                                <span className="py-[2px] text-[15px] font-extrabold leading-none text-black">{day}</span>
                                                 <span className="pb-[3px] text-[7px] font-bold leading-none text-neutral-500">{week}</span>
                                             </div>
-
                                             <div className="min-w-0 flex-1">
                                                 <p className="truncate text-[11px] font-semibold leading-none text-white">Loja Connect</p>
-                                                <p className="mt-[2px] truncate text-[10px] leading-none text-white/80">
-                                                    {emPromo ? `${formatKz(item.preco_promocional)}` : item.preco ? formatKz(item.preco) : 'Disponível'}
+                                                <p className="mt-[3px] truncate text-[10px] leading-none text-white/80">
+                                                    {emPromo ? formatKz(item.preco_promocional) : item.preco ? formatKz(item.preco) : 'Disponível'}
                                                 </p>
                                             </div>
-
                                             <div className="shrink-0 text-right">
                                                 <p className="text-[9px] font-bold leading-none text-white">{emPromo ? 'PROMO' : 'VER'}</p>
                                                 <p className="text-[8px] leading-none text-white/70">DETALHES</p>
