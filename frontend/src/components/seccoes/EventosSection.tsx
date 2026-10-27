@@ -16,38 +16,56 @@ export default function EventosSection({ posts }: { posts: Post[] }) {
             const tipo = (p.tipo || '').toLowerCase()
             return status === 'published' && tipo === 'evento'
         })
-        .sort((a, b) => new Date(a.data_inicio || a.created_at).getTime() - new Date(b.data_inicio || b.created_at).getTime())
+        .sort((a, b) => new Date(b.data_inicio || b.created_at).getTime() - new Date(a.data_inicio || a.created_at).getTime())
         .slice(0, 10)
 
-    const [active, setActive] = useState(2)
+    const [active, setActive] = useState(0)
     const activeItem = eventos[active]
 
-    // SWIPE LOGIC
     const startX = useRef<number | null>(null)
+    const startY = useRef<number | null>(null)
     const currentX = useRef<number | null>(null)
     const isDragging = useRef(false)
+    const isHorizontal = useRef(false)
 
-    const handleStart = (x: number) => {
+    const handleStart = (x: number, y: number) => {
         startX.current = x
-        isDragging.current = true
-    }
-    const handleMove = (x: number) => {
-        if (!isDragging.current || startX.current === null) return
+        startY.current = y
         currentX.current = x
+        isDragging.current = true
+        isHorizontal.current = false
     }
+
+    const handleMove = (x: number, y: number, e?: any) => {
+        if (!isDragging.current || startX.current === null || startY.current === null) return
+        currentX.current = x
+
+        const diffX = Math.abs(x - startX.current)
+        const diffY = Math.abs(y - startY.current)
+
+        if (diffX > 10 && diffX > diffY) {
+            isHorizontal.current = true
+            if (e && e.cancelable) e.preventDefault()
+        }
+    }
+
     const handleEnd = () => {
         if (!isDragging.current || startX.current === null || currentX.current === null) {
             isDragging.current = false
             return
         }
-        const diff = startX.current - currentX.current
-        if (Math.abs(diff) > 50) {
-            if (diff > 0) setActive((s) => (s + 1) % eventos.length)
-            else setActive((s) => (s - 1 + eventos.length) % eventos.length)
+        if (isHorizontal.current) {
+            const diff = startX.current - currentX.current
+            if (Math.abs(diff) > 50) {
+                if (diff > 0) setActive((s) => (s + 1) % eventos.length)
+                else setActive((s) => (s - 1 + eventos.length) % eventos.length)
+            }
         }
         startX.current = null
+        startY.current = null
         currentX.current = null
         isDragging.current = false
+        isHorizontal.current = false
     }
 
     if (eventos.length === 0) {
@@ -92,12 +110,13 @@ export default function EventosSection({ posts }: { posts: Post[] }) {
                 <button onClick={next} className="hidden sm:grid absolute right-8 top-1/2 z-20 -translate-y-1/2 h-10 w-10 place-items-center rounded-full bg-white shadow border text-slate-600 hover:bg-black hover:text-white transition">→</button>
 
                 <div
-                    className="relative flex h-[420px] sm:h-[480px] items-center justify-center gap-0 touch-pan-y px-12 cursor-grab active:cursor-grabbing"
-                    onTouchStart={(e) => handleStart(e.touches[0].clientX)}
-                    onTouchMove={(e) => handleMove(e.touches[0].clientX)}
+                    className="relative flex h-105 sm:h-120 items-center justify-center gap-0 px-12 cursor-grab active:cursor-grabbing overscroll-y-contain"
+                    style={{ touchAction: 'pan-y' }}
+                    onTouchStart={(e) => handleStart(e.touches[0].clientX, e.touches[0].clientY)}
+                    onTouchMove={(e) => handleMove(e.touches[0].clientX, e.touches[0].clientY, e)}
                     onTouchEnd={handleEnd}
-                    onMouseDown={(e) => handleStart(e.clientX)}
-                    onMouseMove={(e) => handleMove(e.clientX)}
+                    onMouseDown={(e) => handleStart(e.clientX, e.clientY)}
+                    onMouseMove={(e) => handleMove(e.clientX, e.clientY)}
                     onMouseUp={handleEnd}
                     onMouseLeave={handleEnd}
                 >
@@ -112,7 +131,7 @@ export default function EventosSection({ posts }: { posts: Post[] }) {
                         let filter = ''
 
                         if (isActive) {
-                            transform = `translateX(${offset * 0}px) scale(1) translateZ(0)`
+                            transform = `translateX(0px) scale(1) translateZ(0)`
                             zIndex = 30
                         } else if (offset === -1) {
                             transform = `translateX(-160px) scale(0.88) rotateY(18deg)`
@@ -135,7 +154,6 @@ export default function EventosSection({ posts }: { posts: Post[] }) {
                             opacity = 0
                         }
 
-                        // MOBILE: junta mais os cards
                         const isMobile = typeof window !== 'undefined' && window.innerWidth < 640
                         if (isMobile) {
                             if (offset === -1) transform = `translateX(-90px) scale(0.85) rotateY(15deg)`
@@ -153,10 +171,10 @@ export default function EventosSection({ posts }: { posts: Post[] }) {
                                 href={link}
                                 onMouseEnter={() => !isDragging.current && setActive(i)}
                                 style={{ transform, zIndex, opacity, filter } as any}
-                                className={`absolute w-[260px] sm:w-[300px] h-[380px] sm:h-[420px] shrink-0 rounded-[24px] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.25)] transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${isActive ? 'ring-2 ring-white/50' : ''}`}
+                                className={`absolute w-65 sm:w-75 h-95 sm:h-105 shrink-0 rounded-3xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.25)] transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${isActive ? 'ring-2 ring-white/50' : ''}`}
                             >
                                 <img src={img} alt={item.titulo} className="absolute inset-0 h-full w-full object-cover pointer-events-none" />
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                                <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent" />
                                 <div className="absolute bottom-0 left-0 right-0 p-5">
                                     <div className="flex items-center gap-2">
                                         <span className="h-3 w-3 rounded-full bg-white shrink-0" />
