@@ -1,6 +1,6 @@
 // app/post/[slug]/page.tsx
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import Header from "@/components/Header";
@@ -43,6 +43,8 @@ export default function PostPage() {
     const [likes, setLikes] = useState(0);
     const [dislikes, setDislikes] = useState(0);
     const [myReaction, setMyReaction] = useState<string | null>(null);
+    const [showHeart, setShowHeart] = useState(false);
+    const lastTap = useRef(0);
 
     useEffect(() => {
         if (!slug) return;
@@ -105,6 +107,26 @@ export default function PostPage() {
         }
     }
 
+    function triggerLike() {
+        setShowHeart(true);
+        setTimeout(() => setShowHeart(false), 900);
+        if (myReaction !== "like") {
+            react("like");
+        }
+    }
+
+    function handleDoubleClick() {
+        triggerLike();
+    }
+
+    function handleTouchEnd() {
+        const now = Date.now();
+        if (now - lastTap.current < 300) {
+            triggerLike();
+        }
+        lastTap.current = now;
+    }
+
     async function share() {
         const url = `https://connect-uuo9.onrender.com/post/${post.slug || post.id}`;
         try {
@@ -142,7 +164,32 @@ export default function PostPage() {
                 <div className="grid grid-cols-12 gap-6 lg:gap-8">
                     <article className="col-span-12 lg:col-span-8">
                         <div className="overflow-hidden shadow-sm">
-                            {(post.thumbnail_url || post.media_url) && <img src={post.thumbnail_url || post.media_url} alt={post.titulo} className="max-h-140 w-full object-cover rounded-none" />}
+                            {(post.thumbnail_url || post.media_url) && (
+                                <div
+                                    className="relative select-none cursor-pointer overflow-hidden bg-black"
+                                    onDoubleClick={handleDoubleClick}
+                                    onTouchEnd={handleTouchEnd}
+                                >
+                                    <img
+                                        src={post.thumbnail_url || post.media_url}
+                                        alt={post.titulo}
+                                        className="max-h-140 w-full object-cover rounded-none"
+                                        draggable={false}
+                                    />
+                                    {/* Coração Instagram */}
+                                    {showHeart && (
+                                        <div className="pointer-events-none absolute inset-0 grid place-items-center">
+                                            <svg
+                                                className="h-24 w-24 animate-[igHeart_0.9s_ease-out_forwards] fill-white stroke-white drop-shadow-[0_2px_20px_rgba(0,0,0,0.5)]"
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                                            </svg>
+                                        </div>
+                                    )}
+                                    <style>{`@keyframes igHeart { 0% { transform: scale(0); opacity: 0; } 15% { transform: scale(1.2); opacity: 1; } 30% { transform: scale(0.95); } 45%, 80% { transform: scale(1); opacity: 1; } 100% { transform: scale(1); opacity: 0; } }`}</style>
+                                </div>
+                            )}
                             <div className="p-6 sm:p-8">
                                 <div className="flex items-center gap-2 text-xs">
                                     <span className="h-px w-7 bg-sky-600" />
@@ -152,22 +199,28 @@ export default function PostPage() {
                                 <h1 className="mt-4 text-3xl font-semibold leading-tight tracking-tight sm:text-4xl">{post.titulo}</h1>
                                 {post.descricao && <p className="mt-3 text-justify text-sm leading-6 text-slate-500 sm:text-base">{post.descricao}</p>}
                                 {isProduto && post.preco && <div className="mt-5 text-2xl font-bold">{formatKz(post.preco_promocional || post.preco)}</div>}
-                                <div className="mt-6 flex flex-wrap items-center gap-2">
-                                    <button onClick={() => react("like")} className={`h-9 rounded-full border px-4 text-xs font-semibold ${myReaction === "like" ? "border-black bg-black text-white" : "bg-white hover:bg-slate-50"}`}>👍 {likes}</button>
-                                    <button onClick={share} className="h-9 rounded-full border bg-white px-4 text-xs">↗ Partilhar</button>
-                                    <span className="ml-auto self-center text-xs text-slate-500">👁 {post.views || 0}</span>
+
+                                {/* Só views + likes count, sem botão */}
+                                <div className="mt-6 flex items-center gap-3 text-xs text-slate-500">
+                                    <span className={`flex items-center gap-1.5 ${myReaction === "like" ? "text-red-600 font-semibold" : ""}`}>
+                                        <svg className={`h-4 w-4 ${myReaction === "like" ? "fill-red-600" : "fill-none stroke-current"}`} viewBox="0 0 24 24"><path strokeWidth={myReaction === "like" ? 0 : 1.5} d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                                        {likes} curtidas
+                                    </span>
+                                    <span>•</span>
+                                    <span>👁 {post.views || 0} visualizações</span>
+                                    <button onClick={share} className="ml-auto h-9 rounded-full border bg-white px-4 text-xs hover:bg-slate-50">↗ Partilhar</button>
                                 </div>
+                                <p className="mt-2 text-[11px] text-slate-400">Dê 2 cliques na imagem para curtir ❤️</p>
                             </div>
 
                             <div className="border-t border-slate-100 p-6 sm:p-8">
                                 {mostrarConteudo && (
-                                    <div className="prose max-w-none prose-p:text-sm prose-p:leading-7 prose-p:text-slate-600 sm:prose-p:text-base">
+                                    <div className="prose max-w-none prose-p:text-justify prose-p:text-sm prose-p:leading-7 prose-p:text-slate-600 sm:prose-p:text-base">
                                         <div dangerouslySetInnerHTML={{ __html: post.conteudo }} />
                                     </div>
                                 )}
 
                                 {bannerDentro && <div className="mt-8 rounded-xl border bg-slate-50 p-3"><a href={bannerDentro.link_url} target="_blank"><img src={bannerDentro.imagem_url} className="w-full rounded-lg" alt="" /></a></div>}
-
                             </div>
                         </div>
 

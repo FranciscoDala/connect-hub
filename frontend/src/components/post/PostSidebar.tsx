@@ -62,7 +62,7 @@ export default function PostSidebar({ postId, categoryId }: Props) {
     return (
         <aside className="col-span-12 space-y-4 lg:col-span-4 lg:sticky lg:top-24 lg:self-start">
             {/* 1. MAIS RECENTES / LIDAS */}
-            <div className="overflow-hidden rounded-none shadow-sm">
+            <div className="overflow-hidden rounded-none shadow-0">
                 <div className="flex items-center gap-6 border-b border-slate-100 px-5 pt-5">
                     <button
                         onClick={() => setTab("recentes")}
