@@ -52,10 +52,9 @@ export default function ProdutosRelated({ posts }: { posts: Post[] }) {
 
                                     {/* CONTEUDO - ALTURA AUTO */}
                                     <div className="flex flex-1 flex-col px-5 pb-4 pt-4" style={{ backgroundColor: '#fffcf5' }}>
-                                        <h3 className="line-clamp-1 text-lg font-bold leading-tight" style={{ color: '#1f1f1f' }}>{item.titulo}</h3>
-
+                                        <h3 className="text-sm font-bold leading-snug wrap-break-word" style={{ color: '#1f1f1f' }}>{item.titulo}</h3>
                                         <div className="mt-1.5 flex flex-wrap gap-x-4 gap-y-1">
-                                            <span className="rounded-full border border-neutral-200 bg-white px-3 py-0.5 text-xs text-neutral-600">{emPromo ? 'Em promoção' : 'Novo'}</span>
+                                            <span className="rounded-full border border-neutral-200 bg-white px-3 py-0.5 text-xs text-neutral-600">{emPromo ? 'PROMO' : 'NOVO'}</span>
                                         </div>
 
                                     </div>
