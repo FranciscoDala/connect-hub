@@ -52,14 +52,14 @@ export default function PostRelacionados({ posts: initialPosts, categoryId, curr
         <p className="text-xs font-bold uppercase tracking-widest text-sky-800">RELACIONADOS</p>
       </div>
 
-      <div className="mt-8 flex snap-x snap-mandatory gap-4 overflow-x-auto px-2 pb-2 sm:grid sm:grid-cols-4 sm:gap-8 sm:overflow-visible sm:px-0 [&::-webkit-scrollbar]:hidden [scrollbar-width:none] [-ms-overflow-style:none]">
+      <div className="mt-6 flex gap-3 overflow-x-auto overflow-y-visible px-2 py-3 sm:grid sm:grid-cols-4 sm:gap-8 sm:overflow-visible sm:p-0 sm:pt-6 [&::-webkit-scrollbar]:hidden [scrollbar-width:none] [-ms-overflow-style:none]">
         {limited.map((r) => (
           <Link
             key={r.id}
             href={`/post/${r.slug || r.id}`}
-            className="group flex flex-none w-1/2 snap-center flex-col items-center sm:w-auto"
+            className="group flex flex-none w-[48%] flex-col items-center sm:w-auto"
           >
-            <div className="h-40 w-40 overflow-hidden rounded-full border border-slate-200 bg-white shadow-sm transition group-hover:ring-4 group-hover:ring-black/10 sm:h-40 sm:w-40 lg:h-46 lg:w-46">
+            <div className="h-36 w-36 shrink-0 overflow-hidden rounded-full border border-slate-200 bg-white shadow-sm transition group-hover:ring-4 group-hover:ring-black/10 sm:h-40 sm:w-40 lg:h-46 lg:w-46">
               <img
                 src={r.thumbnail_url || r.media_url || "/placeholder.jpg"}
                 alt={r.titulo}
@@ -67,7 +67,7 @@ export default function PostRelacionados({ posts: initialPosts, categoryId, curr
               />
             </div>
             <div className="mt-4 w-full px-1 text-center">
-              <p className="line-clamp-3 text-sm font-bold leading-tight text-slate-900 group-hover:underline sm:line-clamp-2">
+              <p className="text-sm font-bold leading-tight text-slate-900 group-hover:underline">
                 {r.titulo}
               </p>
               <p className="mt-1 text-xs text-slate-500">
@@ -78,7 +78,7 @@ export default function PostRelacionados({ posts: initialPosts, categoryId, curr
         ))}
       </div>
 
-      <div className="mt-6 flex justify-end">
+      <div className="mt-2 flex justify-end">
         <Link
           href={categoryId ? `/?categoria=${categoryId}` : "/"}
           className="flex items-center gap-1 text-xs font-medium text-sky-700 hover:underline"
