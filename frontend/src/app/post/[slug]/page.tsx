@@ -150,7 +150,7 @@ export default function PostPage() {
                                     <span className="ml-auto text-slate-400">{new Date(post.created_at).toLocaleDateString("pt-AO")}</span>
                                 </div>
                                 <h1 className="mt-4 text-3xl font-semibold leading-tight tracking-tight sm:text-4xl">{post.titulo}</h1>
-                                {post.descricao && <p className="mt-3 text-sm leading-6 text-slate-500 sm:text-base">{post.descricao}</p>}
+                                {post.descricao && <p className="mt-3 text-justify text-sm leading-6 text-slate-500 sm:text-base">{post.descricao}</p>}
                                 {isProduto && post.preco && <div className="mt-5 text-2xl font-bold">{formatKz(post.preco_promocional || post.preco)}</div>}
                                 <div className="mt-6 flex flex-wrap items-center gap-2">
                                     <button onClick={() => react("like")} className={`h-9 rounded-full border px-4 text-xs font-semibold ${myReaction === "like" ? "border-black bg-black text-white" : "bg-white hover:bg-slate-50"}`}>👍 {likes}</button>
