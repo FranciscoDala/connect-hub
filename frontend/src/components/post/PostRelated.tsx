@@ -42,41 +42,35 @@ export default function ProdutosRelated({ posts }: { posts: Post[] }) {
                             const week = d.toLocaleString('en-US', { weekday: 'short' }).toUpperCase()
 
                             return (
-                                <Link key={item.id} href={link} className="group relative flex w-full min-w-full shrink-0 snap-center overflow-hidden rounded-[28px] bg-slate-200 lg:min-w-0" style={{ aspectRatio: '3 / 4.2' }}>
-                                    {/* IMAGEM FULL */}
-                                    <img src={img} alt={item.titulo} className="absolute inset-0 size-full object-cover transition duration-700 group-hover:scale-105" />
+                                <Link key={item.id} href={link} className="group relative flex w-full min-w-full shrink-0 snap-center overflow-hidden rounded-[28px] bg-[#e9eef2] lg:min-w-0" style={{ aspectRatio: '3 / 4.2' }}>
+                                    <img src={img} alt={item.titulo} className="absolute inset-0 size-full object-cover" />
 
-                                    {/* GRADIENTE IGUAL PRINT */}
-                                    <div className="absolute inset-0 bg-gradient-to-t from-[#0f7d9a] via-[#0f7d9a]/60 via-40% to-transparent to-65%" />
+                                    {/* FUNDO CORRIGIDO - cobre 65% do card, nome nunca fica no branco */}
+                                    <div className="absolute inset-0 bg-gradient-to-t from-[#0e7a98] from-0% via-[#0e7a98]/90 via-35% to-[#0e7a98]/0 to-70%" />
 
-                                    {/* CONTEUDO */}
-                                    <div className="relative mt-auto flex w-full flex-col gap-3 p-4">
-                                        {/* TITULO PEQUENO */}
-                                        <h3 className="max-w-[85%] text-[28px] font-bold leading-[0.95] tracking-tight text-white drop-shadow">
+                                    <div className="relative mt-auto flex w-full flex-col p-3.5">
+                                        {/* NOME PEQUENO E CORTADO */}
+                                        <h3 className="mb-3 line-clamp-2 min-h-[40px] text-[16px] font-semibold leading-[1.15] text-white">
                                             {item.titulo}
                                         </h3>
 
-                                        {/* FOOTER IGUAL PRINT */}
-                                        <div className="flex items-end gap-2.5">
-                                            {/* CAIXINHA DATA */}
-                                            <div className="flex w-[52px] shrink-0 flex-col overflow-hidden rounded-[10px] bg-white text-center shadow">
-                                                <span className="bg-[#0a4a5a] py-1 text-[10px] font-bold leading-none text-white">{month}</span>
-                                                <span className="py-1 text-[18px] font-extrabold leading-none text-black">{day}</span>
-                                                <span className="pb-1 text-[9px] font-bold leading-none text-neutral-500">{week}</span>
+                                        <div className="flex items-center gap-2">
+                                            <div className="flex w-[46px] shrink-0 flex-col overflow-hidden rounded-[9px] bg-white text-center">
+                                                <span className="bg-[#083a4a] py-[3px] text-[8px] font-bold leading-none text-white">{month}</span>
+                                                <span className="py-[2px] text-[16px] font-extrabold leading-none text-black">{day}</span>
+                                                <span className="pb-[3px] text-[7px] font-bold leading-none text-neutral-500">{week}</span>
                                             </div>
 
-                                            <div className="min-w-0 flex-1 leading-tight">
-                                                <p className="truncate text-[12px] font-semibold text-white/90">
-                                                    {item.category?.nome || 'Loja Connect'}
-                                                </p>
-                                                <p className="truncate text-[11px] leading-[1.2] text-white/70">
-                                                    {emPromo ? `${formatKz(item.preco_promocional)} • Promo` : item.preco ? formatKz(item.preco) : 'Disponível agora'}
+                                            <div className="min-w-0 flex-1">
+                                                <p className="truncate text-[11px] font-semibold leading-none text-white">Loja Connect</p>
+                                                <p className="mt-[2px] truncate text-[10px] leading-none text-white/80">
+                                                    {emPromo ? `${formatKz(item.preco_promocional)}` : item.preco ? formatKz(item.preco) : 'Disponível'}
                                                 </p>
                                             </div>
 
-                                            <div className="shrink-0 text-right leading-tight">
-                                                <p className="text-[11px] font-bold text-white">{emPromo ? 'PROMO' : 'VER'}</p>
-                                                <p className="text-[10px] text-white/70">DETALHES</p>
+                                            <div className="shrink-0 text-right">
+                                                <p className="text-[9px] font-bold leading-none text-white">{emPromo ? 'PROMO' : 'VER'}</p>
+                                                <p className="text-[8px] leading-none text-white/70">DETALHES</p>
                                             </div>
                                         </div>
                                     </div>
