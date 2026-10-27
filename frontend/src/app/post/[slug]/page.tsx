@@ -5,7 +5,6 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import PostComments from "@/components/post/PostComments";
 import PostRelacionados from "@/components/post/PostRelacionados";
 import PostSidebar from "@/components/post/PostSidebar";
 
@@ -44,7 +43,6 @@ export default function PostPage() {
     const [likes, setLikes] = useState(0);
     const [dislikes, setDislikes] = useState(0);
     const [myReaction, setMyReaction] = useState<string | null>(null);
-    const [commentCount, setCommentCount] = useState(0);
 
     useEffect(() => {
         if (!slug) return;
@@ -154,11 +152,10 @@ export default function PostPage() {
                                 <h1 className="mt-4 text-3xl font-semibold leading-tight tracking-tight sm:text-4xl">{post.titulo}</h1>
                                 {post.descricao && <p className="mt-3 text-sm leading-6 text-slate-500 sm:text-base">{post.descricao}</p>}
                                 {isProduto && post.preco && <div className="mt-5 text-2xl font-bold">{formatKz(post.preco_promocional || post.preco)}</div>}
-                                <div className="mt-6 flex flex-wrap gap-2">
+                                <div className="mt-6 flex flex-wrap items-center gap-2">
                                     <button onClick={() => react("like")} className={`h-9 rounded-full border px-4 text-xs font-semibold ${myReaction === "like" ? "border-black bg-black text-white" : "bg-white hover:bg-slate-50"}`}>👍 {likes}</button>
-                                    <button onClick={() => react("dislike")} className={`h-9 rounded-full border px-4 text-xs font-semibold ${myReaction === "dislike" ? "bg-black text-white" : "bg-white"}`}>👎 {dislikes}</button>
                                     <button onClick={share} className="h-9 rounded-full border bg-white px-4 text-xs">↗ Partilhar</button>
-                                    <span className="ml-auto self-center text-xs text-slate-500">👁 {post.views || 0} • 💬 {commentCount}</span>
+                                    <span className="ml-auto self-center text-xs text-slate-500">👁 {post.views || 0}</span>
                                 </div>
                             </div>
 
@@ -171,8 +168,6 @@ export default function PostPage() {
 
                                 {bannerDentro && <div className="mt-8 rounded-xl border bg-slate-50 p-3"><a href={bannerDentro.link_url} target="_blank"><img src={bannerDentro.imagem_url} className="w-full rounded-lg" alt="" /></a></div>}
 
-                                <PostComments postId={post.id} onCountChange={setCommentCount} />
-
                                 <div className="mt-10 flex gap-2">
                                     <button onClick={share} className="h-10 rounded-full bg-green-500 px-5 text-xs font-bold text-white">WhatsApp</button>
                                     <a href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(`https://connect-uuo9.onrender.com/post/${post.slug || post.id}`)}`} target="_blank" className="grid h-10 place-items-center rounded-full bg-blue-600 px-5 text-xs font-bold text-white">Facebook</a>
@@ -182,6 +177,7 @@ export default function PostPage() {
                         </div>
 
                         <PostRelacionados categoryId={post.category_id} currentPostId={post.id} posts={related} />
+
                     </article>
 
                     <PostSidebar postId={post.id} categoryId={post.category_id} />
