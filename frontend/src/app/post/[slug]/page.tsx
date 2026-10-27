@@ -168,11 +168,6 @@ export default function PostPage() {
 
                                 {bannerDentro && <div className="mt-8 rounded-xl border bg-slate-50 p-3"><a href={bannerDentro.link_url} target="_blank"><img src={bannerDentro.imagem_url} className="w-full rounded-lg" alt="" /></a></div>}
 
-                                <div className="mt-10 flex gap-2">
-                                    <button onClick={share} className="h-10 rounded-full bg-green-500 px-5 text-xs font-bold text-white">WhatsApp</button>
-                                    <a href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(`https://connect-uuo9.onrender.com/post/${post.slug || post.id}`)}`} target="_blank" className="grid h-10 place-items-center rounded-full bg-blue-600 px-5 text-xs font-bold text-white">Facebook</a>
-                                    <Link href="/" className="grid h-10 place-items-center rounded-full border px-5 text-xs font-bold">Voltar</Link>
-                                </div>
                             </div>
                         </div>
 
