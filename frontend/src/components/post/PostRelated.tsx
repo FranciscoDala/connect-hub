@@ -19,11 +19,15 @@ export default function ProdutosRelated({ posts }: { posts: Post[] }) {
     return (
         <section id="produtos" className="py-2 sm:py-28">
             <div className="mx-auto max-w-7xl">
+
                 <div className="flex items-center gap-3">
                     <span className="h-px w-8 bg-sky-600" />
-                    <p className="text-xs font-bold uppercase tracking-widest text-sky-800">APRESENTAÇÃO DE PRODUTOS</p>
+                    <p className="text-xs font-bold uppercase tracking-widest text-sky-800">NOSSOS PRODUTOS</p>
                 </div>
-                <h2 className="mt-4 max-w-xl text-3xl font-semibold leading-tight tracking-tight text-slate-700 sm:text-4xl">Produtos com tecnologias de ponta.</h2>
+                <h2 className="mt-4 max-w-xl text-2xl font-semibold leading-tight tracking-tight text-slate-700 sm:text-4xl">Produtos com tecnologias de ponta.</h2>
+                <p className="mt-4 max-w-2xl text-sm leading-6 text-slate-500">
+                    Descubra nossos dispositivos de ponta, projetados para aprimorar sua prática com tecnologia inovadora e resultados clínicos comprovados.
+                </p>
 
                 {produtos.length === 0 ? (
                     <div className="mt-10 flex flex-col items-center justify-center rounded-3xl border border-dashed border-slate-200 bg-slate-50 py-20">
@@ -31,55 +35,43 @@ export default function ProdutosRelated({ posts }: { posts: Post[] }) {
                         <p className="mt-4 text-sm font-semibold text-slate-700">Sem produtos disponíveis</p>
                     </div>
                 ) : (
-                    <div className="mt-10 flex snap-x snap-mandatory gap-5 overflow-x-auto pb-4 lg:grid lg:grid-cols-3 lg:gap-6 lg:overflow-visible" style={{ scrollbarWidth: 'none' }}>
+                    <div className="mt-10 flex snap-x snap-mandatory gap-4 overflow-x-auto lg:grid lg:grid-cols-3 lg:gap-6 lg:overflow-visible" style={{ scrollbarWidth: 'none' }}>
                         {produtos.map((item: any) => {
                             const img = item.thumbnail_url || item.media_url || '/connect.png'
                             const link = `/post/${item.slug || item.id}`
                             const emPromo = item.em_promocao && item.preco_promocional
-                            const preco = emPromo ? item.preco_promocional : item.preco
-                            const cat = item.category?.nome || 'Produto'
+                            const d = item.created_at ? new Date(item.created_at) : new Date()
+                            const month = d.toLocaleString('en-US', { month: 'short' }).toUpperCase()
+                            const day = String(d.getDate()).padStart(2, '0')
+                            const week = d.toLocaleString('en-US', { weekday: 'short' }).toUpperCase()
 
                             return (
-                                <Link
-                                    key={item.id}
-                                    href={link}
-                                    className="group flex w-full min-w-70 max-w-90 shrink-0 snap-center flex-col overflow-hidden rounded-3xl bg-white shadow-lg transition-all hover:-translate-y-1 lg:min-w-0 lg:max-w-none"
-                                    style={{ aspectRatio: '1 / 1.08' }}
-                                >
-                                    {/* IMAGEM QUADRADA 1/1 */}
-                                    <div className="relative w-full overflow-hidden rounded-t-3xl" style={{ backgroundColor: '#ffd88f', aspectRatio: '1 / 1' }}>
-                                        <img src={img} alt={item.titulo} className="h-full w-full object-cover" />
-                                    </div>
+                                <Link key={item.id} href={link} className="group relative flex w-full min-w-full shrink-0 snap-center overflow-hidden rounded-3xl lg:min-w-0" style={{ aspectRatio: '3 / 4.2', backgroundColor: '#0e7a98' }}>
+                                    <img src={img} alt={item.titulo} className="absolute inset-0 h-full w-full object-cover object-top" />
+                                    <div className="absolute inset-0" style={{ backgroundColor: 'rgba(14,122,152,0.35)' }} />
+                                    <div className="absolute inset-0" style={{ backgroundImage: 'linear-gradient(to top, #0b5f77 0%, rgba(14,122,152,0.95) 45%, transparent 75%)' }} />
 
-                                    {/* CONTEUDO */}
-                                    <div className="flex flex-1 flex-col px-5 pb-4 pt-4" style={{ backgroundColor: '#fffcf5' }}>
-                                        <h3 className="line-clamp-1 text-lg font-bold leading-tight" style={{ color: '#1f1f1f' }}>{item.titulo}</h3>
+                                    <div className="relative mt-auto flex w-full flex-col p-3.5">
+                                        <h3 className="mb-3 line-clamp-2 min-h-9.5 text-[15px] font-semibold leading-[1.2] text-white">
+                                            {item.titulo}
+                                        </h3>
 
-                                        <div className="mt-1.5 flex flex-wrap gap-x-4 gap-y-1">
-                                            <span className="text-xs text-neutral-400">{cat}</span>
-                                            <span className="text-xs text-neutral-400">{emPromo ? 'Em promoção' : 'Novo'}</span>
-                                            <span className="text-xs text-neutral-400">Original</span>
-                                        </div>
-
-                                        <p className="mt-3 line-clamp-1 text-xs leading-5 text-neutral-500">
-                                            {item.descricao || 'Produto original com garantia e entrega rápida.'}
-                                        </p>
-
-                                        <div className="mt-2.5 flex items-center gap-2">
-                                            <span className="text-xs text-neutral-500">Tags</span>
-                                            <span className="rounded-full border border-neutral-200 bg-white px-3 py-0.5 text-xs text-neutral-600">{cat}</span>
-                                            <span className="rounded-full border border-neutral-200 bg-white px-3 py-0.5 text-xs text-neutral-600">Top</span>
-                                        </div>
-
-                                        <div className="mt-auto flex items-end justify-between gap-3 pt-3">
-                                            <div className="leading-none">
-                                                <p className="text-lg font-bold" style={{ color: '#d49a1e' }}>{preco ? formatKz(preco) : '$10.00'}</p>
-                                                <p className="mt-1 text-xs text-neutral-500">+ entrega</p>
+                                        <div className="flex items-center gap-2">
+                                            <div className="flex w-11 shrink-0 flex-col overflow-hidden rounded-lg bg-white text-center shadow-sm">
+                                                <span className="py-1 text-[8px] font-bold leading-none text-white" style={{ backgroundColor: '#083a4a' }}>{month}</span>
+                                                <span className="py-1 text-[15px] font-extrabold leading-none text-black">{day}</span>
+                                                <span className="pb-1 text-[7px] font-bold leading-none text-neutral-500">{week}</span>
                                             </div>
-
-                                            <span className="rounded-full px-5 py-2 text-xs font-bold shadow-sm transition" style={{ backgroundColor: '#fbbf24', color: '#1f1f1f' }}>
-                                                Add to cart
-                                            </span>
+                                            <div className="min-w-0 flex-1">
+                                                <p className="truncate text-[11px] font-semibold leading-none text-white">P.Unitário</p>
+                                                <p className="mt-1 truncate text-[10px] leading-none text-white/80">
+                                                    {emPromo ? formatKz(item.preco_promocional) : item.preco ? formatKz(item.preco) : 'Disponível'}
+                                                </p>
+                                            </div>
+                                            <div className="shrink-0 text-right">
+                                                <p className="text-[9px] font-bold leading-none text-white">{emPromo ? 'PROMO' : 'VER'}</p>
+                                                <p className="text-[8px] leading-none text-white/70">DETALHES</p>
+                                            </div>
                                         </div>
                                     </div>
                                 </Link>
