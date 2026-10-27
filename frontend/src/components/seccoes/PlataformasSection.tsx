@@ -163,7 +163,7 @@ export default function PlataformasSection({ posts }: { posts: Post[] }) {
                                         href={hrefPost}
                                         onMouseEnter={() => !isDragging.current && setActive(i)}
                                         style={{ transform, zIndex, opacity, filter } as any}
-                                        className={`absolute w-65 sm:w-75 h-95 sm:h-105 shrink-0 rounded-3xl overflow-hidden border border-slate-700/50 shadow-[0_20px_50px_rgba(0,0,0,0.4)] transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${isActive ? 'ring-2 ring-white/20' : ''}`}
+                                        className={`absolute w-65 sm:w-75 h-95 sm:h-105 shrink-0 rounded-3xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.4)] transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)]`}
                                     >
                                         <img src={img} alt={item.titulo} className="absolute inset-0 h-full w-full object-cover pointer-events-none" />
                                         <div className="absolute inset-0 bg-linear-to-t from-[#0f172a] via-[#0f172a]/40 to-transparent" />
