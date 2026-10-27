@@ -24,7 +24,7 @@ export default function ProdutosSection({ posts }: { posts: Post[] }) {
                     <p className="text-xs font-bold uppercase tracking-widest text-sky-800">APRESENTAÇÃO DE PRODUTOS</p>
                 </div>
                 <h2 className="mt-4 max-w-xl text-3xl font-semibold leading-tight tracking-tight text-slate-700 sm:text-4xl">Produtos com tecnologias de ponta.</h2>
-                <p className="mt-4 max-w-2xl text-sm leading-6 text-slate-500">
+                <p className="mt-4 max-w-2xl text-justify text-sm leading-6 text-slate-500">
                     Descubra nossos dispositivos de ponta, projetados para aprimorar sua prática com tecnologia inovadora e resultados clínicos comprovados.
                 </p>
 

@@ -25,7 +25,7 @@ export default function EventosSection({ posts }: { posts: Post[] }) {
                     <p className="text-xs font-bold uppercase tracking-widest text-sky-800">PRÓXIMOS EVENTOS</p>
                 </div>
                 <h2 className="mt-4 max-w-xl text-3xl font-semibold leading-tight tracking-tight text-slate-700 sm:text-4xl">Eventos e formações exclusivas.</h2>
-                <p className="mt-4 max-w-2xl text-sm leading-6 text-slate-500">
+                <p className="mt-4 max-w-2xl text-justify text-sm leading-6 text-slate-500">
                     Participe dos nossos workshops, lançamentos e formações presenciais e online em todo o país.
                 </p>
 
