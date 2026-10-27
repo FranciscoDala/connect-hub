@@ -7,12 +7,13 @@ import { API_URL, getToken, clearAuth, authHeader } from "../../lib/api";
 
 type Category = { id: string; nome: string; slug: string; cor?: string; descricao?: string };
 type Post = any;
-type Tab = 'conteudo' | 'midia' | 'produto' | 'plataforma' | 'config';
+type Tab = 'conteudo' | 'midia' | 'produto' | 'plataforma' | 'evento' | 'config';
 type BannerPos = 'home_topo' | 'home_meio' | 'sidebar' | 'dentro_post' | 'footer';
 type Banner = { id: string; titulo: string; imagem_url: string; link_url?: string; posicao: BannerPos; ativo: boolean; clicks?: number; views?: number; data_inicio?: string; data_fim?: string };
 
 const TIPOS = [
     { value: 'noticia', label: 'Notícia' },
+    { value: 'evento', label: 'Evento' },
     { value: 'produto', label: 'Produto' },
     { value: 'plataforma', label: 'Plataforma / SaaS' },
     { value: 'app', label: 'App' },
@@ -31,6 +32,11 @@ const STATUS = [
 const STATUS_PLATAFORMA = [
     { value: 'em_utilizacao', label: '● Em utilização' },
     { value: 'em_desenvolvimento', label: '● Em desenvolvimento' },
+];
+const MODALIDADES = [
+    { value: 'presencial', label: 'Presencial' },
+    { value: 'online', label: 'Online' },
+    { value: 'hibrido', label: 'Híbrido' },
 ];
 const POSICOES: { value: BannerPos, label: string }[] = [
     { value: 'home_topo', label: 'Home Topo' },
@@ -98,7 +104,9 @@ export default function AdminPage() {
     const [form, setForm] = useState({
         titulo: "", slug: "", tipo: "noticia", descricao: "", conteudo: "", category_id: "", status: "published", destaque: false, tags: "", media_url: "", thumbnail_url: "", link_url: "",
         preco: "", preco_promocional: "", estoque: "", sku: "", unidade: "un", em_promocao: false,
-        status_plataforma: "em_desenvolvimento", em_utilizacao: false
+        status_plataforma: "em_desenvolvimento", em_utilizacao: false,
+        // evento
+        data_inicio: "", data_fim: "", local_evento: "", cidade: "", endereco: "", link_mapa: "", link_inscricao: "", modalidade: "presencial", capacidade: "", organizador: ""
     });
     const [files, setFiles] = useState<FileList | null>(null);
     const [thumbFile, setThumbFile] = useState<FileList | null>(null);
@@ -129,9 +137,16 @@ export default function AdminPage() {
         }
     }
 
+    function toDateTimeLocal(iso?: string) {
+        if (!iso) return "";
+        const d = new Date(iso);
+        const pad = (n: number) => n.toString().padStart(2, '0');
+        return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    }
+
     function openNewPost() {
         setEditingPost(null);
-        setForm({ titulo: "", slug: "", tipo: "noticia", descricao: "", conteudo: "", category_id: "", status: "published", destaque: false, tags: "", media_url: "", thumbnail_url: "", link_url: "", preco: "", preco_promocional: "", estoque: "1", sku: "", unidade: "un", em_promocao: false, status_plataforma: "em_desenvolvimento", em_utilizacao: false });
+        setForm({ titulo: "", slug: "", tipo: "noticia", descricao: "", conteudo: "", category_id: "", status: "published", destaque: false, tags: "", media_url: "", thumbnail_url: "", link_url: "", preco: "", preco_promocional: "", estoque: "1", sku: "", unidade: "un", em_promocao: false, status_plataforma: "em_desenvolvimento", em_utilizacao: false, data_inicio: "", data_fim: "", local_evento: "", cidade: "", endereco: "", link_mapa: "", link_inscricao: "", modalidade: "presencial", capacidade: "", organizador: "" });
         setFiles(null); setThumbFile(null); setTab('conteudo'); setShowPostModal(true);
     }
     function openEditPost(p: Post) {
@@ -139,13 +154,15 @@ export default function AdminPage() {
         setForm({
             titulo: p.titulo, slug: p.slug || "", tipo: p.tipo, descricao: p.descricao || "", conteudo: p.conteudo || "", category_id: p.category_id || "", status: p.status, destaque: p.destaque, tags: (p.tags || []).join(", "), media_url: p.media_url || "", thumbnail_url: p.thumbnail_url || "", link_url: p.link_url || "",
             preco: p.preco?.toString() || "", preco_promocional: p.preco_promocional?.toString() || "", estoque: p.estoque?.toString() || "", sku: p.sku || "", unidade: p.unidade || "un", em_promocao: p.em_promocao || false,
-            status_plataforma: p.status_plataforma || (p.em_utilizacao ? 'em_utilizacao' : 'em_desenvolvimento'), em_utilizacao: p.em_utilizacao || p.status_plataforma === 'em_utilizacao'
+            status_plataforma: p.status_plataforma || (p.em_utilizacao ? 'em_utilizacao' : 'em_desenvolvimento'), em_utilizacao: p.em_utilizacao || p.status_plataforma === 'em_utilizacao',
+            data_inicio: toDateTimeLocal(p.data_inicio), data_fim: toDateTimeLocal(p.data_fim), local_evento: p.local_evento || "", cidade: p.cidade || "", endereco: p.endereco || "", link_mapa: p.link_mapa || "", link_inscricao: p.link_inscricao || "", modalidade: p.modalidade || "presencial", capacidade: p.capacidade?.toString() || "", organizador: p.organizador || ""
         });
-        setFiles(null); setThumbFile(null); setTab('conteudo'); setShowPostModal(true);
+        setFiles(null); setThumbFile(null); setTab(p.tipo === 'evento' ? 'evento' : 'conteudo'); setShowPostModal(true);
     }
 
     async function savePost() {
         if (!form.titulo) return toast.error("Título obrigatório");
+        if (form.tipo === 'evento' && !form.data_inicio) return toast.error("Data de início do evento obrigatória");
         setLoading(true);
         try {
             let media_url = form.media_url.trim();
@@ -175,6 +192,7 @@ export default function AdminPage() {
             if (!thumbnail_url && media_url && media_url.match(/\.(jpg|jpeg|png|webp)/i)) thumbnail_url = media_url;
 
             const isPlatTipo = TIPOS_PLATAFORMA.includes(form.tipo);
+            const isEvento = form.tipo === 'evento';
 
             const payload: any = {
                 titulo: form.titulo,
@@ -197,6 +215,19 @@ export default function AdminPage() {
                 payload.sku = form.sku || null;
                 payload.unidade = form.unidade || "un";
                 payload.em_promocao = form.em_promocao;
+            }
+
+            if(isEvento){
+                payload.data_inicio = form.data_inicio ? new Date(form.data_inicio).toISOString() : null;
+                payload.data_fim = form.data_fim ? new Date(form.data_fim).toISOString() : null;
+                payload.local_evento = form.local_evento || null;
+                payload.cidade = form.cidade || null;
+                payload.endereco = form.endereco || null;
+                payload.link_mapa = form.link_mapa || null;
+                payload.link_inscricao = form.link_inscricao || null;
+                payload.modalidade = form.modalidade || "presencial";
+                payload.capacidade = form.capacidade ? parseInt(form.capacidade) : 0;
+                payload.organizador = form.organizador || null;
             }
 
             const method = editingPost ? "PUT" : "POST";
@@ -242,6 +273,7 @@ export default function AdminPage() {
     const previewFinalThumb = form.thumbnail_url || previewAutoThumb || form.media_url;
     const isProduto = form.tipo === 'produto';
     const isPlataforma = TIPOS_PLATAFORMA.includes(form.tipo);
+    const isEvento = form.tipo === 'evento';
 
     return (
         <main className="min-h-screen bg-[#f8fafc] text-zinc-900 font-sans">
@@ -297,12 +329,13 @@ export default function AdminPage() {
                             const catName = cats.find(c => c.id === p.category_id)?.nome || "—";
                             const isPlatList = TIPOS_PLATAFORMA.includes((p.tipo || '').toLowerCase());
                             const platStatus = isPlatList ? (p.em_utilizacao || p.status_plataforma === 'em_utilizacao' ? '● EM UTILIZAÇÃO' : '● EM DESENV') : '';
+                            const eventoInfo = p.tipo === 'evento' ? (p.data_inicio ? new Date(p.data_inicio).toLocaleDateString() : 'sem data') : '';
                             return (
                                 <div key={p.id} className="group border-b p-4 last:border-0 hover:bg-zinc-50/70 md:grid md:grid-cols-12 md:items-center md:px-6 md:py-4">
-                                    <div className="col-span-5 flex items-start gap-3"><div className="h-12 w-12 shrink-0 overflow-hidden rounded-xl border bg-zinc-100">{p.thumbnail_url ? <img src={p.thumbnail_url} className="h-full w-full object-cover" alt="" /> : <div className="grid h-full w-full place-items-center bg-zinc-900 text-xs font-bold text-white">{p.tipo[0].toUpperCase()}</div>}</div><div className="min-w-0 flex-1"><p className="line-clamp-2 text-sm font-semibold leading-tight">{p.titulo}</p><p className="mt-1 text-xs text-zinc-500">{p.tipo} {platStatus && `• ${platStatus}`} • {new Date(p.created_at).toLocaleDateString()}</p></div></div>
+                                    <div className="col-span-5 flex items-start gap-3"><div className="h-12 w-12 shrink-0 overflow-hidden rounded-xl border bg-zinc-100">{p.thumbnail_url ? <img src={p.thumbnail_url} className="h-full w-full object-cover" alt="" /> : <div className="grid h-full w-full place-items-center bg-zinc-900 text-xs font-bold text-white">{p.tipo[0].toUpperCase()}</div>}</div><div className="min-w-0 flex-1"><p className="line-clamp-2 text-sm font-semibold leading-tight">{p.titulo}</p><p className="mt-1 text-xs text-zinc-500">{p.tipo} {eventoInfo && `• ${eventoInfo}`} {platStatus && `• ${platStatus}`} • {new Date(p.created_at).toLocaleDateString()}</p></div></div>
                                     <div className="hidden col-span-2 md:block"><span className="rounded-full border border-violet-100 bg-violet-50 px-2.5 py-1 text-xs font-medium text-violet-700">{catName}</span></div>
                                     <div className="hidden col-span-1 md:flex"><span className={`rounded-full border px-2.5 py-1 text-xs font-medium ${p.status === 'published' ? 'bg-green-50 text-green-700 border-green-200' : 'bg-zinc-100'}`}>{p.status}</span></div>
-                                    <div className="hidden col-span-2 md:flex"><span className="rounded-full border bg-zinc-50 px-2 py-1 text-xs">{views} views</span></div>
+                                    <div className="hidden col-span-2 md:flex"><span className="rounded-full border bg-zinc-50 px-2 py-1 text-xs">{views} views {p.tipo==='evento' && p.inscritos_count ? `• ${p.inscritos_count} inscritos` : ''}</span></div>
                                     <div className="col-span-12 mt-3 flex justify-end gap-1.5 border-t pt-3 md:col-span-2 md:mt-0 md:border-0 md:pt-0"><button onClick={() => openEditPost(p)} className="grid h-9 w-9 place-items-center rounded-full border bg-white hover:bg-zinc-900 hover:text-white">✎</button><button onClick={() => deletePost(p.id)} className="grid h-9 w-9 place-items-center rounded-full border bg-white text-zinc-500 hover:bg-red-500 hover:text-white">🗑</button></div>
                                 </div>
                             )
@@ -320,19 +353,39 @@ export default function AdminPage() {
             {showPostModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
                     <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
-                    <div className="relative flex max-h-[90vh] w-full max-w-xl flex-col overflow-hidden rounded-3xl bg-white shadow-2xl">
-                        <div className="flex h-18 shrink-0 items-start justify-between bg-blue-50 px-5 pt-5"><div className="grid h-9 w-9 place-items-center rounded-full border bg-white shadow-sm text-sm">📄</div><button onClick={() => setShowPostModal(false)} className="grid h-8 w-8 place-items-center rounded-full border bg-white">×</button></div>
-                        <div className="border-b px-6 pb-3 pt-5"><h3 className="text-lg font-bold">{editingPost ? 'Editar' : 'Novo'} {isProduto ? 'Produto' : isPlataforma ? 'Plataforma' : 'Post'}</h3><div className="mt-4 flex gap-1.5 flex-wrap"><TabBtn id="conteudo" label="Conteúdo" /><TabBtn id="midia" label="Mídia" /><TabBtn id="plataforma" label="Plataforma / Link" show={isPlataforma} /><TabBtn id="produto" label="Preço" show={isProduto} /><TabBtn id="config" label="Config" /></div></div>
+                    <div className="relative flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-3xl bg-white shadow-2xl">
+                        <div className="flex h-18 shrink-0 items-start justify-between bg-blue-50 px-5 pt-5"><div className="grid h-9 w-9 place-items-center rounded-full border bg-white shadow-sm text-sm">{isEvento ? '📅' : isProduto ? '📦' : isPlataforma ? '💻' : '📄'}</div><button onClick={() => setShowPostModal(false)} className="grid h-8 w-8 place-items-center rounded-full border bg-white">×</button></div>
+                        <div className="border-b px-6 pb-3 pt-5"><h3 className="text-lg font-bold">{editingPost ? 'Editar' : 'Novo'} {isEvento ? 'Evento' : isProduto ? 'Produto' : isPlataforma ? 'Plataforma' : 'Post'}</h3><div className="mt-4 flex gap-1.5 flex-wrap"><TabBtn id="conteudo" label="Conteúdo" /><TabBtn id="evento" label="Evento" show={isEvento} /><TabBtn id="midia" label="Mídia" /><TabBtn id="plataforma" label="Plataforma / Link" show={isPlataforma} /><TabBtn id="produto" label="Preço" show={isProduto} /><TabBtn id="config" label="Config" /></div></div>
                         <div className="flex-1 overflow-y-auto px-6 py-4">
-                            {tab === 'conteudo' && <div className="flex flex-col gap-3"><input value={form.titulo} onChange={e => setForm({ ...form, titulo: e.target.value })} placeholder={isProduto ? "Nome do produto *" : isPlataforma ? "Nome da plataforma / site *" : "Título *"} className={inputClass} /><div className="grid gap-2 md:grid-cols-2"><CustomSelect value={form.category_id} onChange={v => setForm({ ...form, category_id: v })} placeholder="Categoria" options={cats.map(c => ({ value: c.id, label: c.nome }))} /><CustomSelect value={form.tipo} onChange={v => { setForm({ ...form, tipo: v }); if(v==='produto') setTab('produto'); else if(TIPOS_PLATAFORMA.includes(v)) setTab('plataforma'); }} placeholder="Tipo" options={TIPOS} /></div><textarea value={form.descricao} onChange={e => setForm({ ...form, descricao: e.target.value })} rows={3} placeholder={isPlataforma ? "Descrição curta - aparece no card" : isProduto ? "Descrição curta do produto" : "Descrição curta"} className="w-full rounded-xl border border-gray-200 px-3 py-3 text-sm focus:outline-none focus:border-black" /><textarea value={form.conteudo} onChange={e => setForm({ ...form, conteudo: e.target.value })} rows={5} placeholder={isPlataforma ? "Sobre a plataforma, tecnologias usadas..." : isProduto ? "Ficha técnica / conteúdo detalhado" : "Conteúdo completo"} className="w-full rounded-xl border border-gray-200 px-3 py-3 text-sm focus:outline-none focus:border-black" /></div>}
+                            {tab === 'conteudo' && <div className="flex flex-col gap-3"><input value={form.titulo} onChange={e => setForm({ ...form, titulo: e.target.value })} placeholder={isEvento ? "Nome do evento *" : isProduto ? "Nome do produto *" : isPlataforma ? "Nome da plataforma / site *" : "Título *"} className={inputClass} /><div className="grid gap-2 md:grid-cols-2"><CustomSelect value={form.category_id} onChange={v => setForm({ ...form, category_id: v })} placeholder="Categoria" options={cats.map(c => ({ value: c.id, label: c.nome }))} /><CustomSelect value={form.tipo} onChange={v => { setForm({ ...form, tipo: v }); if(v==='produto') setTab('produto'); else if(v==='evento') setTab('evento'); else if(TIPOS_PLATAFORMA.includes(v)) setTab('plataforma'); }} placeholder="Tipo" options={TIPOS} /></div><textarea value={form.descricao} onChange={e => setForm({ ...form, descricao: e.target.value })} rows={3} placeholder={isEvento ? "Resumo do evento - aparece no card" : isPlataforma ? "Descrição curta - aparece no card" : isProduto ? "Descrição curta do produto" : "Descrição curta"} className="w-full rounded-xl border border-gray-200 px-3 py-3 text-sm focus:outline-none focus:border-black" /><textarea value={form.conteudo} onChange={e => setForm({ ...form, conteudo: e.target.value })} rows={5} placeholder={isEvento ? "Programação completa, palestrantes, etc..." : isPlataforma ? "Sobre a plataforma, tecnologias usadas..." : isProduto ? "Ficha técnica / conteúdo detalhado" : "Conteúdo completo"} className="w-full rounded-xl border border-gray-200 px-3 py-3 text-sm focus:outline-none focus:border-black" /></div>}
+                            {tab === 'evento' && isEvento && (
+                                <div className="flex flex-col gap-3">
+                                    <div className="rounded-2xl bg-sky-50 border border-sky-200 p-3 text-xs text-sky-800">📅 Configuração do Evento - será exibido em /eventos</div>
+                                    <div className="grid gap-3 md:grid-cols-2">
+                                        <div><label className="text-xs font-semibold">Data Início *</label><input type="datetime-local" value={form.data_inicio} onChange={e => setForm({ ...form, data_inicio: e.target.value })} className={inputClass} /></div>
+                                        <div><label className="text-xs font-semibold">Data Fim</label><input type="datetime-local" value={form.data_fim} onChange={e => setForm({ ...form, data_fim: e.target.value })} className={inputClass} /></div>
+                                    </div>
+                                    <div className="grid gap-3 md:grid-cols-2">
+                                        <div><label className="text-xs font-semibold">Local</label><input value={form.local_evento} onChange={e => setForm({ ...form, local_evento: e.target.value })} placeholder="Hotel Intercontinental" className={inputClass} /></div>
+                                        <div><label className="text-xs font-semibold">Cidade</label><input value={form.cidade} onChange={e => setForm({ ...form, cidade: e.target.value })} placeholder="Luanda" className={inputClass} /></div>
+                                    </div>
+                                    <div><label className="text-xs font-semibold">Endereço completo</label><input value={form.endereco} onChange={e => setForm({ ...form, endereco: e.target.value })} placeholder="Av. 4 de Fevereiro, 123" className={inputClass} /></div>
+                                    <div className="grid gap-3 md:grid-cols-2">
+                                        <div><label className="text-xs font-semibold">Modalidade</label><CustomSelect value={form.modalidade} onChange={v => setForm({ ...form, modalidade: v })} placeholder="Modalidade" options={MODALIDADES} /></div>
+                                        <div><label className="text-xs font-semibold">Capacidade</label><input type="number" value={form.capacidade} onChange={e => setForm({ ...form, capacidade: e.target.value })} placeholder="100" className={inputClass} /></div>
+                                    </div>
+                                    <div><label className="text-xs font-semibold">Link de Inscrição (Sympla, Forms, WhatsApp)</label><input value={form.link_inscricao} onChange={e => setForm({ ...form, link_inscricao: e.target.value })} placeholder="https://wa.me/..." className={inputClass} /></div>
+                                    <div><label className="text-xs font-semibold">Link do Mapa (Google Maps)</label><input value={form.link_mapa} onChange={e => setForm({ ...form, link_mapa: e.target.value })} placeholder="https://maps.google.com/..." className={inputClass} /></div>
+                                    <div><label className="text-xs font-semibold">Organizador</label><input value={form.organizador} onChange={e => setForm({ ...form, organizador: e.target.value })} placeholder="CONNECT Angola" className={inputClass} /></div>
+                                </div>
+                            )}
                             {tab === 'midia' && <div className="flex flex-col gap-3"><input value={form.media_url} onChange={e => setForm({ ...form, media_url: e.target.value })} placeholder="Media URL" className={inputClass} /><div><p className="mb-1 text-xs font-semibold">Thumbnail (capa) - Recomendado 1280x720</p><input type="file" accept="image/*" onChange={e => setThumbFile(e.target.files)} className="text-sm" /></div><div><p className="mb-1 text-xs font-semibold">Galeria</p><input type="file" multiple onChange={e => setFiles(e.target.files)} className="text-sm" /></div>{previewFinalThumb && <img src={previewFinalThumb} className="h-40 w-full rounded-xl border object-cover" alt="" />}</div>}
                             {tab === 'plataforma' && isPlataforma && (
                                 <div className="flex flex-col gap-3">
-                                    <div className="rounded-2xl bg-blue-50 border border-blue-200 p-3 text-xs text-blue-800">🔗 Configuração de Plataforma - aparece na home</div>
+                                    <div className="rounded-2xl bg-blue-50 border border-blue-200 p-3 text-xs text-blue-800">🔗 Configuração de Plataforma</div>
                                     <div><label className="text-xs font-semibold">Link da Plataforma / App / Site</label><input value={form.link_url} onChange={e => setForm({ ...form, link_url: e.target.value })} placeholder="https://..." className={inputClass} /></div>
                                     <div><label className="text-xs font-semibold">Status da Plataforma</label><CustomSelect value={form.status_plataforma} onChange={v => setForm({ ...form, status_plataforma: v, em_utilizacao: v === 'em_utilizacao' })} placeholder="Status" options={STATUS_PLATAFORMA} /></div>
-                                    <div><label className="text-xs font-semibold">Tags (ex: SAAS, APP)</label><input value={form.tags} onChange={e => setForm({ ...form, tags: e.target.value })} placeholder="SAAS, APP, SITE" className={inputClass} /></div>
-                                    <div className="rounded-xl bg-zinc-50 border p-3 text-xs"><p className="font-semibold mb-1">Preview:</p><p>Tipo: <b>{form.tipo}</b> • Status: <b>{form.status_plataforma}</b></p><p className="truncate">Link: {form.link_url || "Sem link"}</p></div>
+                                    <div><label className="text-xs font-semibold">Tags</label><input value={form.tags} onChange={e => setForm({ ...form, tags: e.target.value })} placeholder="SAAS, APP, SITE" className={inputClass} /></div>
                                 </div>
                             )}
                             {tab === 'produto' && isProduto && (

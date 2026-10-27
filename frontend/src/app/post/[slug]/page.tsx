@@ -29,6 +29,12 @@ function isSameText(a?: string, b?: string) {
     const clean = (s: string) => s.replace(/<[^>]*>/g, "").trim().toLowerCase();
     return clean(a) === clean(b);
 }
+function formatDate(d?: string) {
+    if (!d) return null;
+    try {
+        return new Date(d).toLocaleString("pt-AO", { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    } catch { return d; }
+}
 
 export default function PostPage() {
     const params = useParams();
@@ -88,6 +94,7 @@ export default function PostPage() {
     if (!post) return <div className="min-h-screen grid place-items-center">Post não encontrado</div>;
 
     const isProduto = ["produto", "product"].includes((post.tipo || "").toLowerCase());
+    const isEvento = (post.tipo || "").toLowerCase() === "evento";
     const cat = categories.find((c: any) => c.id === post.category_id);
     const bannerDentro = banners.find((b: any) => b.posicao === "dentro_post");
     const conteudoDuplicado = isSameText(post.descricao, post.conteudo);
@@ -150,7 +157,32 @@ export default function PostPage() {
                                 <p className="text-sm font-semibold">{likes} curtidas</p>
                                 <div className="mt-3 flex items-center gap-2 text-xs"><span className="h-px w-7 bg-sky-600" /><span className="font-bold uppercase tracking-widest text-sky-800">{cat?.nome || post.tipo}</span><span className="ml-auto text-slate-400">{new Date(post.created_at).toLocaleDateString("pt-AO")} • 👁 {post.views || 0}</span></div>
                                 <h1 className="mt-3 text-2xl font-semibold leading-tight tracking-tight sm:text-3xl">{post.titulo}</h1>
-                                {post.descricao && <p className="mt-2 text-justify text-sm leading-6 text-slate-500 sm:text-[15px]">{post.descricao}</p>}
+
+                                {/* BLOCO EXCLUSIVO PARA EVENTO */}
+                                {isEvento && (
+                                    <div className="mt-5 overflow-hidden rounded-2xl border border-sky-100 bg-white">
+                                        <div className="bg-sky-50 px-4 py-3 flex items-center justify-between">
+                                            <span className="text-xs font-bold tracking-widest text-sky-800">📅 INFORMAÇÕES DO EVENTO</span>
+                                            {post.modalidade && <span className="rounded-full bg-sky-600 px-2.5 py-1 text-[10px] font-bold uppercase text-white">{post.modalidade}</span>}
+                                        </div>
+                                        <div className="grid gap-3 p-4 text-sm sm:grid-cols-2">
+                                            <div><p className="text-xs text-slate-400">Data início</p><p className="font-semibold">{formatDate(post.data_inicio) || "A definir"}</p></div>
+                                            <div><p className="text-xs text-slate-400">Data fim</p><p className="font-semibold">{formatDate(post.data_fim) || "—"}</p></div>
+                                            <div><p className="text-xs text-slate-400">Local</p><p className="font-semibold">{post.local_evento || "—"}</p></div>
+                                            <div><p className="text-xs text-slate-400">Cidade</p><p className="font-semibold">{post.cidade || "—"}</p></div>
+                                            <div className="sm:col-span-2"><p className="text-xs text-slate-400">Endereço</p><p className="font-medium text-slate-600">{post.endereco || "—"}</p></div>
+                                            <div><p className="text-xs text-slate-400">Capacidade</p><p className="font-semibold">{post.capacidade ? `${post.inscritos_count || 0} / ${post.capacidade} inscritos` : `${post.inscritos_count || 0} inscritos`}</p></div>
+                                            <div><p className="text-xs text-slate-400">Organizador</p><p className="font-semibold">{post.organizador || "CONNECT"}</p></div>
+                                        </div>
+                                        <div className="flex flex-wrap gap-2 border-t p-4">
+                                            {post.link_inscricao && <a href={post.link_inscricao} target="_blank" className="rounded-full bg-black px-5 py-2.5 text-xs font-bold text-white">INSCREVER-SE</a>}
+                                            {post.link_mapa && <a href={post.link_mapa} target="_blank" className="rounded-full border px-5 py-2.5 text-xs font-bold">VER NO MAPA</a>}
+                                            {post.cidade && <span className="ml-auto text-xs text-slate-400">📍 {post.cidade}</span>}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {post.descricao && <p className="mt-4 text-justify text-sm leading-6 text-slate-500 sm:text-[15px]">{post.descricao}</p>}
                                 {isProduto && post.preco && <div className="mt-4 text-xl font-bold">{formatKz(post.preco_promocional || post.preco)}</div>}
                             </div>
                             <div className="border-t border-slate-100 p-4 sm:p-6">

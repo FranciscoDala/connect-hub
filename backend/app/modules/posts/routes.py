@@ -71,7 +71,7 @@ async def upload_post_media(file: UploadFile = File(...), admin=Depends(get_curr
 
 # POSTS LIST
 @router.get("/posts", response_model=List[PostResponse])
-def list_posts(db: Session=Depends(get_db), tipo: Optional[str]=None, category_id: Optional[uuid.UUID]=None, status: Optional[str]=Query(None), q: Optional[str]=None, destaque: Optional[bool]=None, limit: int=Query(50, le=100), offset: int=0):
+def list_posts(db: Session=Depends(get_db), tipo: Optional[str]=None, category_id: Optional[uuid.UUID]=None, status: Optional[str]=Query(None), q: Optional[str]=None, destaque: Optional[bool]=None, limit: int=Query(50, le=100), offset: int=0, upcoming: Optional[bool]=None):
     query = db.query(Post)
     if tipo:
         tipos = [t.strip().lower() for t in tipo.split(",") if t.strip()]
@@ -81,7 +81,18 @@ def list_posts(db: Session=Depends(get_db), tipo: Optional[str]=None, category_i
     if status: query = query.filter(func.lower(Post.status) == status.lower())
     if destaque is not None: query = query.filter(Post.destaque == destaque)
     if q: query = query.filter(Post.titulo.ilike(f"%{q}%"))
-    posts = query.order_by(Post.created_at.desc()).offset(offset).limit(limit).all()
+
+    # filtro especial para eventos futuros
+    if upcoming and tipo and 'evento' in tipo.lower():
+        query = query.filter(Post.data_inicio >= func.now())
+
+    # ordenação inteligente: se for evento, ordena por data_inicio, senão por created_at
+    if tipo and 'evento' in tipo.lower():
+        query = query.order_by(Post.data_inicio.asc().nulls_last(), Post.created_at.desc())
+    else:
+        query = query.order_by(Post.created_at.desc())
+
+    posts = query.offset(offset).limit(limit).all()
     return [to_post_response(p, db) for p in posts]
 
 @router.get("/posts/slug/{slug}", response_model=PostResponse)

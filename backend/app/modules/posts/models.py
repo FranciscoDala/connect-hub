@@ -50,6 +50,19 @@ class Post(Base):
     status_plataforma: Mapped[str] = mapped_column(String(30), default="em_desenvolvimento")
     em_utilizacao: Mapped[bool] = mapped_column(Boolean, default=False)
 
+    # ===== CAMPOS DE EVENTO =====
+    data_inicio: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True, index=True)
+    data_fim: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    local_evento: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    cidade: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    endereco: Mapped[str | None] = mapped_column(Text, nullable=True)
+    link_mapa: Mapped[str | None] = mapped_column(Text, nullable=True)
+    link_inscricao: Mapped[str | None] = mapped_column(Text, nullable=True)
+    modalidade: Mapped[str | None] = mapped_column(String(20), nullable=True, default="presencial") # presencial | online | hibrido
+    capacidade: Mapped[int | None] = mapped_column(Integer, nullable=True, default=0)
+    inscritos_count: Mapped[int] = mapped_column(Integer, default=0)
+    organizador: Mapped[str | None] = mapped_column(String(200), nullable=True)
+
     author_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True)
 
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
@@ -79,6 +92,6 @@ class PostReaction(Base):
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     post_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("posts.id", ondelete="CASCADE"), nullable=False, index=True)
     post: Mapped["Post"] = relationship("Post", back_populates="reactions")
-    client_id: Mapped[str] = mapped_column(String(100), nullable=False) # ip ou fingerprint do front
-    type: Mapped[str] = mapped_column(String(20), nullable=False) # like | dislike
+    client_id: Mapped[str] = mapped_column(String(100), nullable=False)
+    type: Mapped[str] = mapped_column(String(20), nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

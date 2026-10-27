@@ -69,6 +69,17 @@ class PostCreate(BaseModel):
     em_promocao: bool = False
     status_plataforma: Optional[str] = Field(default="em_desenvolvimento")
     em_utilizacao: bool = False
+    # evento
+    data_inicio: Optional[datetime] = None
+    data_fim: Optional[datetime] = None
+    local_evento: Optional[str] = None
+    cidade: Optional[str] = None
+    endereco: Optional[str] = None
+    link_mapa: Optional[str] = None
+    link_inscricao: Optional[str] = None
+    modalidade: Optional[str] = "presencial"
+    capacidade: Optional[int] = 0
+    organizador: Optional[str] = None
 
 class PostUpdate(BaseModel):
     titulo: Optional[str] = None
@@ -93,6 +104,18 @@ class PostUpdate(BaseModel):
     em_promocao: Optional[bool] = None
     status_plataforma: Optional[str] = None
     em_utilizacao: Optional[bool] = None
+    # evento
+    data_inicio: Optional[datetime] = None
+    data_fim: Optional[datetime] = None
+    local_evento: Optional[str] = None
+    cidade: Optional[str] = None
+    endereco: Optional[str] = None
+    link_mapa: Optional[str] = None
+    link_inscricao: Optional[str] = None
+    modalidade: Optional[str] = None
+    capacidade: Optional[int] = None
+    inscritos_count: Optional[int] = None
+    organizador: Optional[str] = None
 
 class PostResponse(BaseModel):
     id: uuid.UUID
@@ -127,6 +150,18 @@ class PostResponse(BaseModel):
     em_promocao: bool = False
     status_plataforma: str = "em_desenvolvimento"
     em_utilizacao: bool = False
+    # evento
+    data_inicio: Optional[datetime] = None
+    data_fim: Optional[datetime] = None
+    local_evento: Optional[str] = None
+    cidade: Optional[str] = None
+    endereco: Optional[str] = None
+    link_mapa: Optional[str] = None
+    link_inscricao: Optional[str] = None
+    modalidade: Optional[str] = None
+    capacidade: Optional[int] = None
+    inscritos_count: int = 0
+    organizador: Optional[str] = None
     created_at: datetime
     updated_at: datetime
     published_at: Optional[datetime] = None
@@ -167,6 +202,17 @@ class PostResponse(BaseModel):
             em_promocao=post.em_promocao or False,
             status_plataforma=post.status_plataforma or "em_desenvolvimento",
             em_utilizacao=post.em_utilizacao or False,
+            data_inicio=post.data_inicio,
+            data_fim=post.data_fim,
+            local_evento=getattr(post, 'local_evento', None),
+            cidade=getattr(post, 'cidade', None),
+            endereco=getattr(post, 'endereco', None),
+            link_mapa=getattr(post, 'link_mapa', None),
+            link_inscricao=getattr(post, 'link_inscricao', None),
+            modalidade=getattr(post, 'modalidade', None),
+            capacidade=getattr(post, 'capacidade', None),
+            inscritos_count=getattr(post, 'inscritos_count', 0) or 0,
+            organizador=getattr(post, 'organizador', None),
             created_at=post.created_at,
             updated_at=post.updated_at,
             published_at=post.published_at
