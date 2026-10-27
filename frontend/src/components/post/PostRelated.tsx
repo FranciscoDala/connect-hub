@@ -43,22 +43,20 @@ export default function ProdutosRelated({ posts }: { posts: Post[] }) {
                                 <Link
                                     key={item.id}
                                     href={link}
-                                    className="group flex w-full min-w-70 max-w-90 shrink-0 snap-center flex-col overflow-hidden rounded-3xl bg-white shadow-lg transition-all hover:-translate-y-1 lg:min-w-0 lg:max-w-none"
-                                    style={{ aspectRatio: '1 / 1.08' }}
+                                    className="group flex w-full min-w-70 max-w-90 shrink-0 snap-center flex-col overflow-hidden rounded-3xl bg-white shadow-lg transition-all hover:-translate-y-1 lg:min-w-0 lg:max-w-none lg:w-full"
                                 >
                                     {/* IMAGEM QUADRADA 1/1 */}
-                                    <div className="relative w-full overflow-hidden rounded-t-3xl" style={{ backgroundColor: '#ffd88f', aspectRatio: '1 / 1' }}>
+                                    <div className="relative w-full shrink-0 overflow-hidden rounded-t-3xl" style={{ backgroundColor: '#ffd88f', aspectRatio: '1 / 1' }}>
                                         <img src={img} alt={item.titulo} className="h-full w-full object-cover" />
                                     </div>
 
-                                    {/* CONTEUDO */}
+                                    {/* CONTEUDO - ALTURA AUTO */}
                                     <div className="flex flex-1 flex-col px-5 pb-4 pt-4" style={{ backgroundColor: '#fffcf5' }}>
                                         <h3 className="line-clamp-1 text-lg font-bold leading-tight" style={{ color: '#1f1f1f' }}>{item.titulo}</h3>
 
                                         <div className="mt-1.5 flex flex-wrap gap-x-4 gap-y-1">
-                                            <span className="text-xs text-neutral-400">{cat}</span>
-                                            <span className="text-xs text-neutral-400">{emPromo ? 'Em promoção' : 'Novo'}</span>
-                                            <span className="text-xs text-neutral-400">Original</span>
+                                            <span className="rounded-full border border-neutral-200 bg-white px-3 py-0.5 text-xs text-neutral-600">{emPromo ? 'Em promoção' : 'Novo'}</span>
+                                            <span className="rounded-full border border-neutral-200 bg-white px-3 py-0.5 text-xs text-neutral-600">Original</span>
                                         </div>
 
                                         <p className="mt-3 line-clamp-1 text-xs leading-5 text-neutral-500">
@@ -66,20 +64,14 @@ export default function ProdutosRelated({ posts }: { posts: Post[] }) {
                                         </p>
 
                                         <div className="mt-2.5 flex items-center gap-2">
-                                            <span className="text-xs text-neutral-500">Tags</span>
                                             <span className="rounded-full border border-neutral-200 bg-white px-3 py-0.5 text-xs text-neutral-600">{cat}</span>
-                                            <span className="rounded-full border border-neutral-200 bg-white px-3 py-0.5 text-xs text-neutral-600">Top</span>
                                         </div>
 
-                                        <div className="mt-auto flex items-end justify-between gap-3 pt-3">
+                                        <div className="mt-auto flex items-end justify-between gap-3 pt-4">
                                             <div className="leading-none">
-                                                <p className="text-lg font-bold" style={{ color: '#d49a1e' }}>{preco ? formatKz(preco) : '$10.00'}</p>
+                                                <p className="text-lg font-bold leading-tight" style={{ color: '#d49a1e' }}>{preco ? formatKz(preco) : '56 000 Kz'}</p>
                                                 <p className="mt-1 text-xs text-neutral-500">+ entrega</p>
                                             </div>
-
-                                            <span className="rounded-full px-5 py-2 text-xs font-bold shadow-sm transition" style={{ backgroundColor: '#fbbf24', color: '#1f1f1f' }}>
-                                                Add to cart
-                                            </span>
                                         </div>
                                     </div>
                                 </Link>

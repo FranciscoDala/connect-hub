@@ -63,7 +63,7 @@ export default function PostSidebar({ postId, categoryId }: Props) {
         <aside className="col-span-12 space-y-4 lg:col-span-4 lg:sticky lg:top-24 lg:self-start">
             {/* 1. MAIS RECENTES / LIDAS */}
             <div className="overflow-hidden rounded-none shadow-0">
-                <div className="flex items-center gap-6 border-b border-slate-100 px-5 pt-5">
+                <div className="flex items-center gap-6 border-b border-slate-100 pt-5">
                     <button
                         onClick={() => setTab("recentes")}
                         className={`relative pb-3 text-xs font-bold uppercase tracking-widest transition ${tab === "recentes" ? "text-sky-700" : "text-slate-400 hover:text-slate-600"
@@ -82,7 +82,7 @@ export default function PostSidebar({ postId, categoryId }: Props) {
                     </button>
                 </div>
 
-                <div className="px-5">
+                <div>
                     {list.length === 0 ? (
                         <div className="py-10 text-center text-xs text-slate-400">Carregando...</div>
                     ) : (
@@ -121,10 +121,9 @@ export default function PostSidebar({ postId, categoryId }: Props) {
                     <a href={banner.link_url} target="_blank" rel="noopener noreferrer">
                         <img src={banner.imagem_url} alt="Publicidade" className="w-full rounded-xl" />
                     </a>
-                    <p className="mt-2 text-center text-[10px] uppercase tracking-widest text-slate-400">Publicidade</p>
+                    <p className="mt-2 text-center text-xs uppercase tracking-widest text-slate-400">Publicidade</p>
                 </div>
             )}
-
 
         </aside>
     );
