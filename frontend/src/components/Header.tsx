@@ -17,7 +17,7 @@ export default function Header() {
                         </Link>
                         <div className="hidden items-center gap-6 text-sm font-semibold text-[#475569] lg:flex">
                             <Link href="/" className="hover:text-black">INÍCIO</Link>
-                            <a href="#destaques" className="hover:text-black">Destaques</a>
+                            <Link href="/eventos" className="hover:text-black">Eventos</Link>
                             <a href="#categorias" className="hover:text-black">Tecnologia</a>
                             <a href="#videos" className="hover:text-black">Connect TV</a>
                             <a href="#apps" className="hover:text-black">Apps</a>
@@ -39,7 +39,7 @@ export default function Header() {
                             <div className="rounded-4xl border bg-white p-6 shadow-sm">
                                 <div className="grid divide-y text-sm font-semibold">
                                     <Link href="/" onClick={() => setOpen(false)} className="flex justify-between py-4">Início <span className="text-[#0e8ac2]">→</span></Link>
-                                    <a href="#destaques" onClick={() => setOpen(false)} className="flex justify-between py-4">Destaques <span className="text-[#0e8ac2]">→</span></a>
+                                    <Link href="/eventos" onClick={() => setOpen(false)} className="flex justify-between py-4">Eventos <span className="text-[#0e8ac2]">→</span></Link>
                                     <a href="#categorias" onClick={() => setOpen(false)} className="flex justify-between py-4">Tecnologia <span className="text-[#0e8ac2]">→</span></a>
                                     <a href="#videos" onClick={() => setOpen(false)} className="flex justify-between py-4">Connect TV <span className="text-[#0e8ac2]">→</span></a>
                                     <a href="#apps" onClick={() => setOpen(false)} className="flex justify-between py-4">Apps <span className="text-[#0e8ac2]">→</span></a>
