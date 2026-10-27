@@ -62,7 +62,7 @@ export default function PostSidebar({ postId, categoryId }: Props) {
     return (
         <aside className="col-span-12 space-y-4 lg:col-span-4 lg:sticky lg:top-24 lg:self-start">
             {/* 1. MAIS RECENTES / LIDAS */}
-            <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+            <div className="overflow-hidden rounded-none shadow-sm">
                 <div className="flex items-center gap-6 border-b border-slate-100 px-5 pt-5">
                     <button
                         onClick={() => setTab("recentes")}
@@ -125,61 +125,7 @@ export default function PostSidebar({ postId, categoryId }: Props) {
                 </div>
             )}
 
-            {/* 3. CATEGORIAS */}
-            {categories.length > 0 && (
-                <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-                    <p className="text-xs font-bold uppercase tracking-widest text-slate-800">Categorias</p>
-                    <div className="mt-4 flex flex-wrap gap-2">
-                        {categories.map((c) => (
-                            <Link
-                                key={c.id}
-                                href={`/?cat=${c.id}`}
-                                className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition hover:bg-slate-900 hover:text-white ${categoryId === c.id ? "bg-slate-900 text-white border-slate-900" : "bg-white text-slate-600 border-slate-200"
-                                    }`}
-                            >
-                                {c.nome}
-                            </Link>
-                        ))}
-                    </div>
-                </div>
-            )}
 
-            {/* 4. NEWSLETTER / WHATSAPP */}
-            <div className="rounded-2xl border border-sky-100 bg-sky-50 p-5 shadow-sm">
-                <p className="text-xs font-bold uppercase tracking-widest text-sky-900">Fica ligado</p>
-                <h4 className="mt-2 text-base font-semibold leading-tight text-slate-900">
-                    Receba as notícias no WhatsApp
-                </h4>
-                <p className="mt-1 text-xs leading-5 text-slate-500">
-                    Entre no nosso canal e não perca nada que acontece em Angola e no mundo.
-                </p>
-                <a
-                    href="https://whatsapp.com/channel/seu-link-aqui"
-                    target="_blank"
-                    className="mt-4 flex h-10 w-full items-center justify-center rounded-full bg-green-600 text-xs font-bold text-white hover:bg-green-700"
-                >
-                    Entrar no canal
-                </a>
-            </div>
-
-            {/* 5. SEGUE-NOS */}
-            <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-                <p className="text-xs font-bold uppercase tracking-widest text-slate-800">Siga-nos</p>
-                <div className="mt-4 grid grid-cols-2 gap-2">
-                    <a href="#" className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold hover:bg-slate-50">
-                        <span className="h-2 w-2 rounded-full bg-blue-600" /> Facebook
-                    </a>
-                    <a href="#" className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold hover:bg-slate-50">
-                        <span className="h-2 w-2 rounded-full bg-sky-500" /> TikTok
-                    </a>
-                    <a href="#" className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold hover:bg-slate-50">
-                        <span className="h-2 w-2 rounded-full bg-pink-600" /> Instagram
-                    </a>
-                    <a href="#" className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold hover:bg-slate-50">
-                        <span className="h-2 w-2 rounded-full bg-black" /> YouTube
-                    </a>
-                </div>
-            </div>
         </aside>
     );
 }
