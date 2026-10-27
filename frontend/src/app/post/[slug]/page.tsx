@@ -144,7 +144,7 @@ export default function PostPage() {
                 <div className="grid grid-cols-12 gap-6 lg:gap-8">
                     <article className="col-span-12 lg:col-span-8">
                         <div className="overflow-hidden shadow-sm">
-                            {(post.thumbnail_url || post.media_url) && <img src={post.thumbnail_url || post.media_url} alt={post.titulo} className="max-h-140 w-full object-cover" />}
+                            {(post.thumbnail_url || post.media_url) && <img src={post.thumbnail_url || post.media_url} alt={post.titulo} className="max-h-140 w-full object-cover rounded-none" />}
                             <div className="p-6 sm:p-8">
                                 <div className="flex items-center gap-2 text-xs">
                                     <span className="h-px w-7 bg-sky-600" />
