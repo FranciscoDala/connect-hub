@@ -16,6 +16,7 @@ export default function Header() {
                             <img src="/connect.png" alt="CONNECT" className="h-9 w-auto object-contain sm:h-10" />
                         </Link>
                         <div className="hidden items-center gap-6 text-sm font-semibold text-[#475569] lg:flex">
+                            <Link href="/" className="hover:text-black">INÍCIO</Link>
                             <a href="#destaques" className="hover:text-black">Destaques</a>
                             <a href="#categorias" className="hover:text-black">Tecnologia</a>
                             <a href="#videos" className="hover:text-black">Connect TV</a>
@@ -37,7 +38,11 @@ export default function Header() {
                         <div className="mx-auto w-full max-w-7xl p-5 sm:px-8">
                             <div className="rounded-4xl border bg-white p-6 shadow-sm">
                                 <div className="grid divide-y text-sm font-semibold">
+                                    <Link href="/" onClick={() => setOpen(false)} className="flex justify-between py-4">Início <span className="text-[#0e8ac2]">→</span></Link>
                                     <a href="#destaques" onClick={() => setOpen(false)} className="flex justify-between py-4">Destaques <span className="text-[#0e8ac2]">→</span></a>
+                                    <a href="#categorias" onClick={() => setOpen(false)} className="flex justify-between py-4">Tecnologia <span className="text-[#0e8ac2]">→</span></a>
+                                    <a href="#videos" onClick={() => setOpen(false)} className="flex justify-between py-4">Connect TV <span className="text-[#0e8ac2]">→</span></a>
+                                    <a href="#apps" onClick={() => setOpen(false)} className="flex justify-between py-4">Apps <span className="text-[#0e8ac2]">→</span></a>
                                     <button onClick={() => { setOpen(false); setLoginOpen(true); }} className="flex w-full justify-between py-4 text-left">Login <span className="text-[#0e8ac2]">→</span></button>
                                 </div>
                             </div>
