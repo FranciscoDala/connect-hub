@@ -46,28 +46,28 @@ export default function PostRelacionados({ posts: initialPosts, categoryId, curr
   if (limited.length === 0) return null;
 
   return (
-    <div className="mt-14 overflow-hidden">
+    <div className="mt-14">
       <div className="flex items-center gap-3">
         <span className="h-px w-8 bg-sky-600" />
         <p className="text-xs font-bold uppercase tracking-widest text-sky-800">RELACIONADOS</p>
       </div>
 
-      <div className="mt-8 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-6 pl-1 pr-6 [-ms-overflow-style:none] [scrollbar-width:none] sm:grid sm:grid-cols-4 sm:gap-8 sm:overflow-visible sm:p-0 [&::-webkit-scrollbar]:hidden">
+      <div className="mt-8 flex snap-x snap-mandatory gap-5 overflow-x-auto pl-1 pr-8 sm:grid sm:grid-cols-4 sm:gap-8 sm:overflow-visible sm:p-0 [&::-webkit-scrollbar]:hidden [scrollbar-width:none] [-ms-overflow-style:none]">
         {limited.map((r) => (
           <Link
             key={r.id}
             href={`/post/${r.slug || r.id}`}
-            className="group flex-none w-[46%] snap-start sm:w-auto sm:flex-auto"
+            className="group flex-none w-1/2 snap-start sm:w-auto"
           >
-            <div className="mx-auto h-40 w-40 overflow-hidden rounded-full border border-slate-200 bg-white shadow-sm transition group-hover:ring-4 group-hover:ring-black/10 sm:h-40 sm:w-40 lg:h-46 lg:w-46">
+            <div className="mx-auto h-36 w-36 overflow-hidden rounded-full border border-slate-200 bg-white shadow-sm transition group-hover:ring-4 group-hover:ring-black/10 sm:h-40 sm:w-40 lg:h-46 lg:w-46">
               <img
                 src={r.thumbnail_url || r.media_url || "/placeholder.jpg"}
                 alt={r.titulo}
                 className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
               />
             </div>
-            <div className="mt-4 px-2 text-center">
-              <p className="text-sm font-bold leading-tight text-slate-900 group-hover:underline sm:line-clamp-2 sm:min-h-10">
+            <div className="mt-4 text-center">
+              <p className="line-clamp-3 text-sm font-bold leading-tight text-slate-900 group-hover:underline sm:line-clamp-2">
                 {r.titulo}
               </p>
               <p className="mt-1 text-xs text-slate-500">
@@ -76,11 +76,9 @@ export default function PostRelacionados({ posts: initialPosts, categoryId, curr
             </div>
           </Link>
         ))}
-        {/* spacer para não cortar o último no mobile */}
-        <div className="flex-none w-2 sm:hidden" />
       </div>
 
-      <div className="mt-2 flex justify-end pr-2 sm:pr-0">
+      <div className="mt-6 flex justify-end">
         <Link
           href={categoryId ? `/?categoria=${categoryId}` : "/"}
           className="flex items-center gap-1 text-xs font-medium text-sky-700 hover:underline"
