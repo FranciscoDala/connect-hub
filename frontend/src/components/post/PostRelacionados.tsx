@@ -52,7 +52,7 @@ export default function PostRelacionados({ posts: initialPosts, categoryId, curr
                 <p className="text-xs font-bold uppercase tracking-widest text-sky-800">RELACIONADOS</p>
             </div>
 
-            <div className="mt-6 flex gap-3 overflow-x-auto overflow-y-visible px-2 py-3 sm:grid sm:grid-cols-4 sm:gap-8 sm:overflow-visible sm:p-0 sm:pt-6 [&::-webkit-scrollbar]:hidden">
+            <div className="mt-6 flex gap-3 overflow-x-auto overflow-y-visible px-0 py-3 sm:grid sm:grid-cols-4 sm:gap-8 sm:overflow-visible sm:p-0 sm:pt-6 [&::-webkit-scrollbar]:hidden">
                 {limited.map((r) => (
                     <Link
                         key={r.id}

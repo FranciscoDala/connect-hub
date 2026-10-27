@@ -44,6 +44,7 @@ export default function PostPage() {
     const [dislikes, setDislikes] = useState(0);
     const [myReaction, setMyReaction] = useState<string | null>(null);
     const [showHeart, setShowHeart] = useState(false);
+    const [saved, setSaved] = useState(false);
     const lastTap = useRef(0);
 
     useEffect(() => {
@@ -115,15 +116,10 @@ export default function PostPage() {
         }
     }
 
-    function handleDoubleClick() {
-        triggerLike();
-    }
-
+    function handleDoubleClick() { triggerLike(); }
     function handleTouchEnd() {
         const now = Date.now();
-        if (now - lastTap.current < 300) {
-            triggerLike();
-        }
+        if (now - lastTap.current < 300) triggerLike();
         lastTap.current = now;
     }
 
@@ -131,10 +127,7 @@ export default function PostPage() {
         const url = `https://connect-uuo9.onrender.com/post/${post.slug || post.id}`;
         try {
             if (navigator.share) await navigator.share({ title: post.titulo, url });
-            else {
-                await navigator.clipboard.writeText(url);
-                alert("Link copiado!");
-            }
+            else { await navigator.clipboard.writeText(url); alert("Link copiado!"); }
             fetch(`${API}/api/v1/posts/${post.id}/share`, { method: "POST" }).catch(() => { });
         } catch { }
     }
@@ -145,7 +138,6 @@ export default function PostPage() {
     const isProduto = ["produto", "product"].includes((post.tipo || "").toLowerCase());
     const cat = categories.find((c: any) => c.id === post.category_id);
     const bannerDentro = banners.find((b: any) => b.posicao === "dentro_post");
-
     const conteudoDuplicado = isSameText(post.descricao, post.conteudo);
     const mostrarConteudo = post.conteudo && !conteudoDuplicado;
 
@@ -163,69 +155,80 @@ export default function PostPage() {
             <div className="mx-auto max-w-7xl px-5 pb-20 sm:px-8">
                 <div className="grid grid-cols-12 gap-6 lg:gap-8">
                     <article className="col-span-12 lg:col-span-8">
-                        <div className="overflow-hidden shadow-sm">
+                        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
                             {(post.thumbnail_url || post.media_url) && (
                                 <div
                                     className="relative select-none cursor-pointer overflow-hidden bg-black"
                                     onDoubleClick={handleDoubleClick}
                                     onTouchEnd={handleTouchEnd}
                                 >
-                                    <img
-                                        src={post.thumbnail_url || post.media_url}
-                                        alt={post.titulo}
-                                        className="max-h-140 w-full object-cover rounded-none"
-                                        draggable={false}
-                                    />
-                                    {/* Coração Instagram */}
+                                    <img src={post.thumbnail_url || post.media_url} alt={post.titulo} className="max-h-[560px] w-full object-cover" draggable={false} />
+
+                                    {/* Coração no canto quando já curtiu */}
+                                    {myReaction === "like" && (
+                                        <div className="absolute right-3 top-3 grid h-8 w-8 place-items-center rounded-full bg-white/90 shadow backdrop-blur">
+                                            <svg className="h-5 w-5 fill-red-600" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                                        </div>
+                                    )}
+
+                                    {/* Animação coração VERMELHO */}
                                     {showHeart && (
                                         <div className="pointer-events-none absolute inset-0 grid place-items-center">
-                                            <svg
-                                                className="h-24 w-24 animate-[igHeart_0.9s_ease-out_forwards] fill-white stroke-white drop-shadow-[0_2px_20px_rgba(0,0,0,0.5)]"
-                                                viewBox="0 0 24 24"
-                                            >
+                                            <svg className="h-28 w-28 animate-[igHeart_0.9s_ease-out_forwards] fill-red-600 drop-shadow-[0_4px_20px_rgba(0,0,0,0.6)]" viewBox="0 0 24 24">
                                                 <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
                                             </svg>
                                         </div>
                                     )}
-                                    <style>{`@keyframes igHeart { 0% { transform: scale(0); opacity: 0; } 15% { transform: scale(1.2); opacity: 1; } 30% { transform: scale(0.95); } 45%, 80% { transform: scale(1); opacity: 1; } 100% { transform: scale(1); opacity: 0; } }`}</style>
+                                    <style>{`@keyframes igHeart { 0% { transform: scale(0); opacity: 0; } 15% { transform: scale(1.25); opacity: 1; } 30% { transform: scale(0.95); } 45%, 80% { transform: scale(1); opacity: 1; } 100% { transform: scale(1); opacity: 0; } }`}</style>
                                 </div>
                             )}
-                            <div className="p-6 sm:p-8">
-                                <div className="flex items-center gap-2 text-xs">
-                                    <span className="h-px w-7 bg-sky-600" />
-                                    <span className="font-bold uppercase tracking-widest text-sky-800">{cat?.nome || post.tipo}</span>
-                                    <span className="ml-auto text-slate-400">{new Date(post.created_at).toLocaleDateString("pt-AO")}</span>
-                                </div>
-                                <h1 className="mt-4 text-3xl font-semibold leading-tight tracking-tight sm:text-4xl">{post.titulo}</h1>
-                                {post.descricao && <p className="mt-3 text-justify text-sm leading-6 text-slate-500 sm:text-base">{post.descricao}</p>}
-                                {isProduto && post.preco && <div className="mt-5 text-2xl font-bold">{formatKz(post.preco_promocional || post.preco)}</div>}
 
-                                {/* Só views + likes count, sem botão */}
-                                <div className="mt-6 flex items-center gap-3 text-xs text-slate-500">
-                                    <span className={`flex items-center gap-1.5 ${myReaction === "like" ? "text-red-600 font-semibold" : ""}`}>
-                                        <svg className={`h-4 w-4 ${myReaction === "like" ? "fill-red-600" : "fill-none stroke-current"}`} viewBox="0 0 24 24"><path strokeWidth={myReaction === "like" ? 0 : 1.5} d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-                                        {likes} curtidas
-                                    </span>
-                                    <span>•</span>
-                                    <span>👁 {post.views || 0} visualizações</span>
-                                    <button onClick={share} className="ml-auto h-9 rounded-full border bg-white px-4 text-xs hover:bg-slate-50">↗ Partilhar</button>
-                                </div>
-                                <p className="mt-2 text-[11px] text-slate-400">Dê 2 cliques na imagem para curtir ❤️</p>
+                            {/* Barra de ações estilo Instagram */}
+                            <div className="flex items-center gap-4 px-4 py-3">
+                                <button onClick={() => react("like")} className="group flex items-center gap-1.5">
+                                    <svg className={`h-6 w-6 transition ${myReaction === "like" ? "fill-red-600 stroke-red-600" : "fill-none stroke-black group-active:scale-90"}`} strokeWidth="1.8" viewBox="0 0 24 24">
+                                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                                    </svg>
+                                    <span className="text-sm font-semibold">{likes > 0 ? likes : ""}</span>
+                                </button>
+
+                                <span className="flex items-center gap-1.5 text-sm text-slate-600">
+                                    <svg className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
+                                </span>
+
+                                <button onClick={share} className="flex items-center gap-1.5">
+                                    <svg className="h-6 w-6 -rotate-12" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M22 2L11 13"/><path strokeLinecap="round" strokeLinejoin="round" d="M22 2l-7 20-4-9-4 20-7z"/></svg>
+                                </button>
+
+                                <button onClick={() => setSaved(!saved)} className="ml-auto">
+                                    <svg className={`h-6 w-6 transition ${saved ? "fill-black" : "fill-none"} stroke-black`} strokeWidth="1.8" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg>
+                                </button>
                             </div>
 
-                            <div className="border-t border-slate-100 p-6 sm:p-8">
+                            {/* Infos */}
+                            <div className="px-4 pb-1">
+                                <p className="text-sm font-semibold">{likes} curtidas</p>
+                                <div className="mt-3 flex items-center gap-2 text-xs">
+                                    <span className="h-px w-7 bg-sky-600" />
+                                    <span className="font-bold uppercase tracking-widest text-sky-800">{cat?.nome || post.tipo}</span>
+                                    <span className="ml-auto text-slate-400">{new Date(post.created_at).toLocaleDateString("pt-AO")} • 👁 {post.views || 0}</span>
+                                </div>
+                                <h1 className="mt-3 text-2xl font-semibold leading-tight tracking-tight sm:text-3xl">{post.titulo}</h1>
+                                {post.descricao && <p className="mt-2 text-justify text-sm leading-6 text-slate-500 sm:text-[15px]">{post.descricao}</p>}
+                                {isProduto && post.preco && <div className="mt-4 text-xl font-bold">{formatKz(post.preco_promocional || post.preco)}</div>}
+                            </div>
+
+                            <div className="border-t border-slate-100 p-4 sm:p-6">
                                 {mostrarConteudo && (
-                                    <div className="prose max-w-none prose-p:text-justify prose-p:text-sm prose-p:leading-7 prose-p:text-slate-600 sm:prose-p:text-base">
+                                    <div className="prose max-w-none prose-p:text-justify prose-p:text-sm prose-p:leading-7 prose-p:text-slate-600 sm:prose-p:text-[15px]">
                                         <div dangerouslySetInnerHTML={{ __html: post.conteudo }} />
                                     </div>
                                 )}
-
-                                {bannerDentro && <div className="mt-8 rounded-xl border bg-slate-50 p-3"><a href={bannerDentro.link_url} target="_blank"><img src={bannerDentro.imagem_url} className="w-full rounded-lg" alt="" /></a></div>}
+                                {bannerDentro && <div className="mt-6 rounded-xl border bg-slate-50 p-3"><a href={bannerDentro.link_url} target="_blank"><img src={bannerDentro.imagem_url} className="w-full rounded-lg" alt="" /></a></div>}
                             </div>
                         </div>
 
                         <PostRelacionados categoryId={post.category_id} currentPostId={post.id} posts={related} />
-
                     </article>
 
                     <PostSidebar postId={post.id} categoryId={post.category_id} />
