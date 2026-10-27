@@ -7,6 +7,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PostRelacionados from "@/components/post/PostRelacionados";
 import PostSidebar from "@/components/post/PostSidebar";
+import ProdutosSection from '@/components/seccoes/ProdutosSection'
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
@@ -151,7 +152,11 @@ export default function PostPage() {
                                 {bannerDentro && <div className="mt-6 rounded-xl border bg-slate-50 p-3"><a href={bannerDentro.link_url} target="_blank"><img src={bannerDentro.imagem_url} className="w-full rounded-lg" alt="" /></a></div>}
                             </div>
                         </div>
+
                         <PostRelacionados categoryId={post.category_id} currentPostId={post.id} posts={related} />
+
+                        <ProdutosSection posts={related} />
+
                     </article>
                     <PostSidebar postId={post.id} categoryId={post.category_id} />
                 </div>
