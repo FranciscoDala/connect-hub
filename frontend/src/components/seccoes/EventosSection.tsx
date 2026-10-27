@@ -18,7 +18,7 @@ export default function EventosSection({ posts }: { posts: Post[] }) {
         .slice(0, 8)
 
     return (
-        <section id="eventos" className="bg-white py-20 sm:py-28">
+        <section id="eventos" className="bg-white py-10 sm:py-18">
             <div className="mx-auto max-w-7xl px-5 sm:px-8">
                 <div className="flex items-center gap-3">
                     <span className="h-px w-8 bg-sky-600" />
