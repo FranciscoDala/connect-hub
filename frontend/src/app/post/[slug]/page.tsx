@@ -101,7 +101,7 @@ export default function PostPage() {
             <div className="mx-auto max-w-7xl px-5 pb-20 sm:px-8">
                 <div className="grid grid-cols-12 gap-6 lg:gap-8">
                     <article className="col-span-12 lg:col-span-8">
-                        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                        <div className="overflow-hidden rounded-none border-0">
                             {(post.thumbnail_url || post.media_url) && (
                                 <div className="relative select-none cursor-pointer overflow-hidden bg-black" onDoubleClick={handleDoubleClick} onTouchEnd={handleTouchEnd}>
                                     <img src={post.thumbnail_url || post.media_url} alt={post.titulo} className="max-h-140 w-full object-cover" draggable={false} />
@@ -126,10 +126,6 @@ export default function PostPage() {
                                     ) : (
                                         <svg className="size-6.5 fill-none stroke-black transition group-active:scale-90" strokeWidth="1.7" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
                                     )}
-                                </button>
-
-                                <button className="opacity-90">
-                                    <svg className="size-6.5" fill="none" stroke="currentColor" strokeWidth="1.7" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 20.25c0-2.5-5.25-4.5-5.25-8.25A5.25 5.25 0 0112 6.75a5.25 5.25 0 015.25 5.25c0 3.75-5.25 5.75-5.25 8.25z"/></svg>
                                 </button>
 
                                 <button onClick={share} className="group">
