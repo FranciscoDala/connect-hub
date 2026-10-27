@@ -18,10 +18,11 @@ export default function ProdutosRelated({ posts }: { posts: Post[] }) {
 
     return (
         <section id="produtos" className="py-2 sm:py-28">
-            <div className="mx-auto max-w-7xl px-5 sm:px-8">
+            <div className="mx-auto max-w-7xl">
+
                 <div className="flex items-center gap-3">
                     <span className="h-px w-8 bg-sky-600" />
-                    <p className="text-xs font-bold uppercase tracking-widest text-sky-800">APRESENTAÇÃO DE PRODUTOS</p>
+                    <p className="text-xs font-bold uppercase tracking-widest text-sky-800">NOSSOS PRODUTOS</p>
                 </div>
                 <h2 className="mt-4 max-w-xl text-2xl font-semibold leading-tight tracking-tight text-slate-700 sm:text-4xl">Produtos com tecnologias de ponta.</h2>
                 <p className="mt-4 max-w-2xl text-sm leading-6 text-slate-500">
