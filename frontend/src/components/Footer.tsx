@@ -51,11 +51,11 @@ export default function Footer() {
                     <div className="md:col-span-4">
                         <h4 className="text-sm font-bold tracking-widest text-[#334155]">CONNECT</h4>
                         <div className="mt-4 grid gap-1.5 text-sm leading-6 text-[#64748b]">
-                            <p>Talatona, Luanda Sul, Via AL16<br />Luanda, AO • {timeZone}</p>
+                            <p>Viana, Av. Deolinda Rodrigues Nº 100,  <br /> Luanda, AO • {timeZone}</p>
                             <div className="mt-3 grid gap-1">
                                 <p className="text-xs font-bold uppercase tracking-widest text-[#334155]">{weekDayString} • {dateString}</p>
                                 <p className="text-sm font-semibold text-[#1e293b]">{timeString} • Luanda</p>
-                                <p className="text-xs">Seg - Sex, 9:00 - 17:00 {isOpen ? '(Aberto)' : '(Fechado)'}</p>
+                                <p className="text-xs">Seg - Sex, 08:00 - 17:00 {isOpen ? '(Aberto)' : '(Fechado)'}</p>
                             </div>
                             <a href="mailto:connecttics25@gmail.com" className="mt-2 hover:text-black">connecttics25@gmail.com</a>
                         </div>

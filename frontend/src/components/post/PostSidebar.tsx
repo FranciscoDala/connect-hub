@@ -2,6 +2,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import EventoSidebar from "@/components/seccoes/EventoSidebar";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
@@ -21,9 +22,10 @@ type Banner = { imagem_url: string; link_url: string; posicao: string };
 type Props = {
     postId: string;
     categoryId?: string;
+    post?: any;
 };
 
-export default function PostSidebar({ postId, categoryId }: Props) {
+export default function PostSidebar({ postId, categoryId, post }: Props) {
     const [tab, setTab] = useState<"recentes" | "lidas">("recentes");
     const [recentes, setRecentes] = useState<PostMini[]>([]);
     const [lidas, setLidas] = useState<PostMini[]>([]);
@@ -61,6 +63,10 @@ export default function PostSidebar({ postId, categoryId }: Props) {
 
     return (
         <aside className="col-span-12 space-y-4 lg:col-span-4 lg:sticky lg:top-24 lg:self-start">
+
+            {/* 0. INFO EVENTO - SÓ APARECE SE FOR EVENTO */}
+            {post && <EventoSidebar post={post} />}
+
             {/* 1. MAIS RECENTES / LIDAS */}
             <div className="overflow-hidden rounded-none shadow-0">
                 <div className="flex items-center gap-6 border-b border-slate-100 pt-5">
