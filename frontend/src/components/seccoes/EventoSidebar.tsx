@@ -4,13 +4,11 @@
 function formatDate(d?: string) {
     if (!d) return null;
     try {
-        return new Date(d).toLocaleString("pt-AO", {
-            day: '2-digit',
-            month: 'long',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
+        const date = new Date(d);
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = String(date.getFullYear()).slice(-2);
+        return `${day}/${month}/${year}`;
     } catch { return d; }
 }
 
@@ -50,11 +48,7 @@ export default function EventoSidebar({ post }: { post: any }) {
 
             <div className={`p-4 space-y-4 ${isInativo ? 'grayscale-[0.3] opacity-80' : ''}`}>
                 <div className="grid grid-cols-2 gap-4">
-                    <div><p className="text-[11px] text-slate-400 uppercase tracking-wide">Data início</p><p className="mt-1 text-[13px] font-semibold leading-5 text-slate-800">{dataInicioLabel}</p></div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                    <div><p className="text-[11px] text-slate-400 uppercase tracking-wide">Data fim</p><p className="mt-1 text-[13px] font-semibold leading-5 text-slate-800">{post.data_fim ? formatDate(post.data_fim) : "—"}</p></div>
+                    <div><p className="text-[11px] text-slate-400 uppercase tracking-wide">Data</p><p className="mt-1 text-[13px] font-semibold leading-5 text-slate-800">{dataInicioLabel} até {post.data_fim ? formatDate(post.data_fim) : "—"}</p></div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
@@ -62,7 +56,6 @@ export default function EventoSidebar({ post }: { post: any }) {
                 </div>
 
                 <div><p className="text-[11px] text-slate-400 uppercase tracking-wide">Endereço</p><p className="mt-1 text-[13px] font-medium text-slate-600 leading-5">{post.endereco || "—"}</p></div>
-
 
                 <div className="grid grid-cols-2 gap-4 border-t border-slate-100 pt-4">
                     <div><p className="text-[11px] text-slate-400 uppercase tracking-wide">Capacidade</p><p className="mt-1 text-[13px] font-semibold text-slate-800">{post.capacidade ? `${post.inscritos_count || 0} / ${post.capacidade}` : `${post.inscritos_count || 0} inscritos`}</p></div>
