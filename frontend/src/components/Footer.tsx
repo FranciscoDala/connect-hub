@@ -2,13 +2,29 @@
 import Link from "next/link";
 import { useState, useEffect } from "react";
 
+const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
+type Category = { id: string; nome: string; slug: string };
+
 export default function Footer() {
     const [now, setNow] = useState<Date | null>(null);
+    const [categorias, setCategorias] = useState<Category[]>([]);
 
     useEffect(() => {
         setNow(new Date());
         const id = setInterval(() => setNow(new Date()), 60000);
         return () => clearInterval(id);
+    }, []);
+
+    // puxa categorias dinâmicas - máx 8
+    useEffect(() => {
+        fetch(`${API}/api/v1/categories`)
+            .then(r => r.json())
+            .then((data: Category[]) => {
+                const list = Array.isArray(data) ? data : [];
+                setCategorias(list.slice(0, 8));
+            })
+            .catch(() => {});
     }, []);
 
     const timeZone = "Africa/Luanda";
@@ -41,10 +57,22 @@ export default function Footer() {
                     <div className="md:col-span-3">
                         <h4 className="text-sm font-bold tracking-widest text-[#334155]">EXPLORE</h4>
                         <ul className="mt-4 grid gap-2.5 text-sm text-[#64748b]">
-                            <li><a href="#destaques" className="hover:text-black">About the Company</a></li>
-                            <li><a href="#categorias" className="hover:text-black">Our Services</a></li>
-                            <li><a href="#videos" className="hover:text-black">Our Guarantees</a></li>
-                            <li><a href="#apps" className="hover:text-black">Business Inquiries</a></li>
+                            {categorias.length > 0 ? (
+                                categorias.map(cat => (
+                                    <li key={cat.id}>
+                                        <Link href={`/categoria/${cat.slug}`} className="hover:text-black capitalize">
+                                            {cat.nome}
+                                        </Link>
+                                    </li>
+                                ))
+                            ) : (
+                                <>
+                                    <li><a href="#destaques" className="hover:text-black">About the Company</a></li>
+                                    <li><a href="#categorias" className="hover:text-black">Our Services</a></li>
+                                    <li><a href="#videos" className="hover:text-black">Our Guarantees</a></li>
+                                    <li><a href="#apps" className="hover:text-black">Business Inquiries</a></li>
+                                </>
+                            )}
                         </ul>
                     </div>
 
