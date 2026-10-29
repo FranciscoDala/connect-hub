@@ -93,6 +93,14 @@ export default function PostPage() {
     const conteudoDuplicado = isSameText(post.descricao, post.conteudo);
     const mostrarConteudo = post.conteudo && !conteudoDuplicado;
 
+    // STATUS DO EVENTO
+    const statusRaw = (post.status || post.status_evento || post.estado || post.situacao || "").toString().toLowerCase();
+    const isCancelado = ["cancelado", "cancelada", "canceled", "cancelled"].includes(statusRaw);
+    const isAdiado = ["adiado", "adiada", "postponed", "adiamento"].includes(statusRaw);
+    const isEsgotado = ["esgotado", "esgotada", "soldout", "lotado", "lotada", "esgotado"].includes(statusRaw);
+    const isInativo = isCancelado || isAdiado || isEsgotado;
+    const seloImg = isCancelado ? "/selos/cancelado.png" : isAdiado ? "/selos/adiado.png" : "/selos/esgotado.png";
+
     return (
         <main className="min-h-screen bg-stone-50 text-slate-800">
             <Header />
@@ -108,10 +116,21 @@ export default function PostPage() {
                                     <img
                                         src={post.thumbnail_url || post.media_url}
                                         alt={post.titulo}
-                                        className="block w-full h-auto max-h-[85vh] lg:max-h-[750px] rounded-none object-contain object-center"
+                                        className={`block w-full h-auto max-h-[85vh] lg:max-h-[750px] rounded-none object-contain object-center transition-all duration-300 ${isInativo ? 'grayscale' : ''}`}
                                         draggable={false}
                                     />
-                                    {myReaction === "like" && (
+                                    {/* OVERLAY PRETO E BRANCO + SELO */}
+                                    {isInativo && (
+                                        <div className="absolute inset-0 bg-black/20 flex items-center justify-center p-8">
+                                            <img
+                                                src={seloImg}
+                                                alt={statusRaw}
+                                                className="w-[85%] max-w-[420px] h-auto object-contain drop-shadow-[0_4px_20px_rgba(0,0,0,0.5)] animate-[stampIn_0.4s_ease-out]"
+                                            />
+                                        </div>
+                                    )}
+
+                                    {myReaction === "like" && !isInativo && (
                                         <div className="absolute right-3 top-3 grid size-8 place-items-center rounded-full bg-white/90 shadow backdrop-blur">
                                             <svg className="size-5 fill-red-600" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
                                         </div>
@@ -121,7 +140,7 @@ export default function PostPage() {
                                             <svg className="size-28 animate-[igHeart_0.9s_ease-out_forwards] fill-red-600 drop-shadow-[0_4px_20px_rgba(0,0,0,0.6)]" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
                                         </div>
                                     )}
-                                    <style>{`@keyframes igHeart { 0% { transform: scale(0); opacity: 0; } 15% { transform: scale(1.25); opacity: 1; } 30% { transform: scale(0.95); } 45%, 80% { transform: scale(1); opacity: 1; } 100% { transform: scale(1); opacity: 0; } }`}</style>
+                                    <style>{`@keyframes igHeart { 0% { transform: scale(0); opacity: 0; } 15% { transform: scale(1.25); opacity: 1; } 30% { transform: scale(0.95); } 45%, 80% { transform: scale(1); opacity: 1; } 100% { transform: scale(1); opacity: 0; } } @keyframes stampIn { 0% { transform: scale(2) rotate(-15deg); opacity: 0; } 100% { transform: scale(1) rotate(-12deg); opacity: 1; } }`}</style>
                                 </div>
                             )}
 
