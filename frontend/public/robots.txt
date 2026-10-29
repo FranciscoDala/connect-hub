@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://connect-uuo9.onrender.com/sitemap.xml
