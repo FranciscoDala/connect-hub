@@ -37,7 +37,7 @@ export default function NotFound() {
                         <div className="absolute -inset-10 rounded-full bg-sky-100 blur-3xl opacity-60" />
                         <img src="/connect.png" alt="CONNECT" className="relative h-24 w-auto opacity-20 grayscale sm:h-28" />
                     </div>
-                    <p className="mt-6 text-xs font-bold uppercase tracking-widest text-slate-400">CONNECT - Tecnologia de ponta</p>
+                    <p className="mt-6 text-xs font-bold uppercase tracking-widest text-slate-400">CONNECT - Inovamos para liderar</p>
                 </div>
             </div>
             <Footer />
