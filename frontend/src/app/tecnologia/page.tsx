@@ -20,39 +20,54 @@ export default function TecnologiaPage() {
                     fetch(`${API}/api/v1/categories`).then(r => r.json()).catch(() => [])
                 ]);
 
-                // Acha ID da categoria tecnologia
-                const catTec = (catsRes as any[]).find((c: any) =>
-                    (c.nome || c.slug || '').toLowerCase().includes('tecnolog') ||
-                    (c.nome || '').toLowerCase().includes('tec')
+                const cats = Array.isArray(catsRes) ? catsRes : [];
+                const postsList = Array.isArray(postsRes) ? postsRes : [];
+
+                // cria mapa id -> categoria
+                const catMap = new Map(cats.map((c: any) => [c.id, c]));
+                const catTec = cats.find((c: any) =>
+                    (c.nome || c.slug || '').toLowerCase().includes('tecnolog')
                 );
 
-                const filtrados = (postsRes as any[]).filter((p: any) => {
+                let filtrados = postsList.filter((p: any) => {
                     const status = (p.status || '').toLowerCase();
                     if (status !== 'published') return false;
 
-                    // Verifica categoria
-                    const catIdMatch = catTec ? p.category_id === catTec.id : false;
-                    const catNome = (p.category?.nome || p.category_name || p.categoria?.nome || p.categoria_nome || '').toLowerCase();
-                    const catNomeMatch = catNome.includes('tecnolog') || catNome.includes('tec');
+                    const catById = catMap.get(p.category_id);
+                    const nomeDaCategoria = (
+                        catById?.nome ||
+                        p.category?.nome ||
+                        p.category_name ||
+                        p.categoria?.nome ||
+                        p.categoria_nome || ''
+                    ).toLowerCase();
 
-                    const isTecCategory = catIdMatch || catNomeMatch;
+                    const isTecPorCategoria = nomeDaCategoria.includes('tecnolog');
+                    const isTecPorId = catTec ? p.category_id === catTec.id : false;
+                    const isTecPorTipo = (p.tipo || '').toLowerCase() === 'tecnologia';
 
-                    // Só produtos e notícias dentro da categoria tecnologia
-                    const tipo = (p.tipo || '').toLowerCase();
-                    const isProdutoOuNoticia = ['produto','product','noticia','notícias','noticia','news','artigo','blog'].includes(tipo) || true; // pega todos da categoria
-
-                    return isTecCategory && isProdutoOuNoticia;
+                    return isTecPorCategoria || isTecPorId || isTecPorTipo;
                 });
 
+                // FALLBACK: se não achou nada na categoria, mostra todos produtos + noticias (pra não ficar vazio)
+                if (filtrados.length === 0) {
+                    filtrados = postsList.filter((p: any) => {
+                        const status = (p.status || '').toLowerCase();
+                        const tipo = (p.tipo || '').toLowerCase();
+                        return status === 'published' && ['produto','product','noticia','news','tecnologia'].includes(tipo);
+                    });
+                }
+
                 setPosts(filtrados);
-            } catch {}
+            } catch (e) {
+                console.error(e);
+            }
             setLoading(false);
         })();
     }, []);
 
     const totalPages = Math.ceil(posts.length / PER_PAGE);
-    const start = (currentPage - 1) * PER_PAGE;
-    const currentPosts = posts.slice(start, start + PER_PAGE);
+    const currentPosts = posts.slice((currentPage - 1) * PER_PAGE, currentPage * PER_PAGE);
 
     function goToPage(page: number) {
         if (page < 1 || page > totalPages) return;
@@ -117,33 +132,11 @@ export default function TecnologiaPage() {
 
                         {totalPages > 1 && (
                             <div className="mt-12 flex items-center justify-center gap-2">
-                                <button
-                                    onClick={() => goToPage(currentPage - 1)}
-                                    disabled={currentPage === 1}
-                                    className="grid size-9 place-items-center rounded-full border border-slate-200 bg-white text-sm font-bold text-slate-600 transition hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed"
-                                >
-                                    ‹
-                                </button>
+                                <button onClick={() => goToPage(currentPage - 1)} disabled={currentPage === 1} className="grid size-9 place-items-center rounded-full border border-slate-200 bg-white text-sm font-bold text-slate-600 disabled:opacity-40">‹</button>
                                 {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                                    <button
-                                        key={page}
-                                        onClick={() => goToPage(page)}
-                                        className={`grid size-9 place-items-center rounded-full text-xs font-bold transition ${
-                                            currentPage === page
-                                                ? 'bg-sky-600 text-white shadow-lg'
-                                                : 'border border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
-                                        }`}
-                                    >
-                                        {page}
-                                    </button>
+                                    <button key={page} onClick={() => goToPage(page)} className={`grid size-9 place-items-center rounded-full text-xs font-bold transition ${currentPage === page ? 'bg-sky-600 text-white shadow-lg' : 'border border-slate-200 bg-white text-slate-600'}`}>{page}</button>
                                 ))}
-                                <button
-                                    onClick={() => goToPage(currentPage + 1)}
-                                    disabled={currentPage === totalPages}
-                                    className="grid size-9 place-items-center rounded-full border border-slate-200 bg-white text-sm font-bold text-slate-600 transition hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed"
-                                >
-                                    ›
-                                </button>
+                                <button onClick={() => goToPage(currentPage + 1)} disabled={currentPage === totalPages} className="grid size-9 place-items-center rounded-full border border-slate-200 bg-white text-sm font-bold text-slate-600 disabled:opacity-40">›</button>
                             </div>
                         )}
                     </>
