@@ -75,7 +75,7 @@ export default function EventosSection({ posts, hideHeader = false }: { posts: P
 
     if (eventos.length === 0) {
         return (
-            <section id="eventos" className="bg-[#f9f9f7] pt-10 sm:pt-16 pb-20">
+            <section id="eventos" className={hideHeader ? "bg-[#f9f9f7] py-4" : "bg-[#f9f9f7] pt-10 sm:pt-16 pb-20"}>
                 <div className="mx-auto max-w-7xl px-5 sm:px-8">
                     {!hideHeader && (
                         <>
@@ -89,7 +89,7 @@ export default function EventosSection({ posts, hideHeader = false }: { posts: P
                             </p>
                         </>
                     )}
-                    <div className="mt-10 flex flex-col items-center justify-center rounded-3xl border border-dashed border-slate-200 bg-white py-20">
+                    <div className="mt-6 flex flex-col items-center justify-center rounded-3xl border border-dashed border-slate-200 bg-white py-20">
                         <div className="grid h-12 w-12 place-items-center rounded-full bg-slate-50 border text-slate-400">📅</div>
                         <p className="mt-4 text-sm font-semibold text-slate-700">Sem eventos no momento</p>
                     </div>
@@ -102,7 +102,7 @@ export default function EventosSection({ posts, hideHeader = false }: { posts: P
     const next = () => setActive((s) => (s + 1) % eventos.length)
 
     return (
-        <section id="eventos" className="bg-[#f9f9f7] pt-10 sm:pt-16 pb-20 overflow-hidden select-none">
+        <section id="eventos" className={`${hideHeader ? 'bg-[#f9f9f7] pt-2 pb-10' : 'bg-[#f9f9f7] pt-10 sm:pt-16 pb-20'} overflow-hidden select-none`}>
             {!hideHeader && (
                 <div className="mx-auto max-w-7xl px-5 sm:px-8">
                     <div className="flex items-center gap-3">
@@ -116,7 +116,7 @@ export default function EventosSection({ posts, hideHeader = false }: { posts: P
                 </div>
             )}
 
-            <div className="relative mt-12 mx-auto max-w-7xl">
+            <div className={`relative mx-auto max-w-7xl ${hideHeader ? 'mt-2' : 'mt-12'}`}>
                 <button onClick={prev} className="hidden sm:grid absolute left-8 top-1/2 z-20 -translate-y-1/2 h-10 w-10 place-items-center rounded-full bg-white shadow border text-slate-600 hover:bg-black hover:text-white transition">←</button>
                 <button onClick={next} className="hidden sm:grid absolute right-8 top-1/2 z-20 -translate-y-1/2 h-10 w-10 place-items-center rounded-full bg-white shadow border text-slate-600 hover:bg-black hover:text-white transition">→</button>
 

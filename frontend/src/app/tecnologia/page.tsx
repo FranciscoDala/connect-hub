@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ProdutosSection from "@/components/seccoes/ProdutosSection";
-import NoticiasSection from "@/components/seccoes/NoticiasSection";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
@@ -58,7 +57,7 @@ export default function TecnologiaPage() {
     return (
         <main className="min-h-screen bg-stone-50">
             <Header />
-            <div className="mx-auto max-w-7xl px-5 pt-24 pb-10 sm:px-8">
+            <div className="mx-auto max-w-7xl px-5 pt-24 pb-2 sm:px-8">
                 <div className="flex items-center gap-3">
                     <span className="h-px w-8 bg-sky-600" />
                     <p className="text-xs font-bold uppercase tracking-widest text-sky-800">TECNOLOGIA</p>
@@ -74,13 +73,7 @@ export default function TecnologiaPage() {
                     <div className="size-8 animate-spin rounded-full border-2 border-slate-200 border-t-black"></div>
                 </div>
             ) : (
-                <>
-                    {/* PRODUTOS ACIMA - com hideHeader para não duplicar cabeçalho */}
-                    <ProdutosSection posts={posts} hideHeader />
-
-                    {/* NOTICIAS ABAIXO - com hideHeader para não duplicar cabeçalho */}
-                    <NoticiasSection posts={posts} hideHeader />
-                </>
+                <ProdutosSection posts={posts} hideHeader />
             )}
 
             <Footer />

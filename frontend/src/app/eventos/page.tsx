@@ -43,7 +43,7 @@ export default function EventosPage() {
         <main className="min-h-screen bg-stone-50">
             <Header />
 
-            <div className="mx-auto max-w-7xl px-5 pt-24 pb-6 sm:px-8">
+            <div className="mx-auto max-w-7xl px-5 pt-24 pb-2 sm:px-8">
                 <div className="flex items-center gap-3">
                     <span className="h-px w-8 bg-sky-600" />
                     <p className="text-xs font-bold uppercase tracking-widest text-sky-800">EVENTOS</p>
@@ -54,18 +54,17 @@ export default function EventosPage() {
                 </p>
             </div>
 
-            {/* EM CIMA COM HEADER OCULTO */}
             {!loading && posts.length > 0 && (
                 <EventosSection posts={posts} hideHeader />
             )}
 
             <div className="mx-auto max-w-7xl px-5 pb-20 sm:px-8">
                 {loading ? (
-                    <div className="mt-10 grid place-items-center py-20">
+                    <div className="mt-6 grid place-items-center py-20">
                         <div className="size-8 animate-spin rounded-full border-2 border-slate-200 border-t-black"></div>
                     </div>
                 ) : posts.length === 0 ? (
-                    <div className="mt-10 flex flex-col items-center justify-center rounded-3xl border border-dashed border-slate-200 bg-white py-20">
+                    <div className="mt-6 flex flex-col items-center justify-center rounded-3xl border border-dashed border-slate-200 bg-white py-20">
                         <div className="grid h-12 w-12 place-items-center rounded-full border bg-white text-slate-400">📅</div>
                         <p className="mt-4 text-sm font-semibold text-slate-700">Sem eventos disponíveis no momento</p>
                     </div>

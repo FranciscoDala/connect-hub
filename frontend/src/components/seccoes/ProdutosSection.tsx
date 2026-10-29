@@ -17,7 +17,7 @@ export default function ProdutosSection({ posts, hideHeader = false }: { posts: 
         .slice(0, 8)
 
     return (
-        <section id="produtos" className="bg-white py-10 sm:py-18">
+        <section id="produtos" className={`${hideHeader ? 'bg-transparent pt-2 pb-10' : 'bg-white py-10 sm:py-18'}`}>
             <div className="mx-auto max-w-7xl px-5 sm:px-8">
                 {!hideHeader && (
                     <>
@@ -33,18 +33,18 @@ export default function ProdutosSection({ posts, hideHeader = false }: { posts: 
                 )}
 
                 {produtos.length === 0 ? (
-                    <div className="mt-10 flex flex-col items-center justify-center rounded-3xl border border-dashed border-slate-200 bg-slate-50 py-20">
+                    <div className={`${hideHeader ? 'mt-2' : 'mt-10'} flex flex-col items-center justify-center rounded-3xl border border-dashed border-slate-200 bg-white/60 py-20`}>
                         <div className="grid h-12 w-12 place-items-center rounded-full bg-white border text-slate-400">📦</div>
                         <p className="mt-4 text-sm font-semibold text-slate-700">Sem produtos disponíveis</p>
                     </div>
                 ) : (
-                    <div className="mt-10 flex snap-x snap-mandatory gap-4 overflow-x-auto lg:grid lg:grid-cols-4 lg:gap-6 lg:overflow-visible" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' } as any}>
+                    <div className={`${hideHeader ? 'mt-2' : 'mt-10'} flex snap-x snap-mandatory gap-4 overflow-x-auto lg:grid lg:grid-cols-4 lg:gap-6 lg:overflow-visible`} style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' } as any}>
                         {produtos.map((item: any) => {
                             const img = item.thumbnail_url || item.media_url || '/connect.png'
                             const link = `/post/${item.slug || item.id}`
                             const emPromo = item.em_promocao && item.preco_promocional
                             return (
-                                <Link key={item.id} href={link} className="group flex w-full min-w-full shrink-0 snap-center flex-col overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 transition-all hover:-translate-y-1 hover:shadow-md lg:min-w-0">
+                                <Link key={item.id} href={link} className="group flex w-full min-w-full shrink-0 snap-center flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-all hover:-translate-y-1 hover:shadow-md lg:min-w-0">
                                     <div className="relative w-full overflow-hidden bg-slate-100" style={{ aspectRatio: '4 / 3' }}>
                                         <img src={img} alt={item.titulo} className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
                                         {emPromo && <span className="absolute left-3 top-3 rounded-full bg-red-500 px-2.5 py-1 text-xs font-bold text-white">PROMO</span>}
