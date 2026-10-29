@@ -75,11 +75,11 @@ export default function TecnologiaPage() {
                 </div>
             ) : (
                 <>
-                    {/* PRODUTOS ACIMA - já com preço, scroll mobile 100% width, scrollbar invisível */}
-                    <ProdutosSection posts={posts} />
+                    {/* PRODUTOS ACIMA - com hideHeader para não duplicar cabeçalho */}
+                    <ProdutosSection posts={posts} hideHeader />
 
-                    {/* NOTICIAS ABAIXO */}
-                    <NoticiasSection posts={posts} />
+                    {/* NOTICIAS ABAIXO - com hideHeader para não duplicar cabeçalho */}
+                    <NoticiasSection posts={posts} hideHeader />
                 </>
             )}
 

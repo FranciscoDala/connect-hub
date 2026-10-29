@@ -40,7 +40,6 @@ export default function ProdutosSection({ posts, hideHeader = false }: { posts: 
                 ) : (
                     <div className="mt-10 flex snap-x snap-mandatory gap-4 overflow-x-auto lg:grid lg:grid-cols-4 lg:gap-6 lg:overflow-visible" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' } as any}>
                         {produtos.map((item: any) => {
-                            const cat = (item.category?.nome || item.category_name || 'PRODUTO').toUpperCase()
                             const img = item.thumbnail_url || item.media_url || '/connect.png'
                             const link = `/post/${item.slug || item.id}`
                             const emPromo = item.em_promocao && item.preco_promocional

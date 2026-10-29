@@ -9,7 +9,7 @@ function formatData(d?: string) {
     return new Date(d).toLocaleDateString('pt-AO', { day: '2-digit', month: 'short', year: 'numeric' })
 }
 
-export default function EventosSection({ posts }: { posts: Post[] }) {
+export default function EventosSection({ posts, hideHeader = false }: { posts: Post[]; hideHeader?: boolean }) {
     const eventos = posts
         .filter(p => {
             const status = (p.status || '').toLowerCase()
@@ -66,7 +66,6 @@ export default function EventosSection({ posts }: { posts: Post[] }) {
         isHorizontal.current = false
     }
 
-    // OFFSET CIRCULAR - garante 2 pra cada lado
     const getCircularOffset = (i: number, active: number, len: number) => {
         let offset = i - active
         offset = ((offset % len) + len) % len
@@ -78,14 +77,18 @@ export default function EventosSection({ posts }: { posts: Post[] }) {
         return (
             <section id="eventos" className="bg-[#f9f9f7] pt-10 sm:pt-16 pb-20">
                 <div className="mx-auto max-w-7xl px-5 sm:px-8">
-                    <div className="flex items-center gap-3">
-                        <span className="h-px w-8 bg-sky-600" />
-                        <p className="text-xs font-bold uppercase tracking-widest text-sky-800">PRÓXIMOS EVENTOS</p>
-                    </div>
-                    <h2 className="mt-4 max-w-xl text-3xl font-semibold leading-tight tracking-tight text-slate-700 sm:text-4xl">Eventos e formações exclusivas.</h2>
-                    <p className="mt-4 max-w-2xl text-justify text-sm leading-6 text-slate-500">
-                        Participe dos nossos workshops, lançamentos e formações presenciais e online em todo o país.
-                    </p>
+                    {!hideHeader && (
+                        <>
+                            <div className="flex items-center gap-3">
+                                <span className="h-px w-8 bg-sky-600" />
+                                <p className="text-xs font-bold uppercase tracking-widest text-sky-800">PRÓXIMOS EVENTOS</p>
+                            </div>
+                            <h2 className="mt-4 max-w-xl text-3xl font-semibold leading-tight tracking-tight text-slate-700 sm:text-4xl">Eventos e formações exclusivas.</h2>
+                            <p className="mt-4 max-w-2xl text-justify text-sm leading-6 text-slate-500">
+                                Participe dos nossos workshops, lançamentos e formações presenciais e online em todo o país.
+                            </p>
+                        </>
+                    )}
                     <div className="mt-10 flex flex-col items-center justify-center rounded-3xl border border-dashed border-slate-200 bg-white py-20">
                         <div className="grid h-12 w-12 place-items-center rounded-full bg-slate-50 border text-slate-400">📅</div>
                         <p className="mt-4 text-sm font-semibold text-slate-700">Sem eventos no momento</p>
@@ -100,16 +103,18 @@ export default function EventosSection({ posts }: { posts: Post[] }) {
 
     return (
         <section id="eventos" className="bg-[#f9f9f7] pt-10 sm:pt-16 pb-20 overflow-hidden select-none">
-            <div className="mx-auto max-w-7xl px-5 sm:px-8">
-                <div className="flex items-center gap-3">
-                    <span className="h-px w-8 bg-sky-600" />
-                    <p className="text-xs font-bold uppercase tracking-widest text-sky-800">PRÓXIMOS EVENTOS</p>
+            {!hideHeader && (
+                <div className="mx-auto max-w-7xl px-5 sm:px-8">
+                    <div className="flex items-center gap-3">
+                        <span className="h-px w-8 bg-sky-600" />
+                        <p className="text-xs font-bold uppercase tracking-widest text-sky-800">PRÓXIMOS EVENTOS</p>
+                    </div>
+                    <h2 className="mt-4 max-w-xl text-3xl font-semibold leading-tight tracking-tight text-slate-700 sm:text-4xl">Eventos e formações exclusivas.</h2>
+                    <p className="mt-4 max-w-2xl text-justify text-sm leading-6 text-slate-500">
+                        Participe dos nossos workshops, lançamentos e formações presenciais e online em todo o país.
+                    </p>
                 </div>
-                <h2 className="mt-4 max-w-xl text-3xl font-semibold leading-tight tracking-tight text-slate-700 sm:text-4xl">Eventos e formações exclusivas.</h2>
-                <p className="mt-4 max-w-2xl text-justify text-sm leading-6 text-slate-500">
-                    Participe dos nossos workshops, lançamentos e formações presenciais e online em todo o país.
-                </p>
-            </div>
+            )}
 
             <div className="relative mt-12 mx-auto max-w-7xl">
                 <button onClick={prev} className="hidden sm:grid absolute left-8 top-1/2 z-20 -translate-y-1/2 h-10 w-10 place-items-center rounded-full bg-white shadow border text-slate-600 hover:bg-black hover:text-white transition">←</button>
@@ -156,7 +161,6 @@ export default function EventosSection({ posts }: { posts: Post[] }) {
                             opacity = 0.75
                             filter = 'brightness(0.8)'
                         } else {
-                            // esconde o resto mas mantém circular
                             transform = `translateX(${offset * 140}px) scale(0.6)`
                             opacity = 0
                         }

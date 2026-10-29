@@ -12,7 +12,7 @@ type Post = {
     status: string;
 }
 
-export default function NoticiasSection({ posts }: { posts: Post[] }) {
+export default function NoticiasSection({ posts, hideHeader = false }: { posts: Post[]; hideHeader?: boolean }) {
     const noticias = posts
         .filter(p => {
             const status = (p.status || '').toLowerCase()
@@ -26,11 +26,15 @@ export default function NoticiasSection({ posts }: { posts: Post[] }) {
     return (
         <section id="noticias" className="bg-white py-20 sm:py-28">
             <div className="mx-auto max-w-7xl px-5 sm:px-8">
-                <div className="flex items-center gap-3">
-                    <span className="h-px w-8 bg-blue-500" />
-                    <p className="text-xs font-bold uppercase tracking-widest text-sky-600">NOTÍCIAS E MÍDIA</p>
-                </div>
-                <h2 className="mt-4 max-w-xl text-3xl font-semibold leading-tight tracking-tight text-slate-800 sm:text-4xl">Últimas atualizações da empresa.</h2>
+                {!hideHeader && (
+                    <>
+                        <div className="flex items-center gap-3">
+                            <span className="h-px w-8 bg-blue-500" />
+                            <p className="text-xs font-bold uppercase tracking-widest text-sky-600">NOTÍCIAS E MÍDIA</p>
+                        </div>
+                        <h2 className="mt-4 max-w-xl text-3xl font-semibold leading-tight tracking-tight text-slate-800 sm:text-4xl">Últimas atualizações da empresa.</h2>
+                    </>
+                )}
                 <div className="mt-10 flex snap-x snap-mandatory gap-0 overflow-x-auto lg:grid lg:grid-cols-4 lg:gap-6 lg:overflow-visible" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' } as any}>
                     {noticias.map(post => {
                         const dataFormatada = new Date(post.created_at).toLocaleDateString('pt-AO', { day: '2-digit', month: 'long', year: 'numeric' })
