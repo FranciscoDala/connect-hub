@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ProdutosSection from "@/components/seccoes/ProdutosSection";
+import NoticiasSection from "@/components/seccoes/NoticiasSection";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
@@ -17,29 +18,17 @@ export default function TecnologiaPage() {
                     fetch(`${API}/api/v1/posts?limit=100`).then(r => r.json()),
                     fetch(`${API}/api/v1/categories`).then(r => r.json()).catch(() => [])
                 ]);
-
                 const cats = Array.isArray(catsRes) ? catsRes : [];
                 const postsList = Array.isArray(postsRes) ? postsRes : [];
                 const catMap = new Map(cats.map((c: any) => [c.id, c]));
                 const catTec = cats.find((c: any) => (c.nome || c.slug || '').toLowerCase().includes('tecnolog'));
-
                 let filtrados = postsList.filter((p: any) => {
                     const status = (p.status || '').toLowerCase();
                     if (status !== 'published') return false;
                     const catById = catMap.get(p.category_id);
-                    const nomeDaCategoria = (
-                        catById?.nome ||
-                        p.category?.nome ||
-                        p.category_name ||
-                        p.categoria?.nome ||
-                        p.categoria_nome || ''
-                    ).toLowerCase();
-                    const isTecPorCategoria = nomeDaCategoria.includes('tecnolog');
-                    const isTecPorId = catTec ? p.category_id === catTec.id : false;
-                    const isTecPorTipo = (p.tipo || '').toLowerCase() === 'tecnologia';
-                    return isTecPorCategoria || isTecPorId || isTecPorTipo;
+                    const nomeDaCategoria = (catById?.nome || p.category?.nome || p.category_name || p.categoria?.nome || p.categoria_nome || '').toLowerCase();
+                    return nomeDaCategoria.includes('tecnolog') || (catTec ? p.category_id === catTec.id : false) || (p.tipo || '').toLowerCase() === 'tecnologia';
                 });
-
                 if (filtrados.length === 0) {
                     filtrados = postsList.filter((p: any) => {
                         const status = (p.status || '').toLowerCase();
@@ -47,7 +36,6 @@ export default function TecnologiaPage() {
                         return status === 'published' && ['produto','product','noticia','news','tecnologia'].includes(tipo);
                     });
                 }
-
                 setPosts(filtrados);
             } catch {}
             setLoading(false);
@@ -69,13 +57,17 @@ export default function TecnologiaPage() {
             </div>
 
             {loading ? (
-                <div className="py-20 grid place-items-center">
+                <div className="py-10 grid place-items-center">
                     <div className="size-8 animate-spin rounded-full border-2 border-slate-200 border-t-black"></div>
                 </div>
             ) : (
-                <ProdutosSection posts={posts} hideHeader />
+                <>
+                    {/* PRODUTOS SEM HEADER E COM FUNDO TRANSPARENTE E COLADO */}
+                    <ProdutosSection posts={posts} hideHeader />
+                    {/* NOTICIAS COM HEADER VISÍVEL */}
+                    <NoticiasSection posts={posts} />
+                </>
             )}
-
             <Footer />
         </main>
     );
