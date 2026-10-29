@@ -31,7 +31,7 @@ export default function EventoSidebar({ post }: { post: any }) {
     })();
 
     return (
-        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white-0 shadow-sm-0">
+        <div className="overflow-hidden rounded-2xl border-0 border-slate-200-0 bg-white-0 shadow-sm-0">
             <div className={`px-4 py-3 flex items-center justify-between border-b ${isInativo ? 'bg-red-50 border-red-100' : 'bg-sky-50 border-sky-100'}`}>
                 <span className={`text-[11px] font-bold tracking-widest flex items-center gap-2 ${isInativo ? 'text-red-700' : 'text-sky-800'}`}>
                     {isInativo ? '⚠️' : '📅'} {isCancelado ? 'EVENTO CANCELADO' : isAdiado ? 'EVENTO ADIADO' : isEsgotado ? 'EVENTO ESGOTADO' : 'INFORMAÇÕES DO EVENTO'}
@@ -51,15 +51,18 @@ export default function EventoSidebar({ post }: { post: any }) {
             <div className={`p-4 space-y-4 ${isInativo ? 'grayscale-[0.3] opacity-80' : ''}`}>
                 <div className="grid grid-cols-2 gap-4">
                     <div><p className="text-[11px] text-slate-400 uppercase tracking-wide">Data início</p><p className="mt-1 text-[13px] font-semibold leading-5 text-slate-800">{dataInicioLabel}</p></div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
                     <div><p className="text-[11px] text-slate-400 uppercase tracking-wide">Data fim</p><p className="mt-1 text-[13px] font-semibold leading-5 text-slate-800">{post.data_fim ? formatDate(post.data_fim) : "—"}</p></div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
-                    <div><p className="text-[11px] text-slate-400 uppercase tracking-wide">Local</p><p className="mt-1 text-[13px] font-semibold text-slate-800">{post.local_evento || "—"}</p></div>
-                    <div><p className="text-[11px] text-slate-400 uppercase tracking-wide">Cidade</p><p className="mt-1 text-[13px] font-semibold text-slate-800">{post.cidade || "—"}</p></div>
+                    <div><p className="text-[11px] text-slate-400 uppercase tracking-wide">Local</p><p className="mt-1 text-[13px] font-semibold text-slate-800">{post.local_evento || "—"}, {post.cidade || "—"}</p></div>
                 </div>
 
                 <div><p className="text-[11px] text-slate-400 uppercase tracking-wide">Endereço</p><p className="mt-1 text-[13px] font-medium text-slate-600 leading-5">{post.endereco || "—"}</p></div>
+
 
                 <div className="grid grid-cols-2 gap-4 border-t border-slate-100 pt-4">
                     <div><p className="text-[11px] text-slate-400 uppercase tracking-wide">Capacidade</p><p className="mt-1 text-[13px] font-semibold text-slate-800">{post.capacidade ? `${post.inscritos_count || 0} / ${post.capacidade}` : `${post.inscritos_count || 0} inscritos`}</p></div>
