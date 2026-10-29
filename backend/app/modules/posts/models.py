@@ -62,6 +62,8 @@ class Post(Base):
     capacidade: Mapped[int | None] = mapped_column(Integer, nullable=True, default=0)
     inscritos_count: Mapped[int] = mapped_column(Integer, default=0)
     organizador: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    # NOVO: status do evento para cancelado / adiado / esgotado
+    status_evento: Mapped[str | None] = mapped_column(String(30), nullable=True, default="ativo")  # ativo | cancelado | adiado | esgotado
 
     author_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True)
 

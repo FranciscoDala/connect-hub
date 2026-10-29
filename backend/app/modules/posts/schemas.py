@@ -80,6 +80,7 @@ class PostCreate(BaseModel):
     modalidade: Optional[str] = "presencial"
     capacidade: Optional[int] = 0
     organizador: Optional[str] = None
+    status_evento: Optional[str] = Field(default="ativo")  # ativo | cancelado | adiado | esgotado
 
 class PostUpdate(BaseModel):
     titulo: Optional[str] = None
@@ -116,6 +117,7 @@ class PostUpdate(BaseModel):
     capacidade: Optional[int] = None
     inscritos_count: Optional[int] = None
     organizador: Optional[str] = None
+    status_evento: Optional[str] = None  # ativo | cancelado | adiado | esgotado
 
 class PostResponse(BaseModel):
     id: uuid.UUID
@@ -162,6 +164,7 @@ class PostResponse(BaseModel):
     capacidade: Optional[int] = None
     inscritos_count: int = 0
     organizador: Optional[str] = None
+    status_evento: Optional[str] = None
     created_at: datetime
     updated_at: datetime
     published_at: Optional[datetime] = None
@@ -213,6 +216,7 @@ class PostResponse(BaseModel):
             capacidade=getattr(post, 'capacidade', None),
             inscritos_count=getattr(post, 'inscritos_count', 0) or 0,
             organizador=getattr(post, 'organizador', None),
+            status_evento=getattr(post, 'status_evento', 'ativo') or 'ativo',
             created_at=post.created_at,
             updated_at=post.updated_at,
             published_at=post.published_at

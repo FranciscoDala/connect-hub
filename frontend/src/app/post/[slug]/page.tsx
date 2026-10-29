@@ -93,11 +93,11 @@ export default function PostPage() {
     const conteudoDuplicado = isSameText(post.descricao, post.conteudo);
     const mostrarConteudo = post.conteudo && !conteudoDuplicado;
 
-    // STATUS DO EVENTO
-    const statusRaw = (post.status || post.status_evento || post.estado || post.situacao || "").toString().toLowerCase();
+    // STATUS DO EVENTO - prioriza status_evento
+    const statusRaw = (post.status_evento || post.status || post.estado || post.situacao || "").toString().toLowerCase();
     const isCancelado = ["cancelado", "cancelada", "canceled", "cancelled"].includes(statusRaw);
     const isAdiado = ["adiado", "adiada", "postponed", "adiamento"].includes(statusRaw);
-    const isEsgotado = ["esgotado", "esgotada", "soldout", "lotado", "lotada", "esgotado"].includes(statusRaw);
+    const isEsgotado = ["esgotado", "esgotada", "soldout", "lotado", "lotada"].includes(statusRaw);
     const isInativo = isCancelado || isAdiado || isEsgotado;
     const seloImg = isCancelado ? "/selos/cancelado.png" : isAdiado ? "/selos/adiado.png" : "/selos/esgotado.png";
 
@@ -116,7 +116,7 @@ export default function PostPage() {
                                     <img
                                         src={post.thumbnail_url || post.media_url}
                                         alt={post.titulo}
-                                        className={`block w-full h-auto max-h-[85vh] lg:max-h-[750px] rounded-none object-contain object-center transition-all duration-300 ${isInativo ? 'grayscale' : ''}`}
+                                        className={`block w-full h-auto max-h-[85vh] lg:max-h-187.5 rounded-none object-contain object-center transition-all duration-300 ${isInativo ? 'grayscale' : ''}`}
                                         draggable={false}
                                     />
                                     {/* OVERLAY PRETO E BRANCO + SELO */}
@@ -125,7 +125,7 @@ export default function PostPage() {
                                             <img
                                                 src={seloImg}
                                                 alt={statusRaw}
-                                                className="w-[85%] max-w-[420px] h-auto object-contain drop-shadow-[0_4px_20px_rgba(0,0,0,0.5)] animate-[stampIn_0.4s_ease-out]"
+                                                className="w-85/100 max-w-105 h-auto object-contain drop-shadow-[0_4px_20px_rgba(0,0,0,0.5)] animate-[stampIn_0.4s_ease-out]"
                                             />
                                         </div>
                                     )}

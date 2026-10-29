@@ -18,11 +18,17 @@ export default function EventoSidebar({ post }: { post: any }) {
     const isEvento = (post?.tipo || "").toLowerCase() === "evento";
     if (!isEvento) return null;
 
-    const statusRaw = (post.status || post.status_evento || post.estado || post.situacao || "").toString().toLowerCase();
+    const statusRaw = (post.status_evento || post.status || post.estado || post.situacao || "").toString().toLowerCase();
     const isCancelado = ["cancelado", "cancelada", "canceled", "cancelled"].includes(statusRaw);
     const isAdiado = ["adiado", "adiada", "postponed"].includes(statusRaw);
     const isEsgotado = ["esgotado", "esgotada", "soldout", "lotado"].includes(statusRaw);
     const isInativo = isCancelado || isAdiado || isEsgotado;
+
+    // Lógica Sem data: se adiado e sem data_inicio, mostra Sem data
+    const dataInicioLabel = (() => {
+        if (isAdiado && !post.data_inicio) return "Sem data";
+        return formatDate(post.data_inicio) || (isAdiado ? "Sem data" : "—");
+    })();
 
     return (
         <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
@@ -44,8 +50,8 @@ export default function EventoSidebar({ post }: { post: any }) {
 
             <div className={`p-4 space-y-4 ${isInativo ? 'grayscale-[0.3] opacity-80' : ''}`}>
                 <div className="grid grid-cols-2 gap-4">
-                    <div><p className="text-[11px] text-slate-400 uppercase tracking-wide">Data início</p><p className="mt-1 text-[13px] font-semibold leading-5 text-slate-800">{formatDate(post.data_inicio) || "—"}</p></div>
-                    <div><p className="text-[11px] text-slate-400 uppercase tracking-wide">Data fim</p><p className="mt-1 text-[13px] font-semibold leading-5 text-slate-800">{formatDate(post.data_fim) || "—"}</p></div>
+                    <div><p className="text-[11px] text-slate-400 uppercase tracking-wide">Data início</p><p className="mt-1 text-[13px] font-semibold leading-5 text-slate-800">{dataInicioLabel}</p></div>
+                    <div><p className="text-[11px] text-slate-400 uppercase tracking-wide">Data fim</p><p className="mt-1 text-[13px] font-semibold leading-5 text-slate-800">{post.data_fim ? formatDate(post.data_fim) : "—"}</p></div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
@@ -63,7 +69,7 @@ export default function EventoSidebar({ post }: { post: any }) {
                 <div className="space-y-2 pt-2">
                     {isInativo ? (
                         <button disabled className="flex w-full items-center justify-center rounded-full bg-slate-300 px-5 py-3 text-xs font-bold uppercase tracking-widest text-slate-600 cursor-not-allowed">
-                            {isCancelado ? 'Evento Cancelado' : isAdiado ? 'Evento Adiado' : 'Esgotado'}
+                            {isCancelado ? 'Evento Cancelado' : isAdiado ? (post.data_inicio ? 'Adiado - Nova Data' : 'Adiado - Sem data') : 'Esgotado'}
                         </button>
                     ) : (
                         <a href={post.link_inscricao || "#"} target="_blank" className="flex w-full items-center justify-center rounded-full bg-black px-5 py-3 text-xs font-bold uppercase tracking-widest text-white transition hover:bg-zinc-800 active:scale-[0.98]">

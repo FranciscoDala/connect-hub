@@ -116,6 +116,7 @@ def create_post(data: PostCreate, admin=Depends(get_current_admin), db: Session=
     payload = data.model_dump(exclude={"slug"})
     if payload.get("tipo"): payload["tipo"] = payload["tipo"].lower()
     if payload.get("status"): payload["status"] = payload["status"].lower()
+    if payload.get("status_evento"): payload["status_evento"] = payload["status_evento"].lower()
     post = Post(**payload, slug=final_slug, author_id=admin.id)
     db.add(post); db.commit(); db.refresh(post)
     return to_post_response(post, db)
@@ -128,6 +129,7 @@ def update_post(post_id: uuid.UUID, data: PostUpdate, admin=Depends(get_current_
     if "titulo" in payload and not payload.get("slug"): payload["slug"] = slugify(payload["titulo"])
     if "tipo" in payload and payload["tipo"]: payload["tipo"] = payload["tipo"].lower()
     if "status" in payload and payload["status"]: payload["status"] = payload["status"].lower()
+    if "status_evento" in payload and payload["status_evento"]: payload["status_evento"] = payload["status_evento"].lower()
     for k, v in payload.items(): setattr(post, k, v)
     db.commit(); db.refresh(post)
     return to_post_response(post, db)
@@ -245,3 +247,16 @@ def delete_comment_by_post(post_id: uuid.UUID, comment_id: uuid.UUID, db: Sessio
     if not c: raise HTTPException(404, "Comentário não encontrado")
     db.delete(c); db.commit()
     return {"ok": True}
+
+# ========= STATUS EVENTO - NOVO =========
+@router.patch("/posts/{post_id}/status-evento", response_model=PostResponse)
+def update_status_evento(post_id: uuid.UUID, status_evento: str, admin=Depends(get_current_admin), db: Session=Depends(get_db)):
+    allowed = ["ativo", "cancelado", "adiado", "esgotado"]
+    se = status_evento.lower().strip()
+    if se not in allowed:
+        raise HTTPException(400, f"Status inválido. Use: {', '.join(allowed)}")
+    post = db.query(Post).filter(Post.id == post_id).first()
+    if not post: raise HTTPException(404, "Post não encontrado")
+    post.status_evento = se
+    db.commit(); db.refresh(post)
+    return to_post_response(post, db)
