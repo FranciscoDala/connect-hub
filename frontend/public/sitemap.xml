@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+  <url>
+    <loc>https://connect-uuo9.onrender.com/</loc>
+    <lastmod>2026-05-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+    <image:image>
+      <image:loc>https://connect-uuo9.onrender.com/team/ceo.jpg</image:loc>
+      <image:title>CEO Connect - Francisco Dala</image:title>
+      <image:caption>Fundador da Connect desde 2021</image:caption>
+    </image:image>
+  </url>
+</urlset>
