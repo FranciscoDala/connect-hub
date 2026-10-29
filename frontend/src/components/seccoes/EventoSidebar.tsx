@@ -10,7 +10,7 @@ function formatDate(d?: string) {
         const year = String(date.getFullYear()).slice(-2);
         const hours = String(date.getHours()).padStart(2, '0');
         const minutes = String(date.getMinutes()).padStart(2, '0');
-        return `${day}/${month}/${year} as ${hours}:${minutes}m`;
+        return `${day}/${month}/${year} às ${hours}:${minutes}`;
     } catch { return d; }
 }
 
@@ -52,7 +52,7 @@ export default function EventoSidebar({ post }: { post: any }) {
                 <div>
                     <p className="text-[11px] text-slate-400 uppercase tracking-wide">Data</p>
                     <p className="mt-1 text-[13px] font-semibold leading-5 text-slate-800 whitespace-nowrap overflow-hidden text-ellipsis">
-                        {dataInicioLabel} ate {post.data_fim ? formatDate(post.data_fim) : "—"}
+                        {dataInicioLabel} | {post.data_fim ? formatDate(post.data_fim) : "—"}
                     </p>
                 </div>
 
@@ -84,7 +84,6 @@ export default function EventoSidebar({ post }: { post: any }) {
                         </a>
                     )}
                 </div>
-                {post.cidade && <p className="text-center text-[11px] text-slate-400 pt-1">📍 {post.cidade} • {post.local_evento || "Evento presencial"}</p>}
             </div>
         </div>
     );
