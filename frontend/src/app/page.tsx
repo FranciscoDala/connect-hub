@@ -2,13 +2,13 @@
 import Footer from '@/components/Footer'
 import Link from 'next/link'
 
-
 import ParceriasSection from '@/components/seccoes/ParceriasSection'
 import ProdutosSection from '@/components/seccoes/ProdutosSection'
 import PlataformasSection from '@/components/seccoes/PlataformasSection'
 import EquipeSection from '@/components/seccoes/EquipeSection'
 import NoticiasSection from '@/components/seccoes/NoticiasSection'
 import EventosSection from '@/components/seccoes/EventosSection'
+import CeoSection from '@/components/public/ceo-section'
 
 type Banner = {
     id: string;
@@ -88,14 +88,12 @@ export default async function Home() {
             </section>
 
             <EventosSection posts={posts} />
-
             <ProdutosSection posts={posts} />
-            
             <PlataformasSection posts={posts} />
-
             <div id="parcerias"><ParceriasSection /></div>
             <NoticiasSection posts={posts} />
             <EquipeSection />
+            <CeoSection />
             <Footer />
         </main>
     )
