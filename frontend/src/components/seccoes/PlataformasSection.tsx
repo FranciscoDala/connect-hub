@@ -99,7 +99,7 @@ export default function PlataformasSection({ posts }: { posts: Post[] }) {
                         <button onClick={next} className="hidden sm:grid absolute right-4 lg:right-8 top-1/2 z-20 -translate-y-1/2 h-10 w-10 place-items-center rounded-full bg-white shadow border text-slate-600 hover:bg-black hover:text-white transition">→</button>
 
                         <div
-                            className="relative flex h-105 sm:h-120 items-center justify-center gap-0 px-12 cursor-grab active:cursor-grabbing overscroll-y-contain"
+                            className="relative flex h-100 sm:h-125 items-center justify-center gap-0 px-12 cursor-grab active:cursor-grabbing overscroll-y-contain"
                             style={{ touchAction: 'pan-y' }}
                             onTouchStart={(e) => handleStart(e.touches[0].clientX, e.touches[0].clientY)}
                             onTouchMove={(e) => handleMove(e.touches[0].clientX, e.touches[0].clientY, e)}
@@ -163,7 +163,7 @@ export default function PlataformasSection({ posts }: { posts: Post[] }) {
                                         href={hrefPost}
                                         onMouseEnter={() => !isDragging.current && setActive(i)}
                                         style={{ transform, zIndex, opacity, filter } as any}
-                                        className={`absolute w-65 sm:w-75 h-95 sm:h-105 shrink-0 rounded-3xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.4)] transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)]`}
+                                        className="absolute w-65 h-65 sm:w-85 sm:h-85 aspect-square shrink-0 rounded-3xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.4)] transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
                                     >
                                         <img src={img} alt={item.titulo} className="absolute inset-0 h-full w-full object-cover pointer-events-none" />
                                         <div className="absolute inset-0 bg-linear-to-t from-[#0f172a] via-[#0f172a]/40 to-transparent" />
@@ -178,11 +178,13 @@ export default function PlataformasSection({ posts }: { posts: Post[] }) {
                                         </div>
 
                                         <div className="absolute bottom-0 left-0 right-0 p-5">
-                                            <div className="flex items-center gap-2">
-                                                <span className="h-3 w-3 rounded-full bg-sky-400 shrink-0" />
-                                                <p className="text-sm font-bold text-white leading-tight line-clamp-1">{item.titulo}</p>
+                                            <div className="flex items-start gap-2">
+                                                <span className="h-3 w-3 rounded-full bg-sky-400 shrink-0 mt-1" />
+                                                <p className="text-sm font-bold text-white leading-snug wrap-break-word whitespace-normal line-clamp-3">
+                                                    {item.titulo}
+                                                </p>
                                             </div>
-                                            <p className="mt-1.5 text-[11px] text-white/70 truncate">
+                                            <p className="mt-2 text-[11px] text-white/70 line-clamp-2 wrap-break-word">
                                                 {item.link_url ? '🌐 Ver site' : item.preco ? `A partir de ${formatKz(item.preco)}/mês` : 'Clique para saber mais'}
                                             </p>
                                         </div>
@@ -193,8 +195,8 @@ export default function PlataformasSection({ posts }: { posts: Post[] }) {
 
                         {activeItem && (
                             <div className="mx-auto mt-8 max-w-lg text-center px-6">
-                                <h3 className="text-white font-semibold text-lg">{activeItem.titulo}</h3>
-                                <p className="mt-2 text-sm leading-6 text-slate-400 line-clamp-2">
+                                <h3 className="text-white font-semibold text-lg leading-snug wrap-break-word whitespace-normal">{activeItem.titulo}</h3>
+                                <p className="mt-2 text-sm leading-6 text-slate-400 line-clamp-3 wrap-break-word">
                                     {activeItem.descricao || 'Plataforma desenvolvida pela nossa equipe.'}
                                 </p>
                                 <div className="mt-4 flex justify-center gap-3">
