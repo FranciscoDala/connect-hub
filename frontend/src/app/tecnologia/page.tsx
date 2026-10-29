@@ -5,7 +5,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-const PER_PAGE = 6;
+const PER_PAGE = 8;
 
 export default function TecnologiaPage() {
     const [posts, setPosts] = useState<any[]>([]);
@@ -16,14 +16,13 @@ export default function TecnologiaPage() {
         (async () => {
             try {
                 const [postsRes, catsRes] = await Promise.all([
-                    fetch(`${API}/api/v1/posts?limit=100`).then(r => r.json()),
+                    fetch(`${API}/api/v1/posts?limit=500`).then(r => r.json()),
                     fetch(`${API}/api/v1/categories`).then(r => r.json()).catch(() => [])
                 ]);
 
                 const cats = Array.isArray(catsRes) ? catsRes : [];
                 const postsList = Array.isArray(postsRes) ? postsRes : [];
 
-                // cria mapa id -> categoria
                 const catMap = new Map(cats.map((c: any) => [c.id, c]));
                 const catTec = cats.find((c: any) =>
                     (c.nome || c.slug || '').toLowerCase().includes('tecnolog')
@@ -32,7 +31,6 @@ export default function TecnologiaPage() {
                 let filtrados = postsList.filter((p: any) => {
                     const status = (p.status || '').toLowerCase();
                     if (status !== 'published') return false;
-
                     const catById = catMap.get(p.category_id);
                     const nomeDaCategoria = (
                         catById?.nome ||
@@ -41,15 +39,12 @@ export default function TecnologiaPage() {
                         p.categoria?.nome ||
                         p.categoria_nome || ''
                     ).toLowerCase();
-
                     const isTecPorCategoria = nomeDaCategoria.includes('tecnolog');
                     const isTecPorId = catTec ? p.category_id === catTec.id : false;
                     const isTecPorTipo = (p.tipo || '').toLowerCase() === 'tecnologia';
-
                     return isTecPorCategoria || isTecPorId || isTecPorTipo;
                 });
 
-                // FALLBACK: se não achou nada na categoria, mostra todos produtos + noticias (pra não ficar vazio)
                 if (filtrados.length === 0) {
                     filtrados = postsList.filter((p: any) => {
                         const status = (p.status || '').toLowerCase();
@@ -96,33 +91,32 @@ export default function TecnologiaPage() {
                     <div className="mt-10 flex flex-col items-center justify-center rounded-3xl border border-dashed border-slate-200 bg-white py-20">
                         <div className="grid h-12 w-12 place-items-center rounded-full border bg-white text-slate-400">💡</div>
                         <p className="mt-4 text-sm font-semibold text-slate-700">Sem conteúdos de tecnologia no momento</p>
-                        <p className="mt-1 text-xs text-slate-400">Produtos e notícias em breve</p>
                     </div>
                 ) : (
                     <>
-                        <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                        <div className="mt-10 grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
                             {currentPosts.map((item: any) => {
                                 const img = item.thumbnail_url || item.media_url || '/connect.png';
                                 const link = `/post/${item.slug || item.id}`;
                                 const tipo = (item.tipo || 'PRODUTO').toUpperCase();
                                 return (
-                                    <Link key={item.id} href={link} className="group flex flex-col overflow-hidden rounded-3xl bg-white shadow-lg transition-all hover:-translate-y-1">
+                                    <Link key={item.id} href={link} className="group flex flex-col overflow-hidden rounded-2xl bg-white shadow-sm border border-slate-100 transition-all hover:-translate-y-1 hover:shadow-md">
                                         <div className="relative w-full shrink-0 overflow-hidden bg-slate-100 aspect-square">
                                             <img src={img} alt={item.titulo} className="h-full w-full object-cover transition group-hover:scale-105" />
-                                            <div className="absolute left-3 top-3 rounded-full bg-white/90 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-sky-700 shadow backdrop-blur">
+                                            <div className="absolute left-2 top-2 rounded-full bg-white/90 px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-widest text-sky-700 shadow backdrop-blur">
                                                 {tipo}
                                             </div>
                                         </div>
-                                        <div className="flex flex-1 flex-col px-5 pb-4 pt-4">
-                                            <h3 className="text-sm font-bold leading-snug wrap-break-word whitespace-normal line-clamp-3 text-slate-800">
+                                        <div className="flex flex-1 flex-col p-4">
+                                            <h3 className="text-[13px] font-bold leading-snug wrap-break-word whitespace-normal line-clamp-2 text-slate-800">
                                                 {item.titulo}
                                             </h3>
-                                            <p className="mt-2 line-clamp-2 text-xs leading-5 text-slate-500 wrap-break-word">
+                                            <p className="mt-1.5 line-clamp-2 text-[11px] leading-4 text-slate-500 wrap-break-word">
                                                 {item.descricao || 'Saiba mais sobre esta tecnologia.'}
                                             </p>
-                                            <div className="mt-auto flex items-center justify-between pt-4">
-                                                <span className="text-xs text-slate-400">{item.category?.nome || 'Tecnologia'}</span>
-                                                <span className="rounded-full bg-sky-600 px-4 py-1.5 text-xs font-bold text-white">Ver mais</span>
+                                            <div className="mt-auto flex items-center justify-between pt-3">
+                                                <span className="text-[11px] text-slate-400 truncate">{item.category?.nome || 'Tecnologia'}</span>
+                                                <span className="rounded-full bg-sky-600 px-3 py-1 text-[11px] font-bold text-white">Ver</span>
                                             </div>
                                         </div>
                                     </Link>
@@ -132,11 +126,11 @@ export default function TecnologiaPage() {
 
                         {totalPages > 1 && (
                             <div className="mt-12 flex items-center justify-center gap-2">
-                                <button onClick={() => goToPage(currentPage - 1)} disabled={currentPage === 1} className="grid size-9 place-items-center rounded-full border border-slate-200 bg-white text-sm font-bold text-slate-600 disabled:opacity-40">‹</button>
+                                <button onClick={() => goToPage(currentPage - 1)} disabled={currentPage === 1} className="grid size-8 place-items-center rounded-full border border-slate-200 bg-white text-sm font-bold disabled:opacity-40">‹</button>
                                 {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                                    <button key={page} onClick={() => goToPage(page)} className={`grid size-9 place-items-center rounded-full text-xs font-bold transition ${currentPage === page ? 'bg-sky-600 text-white shadow-lg' : 'border border-slate-200 bg-white text-slate-600'}`}>{page}</button>
+                                    <button key={page} onClick={() => goToPage(page)} className={`grid size-8 place-items-center rounded-full text-[11px] font-bold ${currentPage === page ? 'bg-sky-600 text-white shadow' : 'border border-slate-200 bg-white'}`}>{page}</button>
                                 ))}
-                                <button onClick={() => goToPage(currentPage + 1)} disabled={currentPage === totalPages} className="grid size-9 place-items-center rounded-full border border-slate-200 bg-white text-sm font-bold text-slate-600 disabled:opacity-40">›</button>
+                                <button onClick={() => goToPage(currentPage + 1)} disabled={currentPage === totalPages} className="grid size-8 place-items-center rounded-full border border-slate-200 bg-white text-sm font-bold disabled:opacity-40">›</button>
                             </div>
                         )}
                     </>

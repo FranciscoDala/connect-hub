@@ -5,7 +5,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-const PER_PAGE = 6;
+const PER_PAGE = 8;
 
 export default function EventosPage() {
     const [posts, setPosts] = useState<any[]>([]);
@@ -15,7 +15,7 @@ export default function EventosPage() {
     useEffect(() => {
         (async () => {
             try {
-                const res = await fetch(`${API}/api/v1/posts?limit=100`);
+                const res = await fetch(`${API}/api/v1/posts?limit=500`);
                 const data = await res.json();
                 const eventos = data.filter((p: any) => {
                     const status = (p.status || '').toLowerCase();
@@ -29,8 +29,7 @@ export default function EventosPage() {
     }, []);
 
     const totalPages = Math.ceil(posts.length / PER_PAGE);
-    const start = (currentPage - 1) * PER_PAGE;
-    const currentPosts = posts.slice(start, start + PER_PAGE);
+    const currentPosts = posts.slice((currentPage - 1) * PER_PAGE, currentPage * PER_PAGE);
 
     function goToPage(page: number) {
         if (page < 1 || page > totalPages) return;
@@ -48,7 +47,7 @@ export default function EventosPage() {
                 </div>
                 <h1 className="mt-4 max-w-xl text-3xl font-semibold leading-tight tracking-tight text-slate-700 sm:text-4xl">Nossos próximos eventos.</h1>
                 <p className="mt-4 max-w-2xl text-justify text-sm leading-6 text-slate-500">
-                    Fique por dentro dos eventos, formações e lançamentos da CONNECT. Tecnologia, networking e inovação para elevar sua prática.
+                    Fique por dentro dos eventos, formações e lançamentos da CONNECT.
                 </p>
 
                 {loading ? (
@@ -58,32 +57,38 @@ export default function EventosPage() {
                 ) : posts.length === 0 ? (
                     <div className="mt-10 flex flex-col items-center justify-center rounded-3xl border border-dashed border-slate-200 bg-white py-20">
                         <div className="grid h-12 w-12 place-items-center rounded-full border bg-white text-slate-400">📅</div>
-                        <p className="mt-4 text-sm font-semibold text-slate-700">Sem eventos disponíveis no momento</p>
-                        <p className="mt-1 text-xs text-slate-400">Novos eventos em breve</p>
+                        <p className="mt-4 text-sm font-semibold text-slate-700">Sem eventos no momento</p>
                     </div>
                 ) : (
                     <>
-                        <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                        <div className="mt-10 grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
                             {currentPosts.map((item: any) => {
                                 const img = item.thumbnail_url || item.media_url || '/connect.png'
                                 const link = `/post/${item.slug || item.id}`
-                                const data = item.data_evento || item.created_at
+                                const data = item.data_evento || item.data_inicio || item.created_at
+                                const statusEvento = (item.status_evento || 'ativo').toLowerCase();
+                                const isInativo = statusEvento !== 'ativo';
                                 return (
-                                    <Link key={item.id} href={link} className="group flex flex-col overflow-hidden rounded-3xl bg-white shadow-lg transition-all hover:-translate-y-1">
-                                        <div className="relative w-full shrink-0 overflow-hidden" style={{ aspectRatio: '1 / 1', backgroundColor: '#e0f2fe' }}>
-                                            <img src={img} alt={item.titulo} className="h-full w-full object-cover transition group-hover:scale-105" />
-                                            <div className="absolute left-3 top-3 rounded-full bg-white/90 px-3 py-1 text-xs font-bold text-sky-700 shadow backdrop-blur">
+                                    <Link key={item.id} href={link} className="group flex flex-col overflow-hidden rounded-2xl bg-white shadow-sm border border-slate-100 transition-all hover:-translate-y-1 hover:shadow-md">
+                                        <div className="relative w-full shrink-0 overflow-hidden bg-slate-100 aspect-square">
+                                            <img src={img} alt={item.titulo} className={`h-full w-full object-cover transition group-hover:scale-105 ${isInativo ? 'grayscale' : ''}`} />
+                                            <div className="absolute left-2 top-2 rounded-full bg-white/90 px-2.5 py-0.5 text-[9px] font-bold text-sky-700 shadow backdrop-blur">
                                                 {data ? new Date(data).toLocaleDateString('pt-AO', { day: '2-digit', month: 'short' }) : 'EVENTO'}
                                             </div>
+                                            {isInativo && (
+                                                <div className="absolute right-2 top-2 rounded-full bg-black/80 px-2.5 py-0.5 text-[9px] font-bold text-white">
+                                                    {statusEvento.toUpperCase()}
+                                                </div>
+                                            )}
                                         </div>
-                                        <div className="flex flex-1 flex-col px-5 pb-4 pt-4">
-                                            <h3 className="text-sm font-bold leading-snug wrap-break-word text-slate-800">{item.titulo}</h3>
-                                            <p className="mt-2 line-clamp-2 text-xs leading-5 text-slate-500">
-                                                {item.descricao || 'Participe deste evento exclusivo da CONNECT.'}
+                                        <div className="flex flex-1 flex-col p-4">
+                                            <h3 className="text-[13px] font-bold leading-snug wrap-break-word whitespace-normal line-clamp-2 text-slate-800">{item.titulo}</h3>
+                                            <p className="mt-1.5 line-clamp-2 text-[11px] leading-4 text-slate-500 wrap-break-word">
+                                                {item.descricao || 'Participe deste evento exclusivo.'}
                                             </p>
-                                            <div className="mt-auto flex items-center justify-between pt-4">
-                                                <span className="text-xs text-slate-400">{item.local || 'Luanda, AO'}</span>
-                                                <span className="rounded-full bg-sky-600 px-4 py-1.5 text-xs font-bold text-white">Ver evento</span>
+                                            <div className="mt-auto flex items-center justify-between pt-3">
+                                                <span className="text-[11px] text-slate-400 truncate">{item.cidade || item.local_evento || 'Luanda'}</span>
+                                                <span className="rounded-full bg-sky-600 px-3 py-1 text-[11px] font-bold text-white">Ver</span>
                                             </div>
                                         </div>
                                     </Link>
@@ -91,38 +96,13 @@ export default function EventosPage() {
                             })}
                         </div>
 
-                        {/* PAGINAÇÃO */}
                         {totalPages > 1 && (
                             <div className="mt-12 flex items-center justify-center gap-2">
-                                <button
-                                    onClick={() => goToPage(currentPage - 1)}
-                                    disabled={currentPage === 1}
-                                    className="grid size-9 place-items-center rounded-full border border-slate-200 bg-white text-sm font-bold text-slate-600 transition hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed"
-                                >
-                                    ‹
-                                </button>
-
+                                <button onClick={() => goToPage(currentPage - 1)} disabled={currentPage === 1} className="grid size-8 place-items-center rounded-full border border-slate-200 bg-white text-sm font-bold disabled:opacity-40">‹</button>
                                 {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                                    <button
-                                        key={page}
-                                        onClick={() => goToPage(page)}
-                                        className={`grid size-9 place-items-center rounded-full text-xs font-bold transition ${
-                                            currentPage === page
-                                                ? 'bg-sky-600 text-white shadow-lg'
-                                                : 'border border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
-                                        }`}
-                                    >
-                                        {page}
-                                    </button>
+                                    <button key={page} onClick={() => goToPage(page)} className={`grid size-8 place-items-center rounded-full text-[11px] font-bold ${currentPage === page ? 'bg-sky-600 text-white shadow' : 'border border-slate-200 bg-white'}`}>{page}</button>
                                 ))}
-
-                                <button
-                                    onClick={() => goToPage(currentPage + 1)}
-                                    disabled={currentPage === totalPages}
-                                    className="grid size-9 place-items-center rounded-full border border-slate-200 bg-white text-sm font-bold text-slate-600 transition hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed"
-                                >
-                                    ›
-                                </button>
+                                <button onClick={() => goToPage(currentPage + 1)} disabled={currentPage === totalPages} className="grid size-8 place-items-center rounded-full border border-slate-200 bg-white text-sm font-bold disabled:opacity-40">›</button>
                             </div>
                         )}
                     </>
