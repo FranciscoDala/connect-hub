@@ -49,8 +49,11 @@ export default function EventoSidebar({ post }: { post: any }) {
             </div>
 
             <div className={`p-4 space-y-4 ${isInativo ? 'grayscale-[0.3] opacity-80' : ''}`}>
-                <div className="grid grid-cols-2 gap-4">
-                    <div><p className="text-[11px] text-slate-400 uppercase tracking-wide">Data</p><p className="mt-1 text-[13px] font-semibold leading-5 text-slate-800">{dataInicioLabel} ate {post.data_fim ? formatDate(post.data_fim) : "—"}</p></div>
+                <div>
+                    <p className="text-[11px] text-slate-400 uppercase tracking-wide">Data</p>
+                    <p className="mt-1 text-[13px] font-semibold leading-5 text-slate-800 whitespace-nowrap overflow-hidden text-ellipsis">
+                        {dataInicioLabel} ate {post.data_fim ? formatDate(post.data_fim) : "—"}
+                    </p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
