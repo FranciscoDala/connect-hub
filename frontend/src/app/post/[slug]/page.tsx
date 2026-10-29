@@ -84,7 +84,13 @@ export default function PostPage() {
         try { if (navigator.share) await navigator.share({ title: post.titulo, url }); else { await navigator.clipboard.writeText(url); alert("Link copiado!"); } fetch(`${API}/api/v1/posts/${post.id}/share`, { method: "POST" }).catch(() => { }); } catch { }
     }
 
-    if (loading) return <div className="min-h-screen grid place-items-center bg-white">Carregando...</div>;
+    if (loading) return (
+        <div className="min-h-screen grid place-items-center bg-white">
+            <div className="flex flex-col items-center gap-3">
+                <div className="size-8 animate-spin rounded-full border-2 border-slate-200 border-t-black"></div>
+            </div>
+        </div>
+    );
     if (!post) return <div className="min-h-screen grid place-items-center">Post não encontrado</div>;
 
     const isProduto = ["produto", "product"].includes((post.tipo || "").toLowerCase());
@@ -100,6 +106,11 @@ export default function PostPage() {
     const isEsgotado = ["esgotado", "esgotada", "soldout", "lotado", "lotada"].includes(statusRaw);
     const isInativo = isCancelado || isAdiado || isEsgotado;
     const seloImg = isCancelado ? "/selos/cancelado.png" : isAdiado ? "/selos/adiado.png" : "/selos/esgotado.png";
+
+    // ESCONDER PRODUTOS SE FOR FESTA / EVENTO
+    const catNome = (cat?.nome || cat?.slug || "").toLowerCase();
+    const tipoNome = (post.tipo || "").toLowerCase();
+    const isFestaEvento = ["festa", "evento", "eventos", "festas"].some(k => catNome.includes(k) || tipoNome.includes(k));
 
     return (
         <main className="min-h-screen bg-stone-50 text-slate-800">
@@ -119,7 +130,6 @@ export default function PostPage() {
                                         className={`block w-full h-auto max-h-[85vh] lg:max-h-187.5 rounded-none object-contain object-center transition-all duration-300 ${isInativo ? 'grayscale' : ''}`}
                                         draggable={false}
                                     />
-                                    {/* OVERLAY PRETO E BRANCO + SELO */}
                                     {isInativo && (
                                         <div className="absolute inset-0 bg-black/20 flex items-center justify-center p-8">
                                             <img
@@ -178,7 +188,7 @@ export default function PostPage() {
                         </div>
 
                         <PostRelacionados categoryId={post.category_id} currentPostId={post.id} posts={related} />
-                        <ProdutosRelated posts={related} />
+                        {!isFestaEvento && <ProdutosRelated posts={related} />}
                     </article>
                     <PostSidebar postId={post.id} categoryId={post.category_id} post={post} />
                 </div>
