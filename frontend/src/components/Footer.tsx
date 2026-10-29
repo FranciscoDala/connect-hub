@@ -44,7 +44,7 @@ export default function Footer() {
                 <div className="grid gap-10 md:grid-cols-12">
                     <div className="md:col-span-5">
                         <Link href="/" className="flex items-center">
-                            <img src="/connect.png" alt="CONNECT" className="h-20 w-auto object-contain" />
+                            <img src="/connect.png" alt="CONNECT" className="h-15 w-auto object-contain" />
                         </Link>
                         <p className="mt-4 max-w-sm text-justify text-sm leading-6 text-[#64748b]">Inovamos para liderar</p>
                         <p className="mt-4 max-w-sm text-justify text-sm leading-6 text-[#64748b]">Tecnologia é a aplicação prática do conhecimento científico para resolver problemas, criar ferramentas e facilitar as tarefas diárias.</p>
