@@ -31,7 +31,7 @@ export default function EventoSidebar({ post }: { post: any }) {
     })();
 
     return (
-        <div className="overflow-hidden rounded-2xl border-0 border-slate-200-0 bg-white-0 shadow-sm-0">
+        <div className="overflow-hidden rounded-2xl-0 border-0 border-slate-200-0 bg-white-0 shadow-sm-0">
             <div className={`px-4 py-3 flex items-center justify-between border-b ${isInativo ? 'bg-red-50 border-red-100' : 'bg-sky-50 border-sky-100'}`}>
                 <span className={`text-[11px] font-bold tracking-widest flex items-center gap-2 ${isInativo ? 'text-red-700' : 'text-sky-800'}`}>
                     {isInativo ? '⚠️' : '📅'} {isCancelado ? 'EVENTO CANCELADO' : isAdiado ? 'EVENTO ADIADO' : isEsgotado ? 'EVENTO ESGOTADO' : 'INFORMAÇÕES DO EVENTO'}
