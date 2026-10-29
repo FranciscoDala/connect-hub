@@ -111,12 +111,11 @@ export default function PostPage() {
                     <article className="col-span-12 lg:col-span-8">
                         <div className="overflow-hidden rounded-none border-0">
                             {(post.thumbnail_url || post.media_url) && (
-                                <div className="relative select-none cursor-pointer rounded-none overflow-hidden bg-black" onDoubleClick={handleDoubleClick} onTouchEnd={handleTouchEnd}>
+                                <div className="relative select-none cursor-pointer rounded-none overflow-hidden bg-black flex items-center justify-center" onDoubleClick={handleDoubleClick} onTouchEnd={handleTouchEnd}>
                                     <img
                                         src={post.thumbnail_url || post.media_url}
                                         alt={post.titulo}
-                                        className="block w-full rounded-none object-cover"
-                                        style={{ maxHeight: '560px' }}
+                                        className="block w-full h-auto max-h-[85vh] lg:max-h-[750px] rounded-none object-contain object-center"
                                         draggable={false}
                                     />
                                     {myReaction === "like" && (
