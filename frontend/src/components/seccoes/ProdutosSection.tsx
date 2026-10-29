@@ -7,7 +7,7 @@ function formatKz(v?: number | null) {
     return Number(v).toLocaleString('pt-AO', { minimumFractionDigits: 0 }) + ' Kz'
 }
 
-export default function ProdutosSection({ posts }: { posts: Post[] }) {
+export default function ProdutosSection({ posts, hideHeader = false }: { posts: Post[]; hideHeader?: boolean }) {
     const produtos = posts
         .filter(p => {
             const status = (p.status || '').toLowerCase()
@@ -19,14 +19,18 @@ export default function ProdutosSection({ posts }: { posts: Post[] }) {
     return (
         <section id="produtos" className="bg-white py-10 sm:py-18">
             <div className="mx-auto max-w-7xl px-5 sm:px-8">
-                <div className="flex items-center gap-3">
-                    <span className="h-px w-8 bg-sky-600" />
-                    <p className="text-xs font-bold uppercase tracking-widest text-sky-800">APRESENTAÇÃO DE PRODUTOS</p>
-                </div>
-                <h2 className="mt-4 max-w-xl text-3xl font-semibold leading-tight tracking-tight text-slate-700 sm:text-4xl">Produtos com tecnologias de ponta.</h2>
-                <p className="mt-4 max-w-2xl text-justify text-sm leading-6 text-slate-500">
-                    Descubra nossos dispositivos de ponta, projetados para aprimorar sua prática com tecnologia inovadora e resultados clínicos comprovados.
-                </p>
+                {!hideHeader && (
+                    <>
+                        <div className="flex items-center gap-3">
+                            <span className="h-px w-8 bg-sky-600" />
+                            <p className="text-xs font-bold uppercase tracking-widest text-sky-800">APRESENTAÇÃO DE PRODUTOS</p>
+                        </div>
+                        <h2 className="mt-4 max-w-xl text-3xl font-semibold leading-tight tracking-tight text-slate-700 sm:text-4xl">Produtos com tecnologias de ponta.</h2>
+                        <p className="mt-4 max-w-2xl text-justify text-sm leading-6 text-slate-500">
+                            Descubra nossos dispositivos de ponta, projetados para aprimorar sua prática com tecnologia inovadora e resultados clínicos comprovados.
+                        </p>
+                    </>
+                )}
 
                 {produtos.length === 0 ? (
                     <div className="mt-10 flex flex-col items-center justify-center rounded-3xl border border-dashed border-slate-200 bg-slate-50 py-20">
@@ -47,9 +51,7 @@ export default function ProdutosSection({ posts }: { posts: Post[] }) {
                                         {emPromo && <span className="absolute left-3 top-3 rounded-full bg-red-500 px-2.5 py-1 text-xs font-bold text-white">PROMO</span>}
                                     </div>
                                     <div className="flex flex-1 flex-col p-5">
-                                        {/*<span className="text-xs font-bold uppercase tracking-widest text-sky-600">{cat}</span>*/}
                                         <h3 className="mt-2 text-sm font-semibold text-slate-800 line-clamp-2">{item.titulo}</h3>
-                                        {/*<p className="mt-2 line-clamp-2 flex-1 text-xs leading-5 text-slate-500">{item.descricao || ''}</p>*/}
                                         {item.preco && <div className="mt-4 text-sm font-bold">{emPromo ? <><span className="text-red-600">{formatKz(item.preco_promocional)}</span> <span className="ml-2 text-xs line-through text-slate-400">{formatKz(item.preco)}</span></> : <span>{formatKz(item.preco)}</span>}</div>}
                                         <span className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-slate-600 group-hover:text-sky-600">Ver detalhes <span>→</span></span>
                                     </div>

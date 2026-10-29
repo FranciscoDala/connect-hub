@@ -3,9 +3,10 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import EventosSection from "@/components/seccoes/EventosSection";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-const PER_PAGE = 6;
+const PER_PAGE = 8;
 
 export default function EventosPage() {
     const [posts, setPosts] = useState<any[]>([]);
@@ -41,7 +42,9 @@ export default function EventosPage() {
     return (
         <main className="min-h-screen bg-stone-50">
             <Header />
-            <div className="mx-auto max-w-7xl px-5 pt-24 pb-20 sm:px-8">
+
+            {/* HEADER DA PÁGINA */}
+            <div className="mx-auto max-w-7xl px-5 pt-24 pb-6 sm:px-8">
                 <div className="flex items-center gap-3">
                     <span className="h-px w-8 bg-sky-600" />
                     <p className="text-xs font-bold uppercase tracking-widest text-sky-800">EVENTOS</p>
@@ -50,7 +53,15 @@ export default function EventosPage() {
                 <p className="mt-4 max-w-2xl text-justify text-sm leading-6 text-slate-500">
                     Fique por dentro dos eventos, formações e lançamentos da CONNECT. Tecnologia, networking e inovação para elevar sua prática.
                 </p>
+            </div>
 
+            {/* SECCAO EVENTOS DA HOME - EM CIMA */}
+            {!loading && posts.length > 0 && (
+                <EventosSection posts={posts} />
+            )}
+
+            {/* CARDS DA PÁGINA */}
+            <div className="mx-auto max-w-7xl px-5 pb-20 sm:px-8">
                 {loading ? (
                     <div className="mt-10 grid place-items-center py-20">
                         <div className="size-8 animate-spin rounded-full border-2 border-slate-200 border-t-black"></div>
@@ -67,7 +78,7 @@ export default function EventosPage() {
                             {currentPosts.map((item: any) => {
                                 const img = item.thumbnail_url || item.media_url || '/connect.png'
                                 const link = `/post/${item.slug || item.id}`
-                                const data = item.data_evento || item.created_at
+                                const data = item.data_inicio || item.data_evento || item.created_at
                                 return (
                                     <Link key={item.id} href={link} className="group flex flex-col overflow-hidden rounded-3xl bg-white shadow-lg transition-all hover:-translate-y-1">
                                         <div className="relative w-full shrink-0 overflow-hidden" style={{ aspectRatio: '1 / 1', backgroundColor: '#e0f2fe' }}>
@@ -82,7 +93,7 @@ export default function EventosPage() {
                                                 {item.descricao || 'Participe deste evento exclusivo da CONNECT.'}
                                             </p>
                                             <div className="mt-auto flex items-center justify-between pt-4">
-                                                <span className="text-xs text-slate-400">{item.local || 'Luanda, AO'}</span>
+                                                <span className="text-xs text-slate-400">{item.local_evento || item.local || 'Luanda, AO'}</span>
                                                 <span className="rounded-full bg-sky-600 px-4 py-1.5 text-xs font-bold text-white">Ver evento</span>
                                             </div>
                                         </div>
@@ -93,33 +104,11 @@ export default function EventosPage() {
 
                         {totalPages > 1 && (
                             <div className="mt-12 flex items-center justify-center gap-2">
-                                <button
-                                    onClick={() => goToPage(currentPage - 1)}
-                                    disabled={currentPage === 1}
-                                    className="grid size-9 place-items-center rounded-full border border-slate-200 bg-white text-sm font-bold text-slate-600 transition hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed"
-                                >
-                                    ‹
-                                </button>
+                                <button onClick={() => goToPage(currentPage - 1)} disabled={currentPage === 1} className="grid size-9 place-items-center rounded-full border border-slate-200 bg-white text-sm font-bold text-slate-600 disabled:opacity-40">‹</button>
                                 {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                                    <button
-                                        key={page}
-                                        onClick={() => goToPage(page)}
-                                        className={`grid size-9 place-items-center rounded-full text-xs font-bold transition ${
-                                            currentPage === page
-                                                ? 'bg-sky-600 text-white shadow-lg'
-                                                : 'border border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
-                                        }`}
-                                    >
-                                        {page}
-                                    </button>
+                                    <button key={page} onClick={() => goToPage(page)} className={`grid size-9 place-items-center rounded-full text-xs font-bold transition ${currentPage === page ? 'bg-sky-600 text-white shadow-lg' : 'border border-slate-200 bg-white text-slate-600'}`}>{page}</button>
                                 ))}
-                                <button
-                                    onClick={() => goToPage(currentPage + 1)}
-                                    disabled={currentPage === totalPages}
-                                    className="grid size-9 place-items-center rounded-full border border-slate-200 bg-white text-sm font-bold text-slate-600 transition hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed"
-                                >
-                                    ›
-                                </button>
+                                <button onClick={() => goToPage(currentPage + 1)} disabled={currentPage === totalPages} className="grid size-9 place-items-center rounded-full border border-slate-200 bg-white text-sm font-bold text-slate-600 disabled:opacity-40">›</button>
                             </div>
                         )}
                     </>
