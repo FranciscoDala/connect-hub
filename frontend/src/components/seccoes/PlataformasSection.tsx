@@ -74,27 +74,27 @@ export default function PlataformasSection({ posts }: { posts: Post[] }) {
     const next = () => setActive((s) => (s + 1) % lista.length)
 
     return (
-        <section id="plataformas" className="bg-[#0f172a] py-20 sm:py-28 overflow-hidden select-none">
+        <section id="plataformas" className="bg-[#0f172a] py-12 sm:py-16 overflow-hidden select-none">
             <div className="mx-auto max-w-7xl px-5 sm:px-8">
-                <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+                <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
                     <div className="max-w-2xl">
                         <div className="flex items-center gap-3">
                             <span className="h-px w-8 bg-sky-400" />
                             <p className="text-xs font-bold uppercase tracking-widest text-sky-400">NOSSAS PLATAFORMAS</p>
                         </div>
-                        <h2 className="mt-4 text-3xl font-semibold leading-tight tracking-tight text-white sm:text-4xl">Apps e sites que criamos e mantemos.</h2>
-                        <p className="mt-4 text-sm leading-6 text-slate-400">Da ideia ao deploy. Produtos próprios em produção e projetos entregues para clientes em Angola.</p>
+                        <h2 className="mt-3 text-3xl font-semibold leading-tight tracking-tight text-white sm:text-4xl">Apps e sites que criamos e mantemos.</h2>
+                        <p className="mt-2 text-sm leading-6 text-slate-400">Da ideia ao deploy. Produtos próprios em produção e projetos entregues para clientes em Angola.</p>
                     </div>
                 </div>
 
                 {lista.length === 0 ? (
-                    <div className="mt-12 flex flex-col items-center justify-center rounded-3xl border border-dashed border-slate-700 bg-slate-800/40 px-6 py-20 text-center">
+                    <div className="mt-6 flex flex-col items-center justify-center rounded-3xl border border-dashed border-slate-700 bg-slate-800/40 px-6 py-16 text-center">
                         <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-800"><span className="text-lg">🚀</span></div>
                         <h3 className="mt-5 text-base font-semibold text-white">Nenhum SaaS, App ou site disponível</h3>
                         <p className="mt-2 max-w-md text-sm leading-6 text-slate-400">No momento não temos plataformas publicadas. Estamos preparando novidades.</p>
                     </div>
                 ) : (
-                    <div className="relative mt-12">
+                    <div className="relative mt-6 sm:mt-8">
                         <button onClick={prev} className="hidden sm:grid absolute left-4 lg:left-8 top-1/2 z-20 -translate-y-1/2 h-10 w-10 place-items-center rounded-full bg-white shadow border text-slate-600 hover:bg-black hover:text-white transition">←</button>
                         <button onClick={next} className="hidden sm:grid absolute right-4 lg:right-8 top-1/2 z-20 -translate-y-1/2 h-10 w-10 place-items-center rounded-full bg-white shadow border text-slate-600 hover:bg-black hover:text-white transition">→</button>
 
@@ -194,12 +194,12 @@ export default function PlataformasSection({ posts }: { posts: Post[] }) {
                         </div>
 
                         {activeItem && (
-                            <div className="mx-auto mt-8 max-w-lg text-center px-6">
+                            <div className="mx-auto mt-2 max-w-lg text-center px-6">
                                 <h3 className="text-white font-semibold text-lg leading-snug wrap-break-word whitespace-normal">{activeItem.titulo}</h3>
-                                <p className="mt-2 text-sm leading-6 text-slate-400 line-clamp-3 wrap-break-word">
+                                <p className="mt-1.5 text-sm leading-6 text-slate-400 line-clamp-2 wrap-break-word">
                                     {activeItem.descricao || 'Plataforma desenvolvida pela nossa equipe.'}
                                 </p>
-                                <div className="mt-4 flex justify-center gap-3">
+                                <div className="mt-3 flex justify-center gap-3">
                                     <Link href={`/post/${activeItem.slug || activeItem.id}`} className="inline-flex rounded-full bg-white px-6 py-2.5 text-xs font-bold text-slate-900 hover:bg-slate-100">
                                         Ver plataforma
                                     </Link>
@@ -212,12 +212,12 @@ export default function PlataformasSection({ posts }: { posts: Post[] }) {
                             </div>
                         )}
 
-                        <div className="mt-8 flex justify-center gap-1.5">
+                        <div className="mt-5 flex justify-center gap-1.5">
                             {lista.map((_, i) => (
                                 <button key={i} onClick={() => setActive(i)} className={`h-1.5 rounded-full transition-all ${i === active ? 'w-6 bg-sky-400' : 'w-1.5 bg-slate-600'}`} />
                             ))}
                         </div>
-                        <p className="mt-4 text-center text-[10px] tracking-widest text-slate-500 sm:hidden">ARRASTE PARA O LADO →</p>
+                        <p className="mt-3 text-center text-[10px] tracking-widest text-slate-500 sm:hidden">ARRASTE PARA O LADO →</p>
                     </div>
                 )}
             </div>
