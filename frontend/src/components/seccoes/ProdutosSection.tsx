@@ -7,6 +7,33 @@ function formatKz(v?: number | null) {
     return Number(v).toLocaleString('pt-AO', { minimumFractionDigits: 0 }) + ' Kz'
 }
 
+function getTipoLabel(tipo: string) {
+    const t = (tipo || '').toLowerCase()
+    if (t.includes('prod')) return 'PRODUTO'
+    if (t.includes('noticia')) return 'NOTÍCIA'
+    if (t.includes('serv')) return 'SERVIÇO'
+    if (t.includes('evento') || t.includes('festa')) return 'EVENTO'
+    return (tipo || 'PRODUTO').toUpperCase()
+}
+
+function getTipoStyle(tipo: string) {
+    const t = (tipo || '').toLowerCase()
+    if (t.includes('prod')) return 'bg-emerald-600 text-white'
+    if (t.includes('noticia')) return 'bg-sky-600 text-white'
+    if (t.includes('serv')) return 'bg-violet-600 text-white'
+    if (t.includes('evento') || t.includes('festa')) return 'bg-orange-500 text-white'
+    return 'bg-black text-white'
+}
+
+function formatDate(dateStr: string) {
+    if (!dateStr) return null
+    try {
+        return new Date(dateStr).toLocaleDateString('pt-AO', { day: '2-digit', month: 'short', year: 'numeric' }).toUpperCase()
+    } catch {
+        return null
+    }
+}
+
 export default function ProdutosSection({ posts, hideHeader = false }: { posts: Post[]; hideHeader?: boolean }) {
     const produtos = posts
         .filter(p => {
@@ -38,21 +65,72 @@ export default function ProdutosSection({ posts, hideHeader = false }: { posts: 
                         <p className="mt-4 text-sm font-semibold text-slate-700">Sem produtos disponíveis</p>
                     </div>
                 ) : (
-                    <div className={`${hideHeader ? 'mt-2' : 'mt-10'} flex snap-x snap-mandatory gap-4 overflow-x-auto lg:grid lg:grid-cols-4 lg:gap-6 lg:overflow-visible`} style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' } as any}>
+                    <div className={`${hideHeader ? 'mt-2' : 'mt-10'} flex snap-x snap-mandatory gap-4 overflow-x-auto lg:grid lg:grid-cols-4 lg:gap-4 lg:overflow-visible`} style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' } as any}>
                         {produtos.map((item: any) => {
                             const img = item.thumbnail_url || item.media_url || '/connect.png'
                             const link = `/post/${item.slug || item.id}`
                             const emPromo = item.em_promocao && item.preco_promocional
+                            const views = item.views ?? item.views_count ?? 0
+                            const likes = item.likes_count ?? item.likes ?? 0
+                            const tipoLabel = getTipoLabel(item.tipo)
+                            const tipoStyle = getTipoStyle(item.tipo)
+                            const dataPostagem = formatDate(item.created_at)
+
                             return (
-                                <Link key={item.id} href={link} className="group flex w-full min-w-full shrink-0 snap-center flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-all hover:-translate-y-1 hover:shadow-md lg:min-w-0">
-                                    <div className="relative w-full overflow-hidden bg-slate-100" style={{ aspectRatio: '4 / 3' }}>
-                                        <img src={img} alt={item.titulo} className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
-                                        {emPromo && <span className="absolute left-3 top-3 rounded-full bg-red-500 px-2.5 py-1 text-xs font-bold text-white">PROMO</span>}
+                                <Link key={item.id} href={link} className="group relative flex w-full min-w-full shrink-0 snap-center flex-col overflow-hidden rounded-[20px] border border-zinc-200 bg-white transition hover:shadow-lg lg:min-w-0">
+                                    {/* IMAGEM + BADGES */}
+                                    <div className="relative w-full overflow-hidden bg-zinc-100" style={{ aspectRatio: '16 / 10' }}>
+                                        <img src={img} alt={item.titulo} className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]" />
+
+                                        {/* BADGES ESQUERDA - TIPO + DATA POSTAGEM */}
+                                        <div className="absolute left-2 top-2 flex items-center gap-1.5">
+                                            <span className={`rounded-full px-2.5 py-1 text-[9px] font-bold tracking-widest ${tipoStyle}`}>
+                                                {tipoLabel}
+                                            </span>
+                                            {dataPostagem && (
+                                                <span className="rounded-full bg-white/90 px-2.5 py-1 text-[9px] font-bold tracking-widest text-zinc-800 shadow backdrop-blur">
+                                                    📅 {dataPostagem}
+                                                </span>
+                                            )}
+                                        </div>
+
+                                        {/* DIREITA - PROMO + LIKES */}
+                                        <div className="absolute right-2 top-2 flex items-center gap-1.5">
+                                            {emPromo && <span className="rounded-full bg-red-500 px-2.5 py-1 text-[9px] font-bold text-white shadow">PROMO</span>}
+                                            {likes > 0 && (
+                                                <span className="flex items-center gap-1 rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-semibold text-zinc-800 shadow backdrop-blur">
+                                                    <svg className="size-3.5 fill-red-600" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                                                    {likes}
+                                                </span>
+                                            )}
+                                        </div>
                                     </div>
-                                    <div className="flex flex-1 flex-col p-5">
-                                        <h3 className="mt-2 text-sm font-semibold text-slate-800 line-clamp-2">{item.titulo}</h3>
-                                        {item.preco && <div className="mt-4 text-sm font-bold">{emPromo ? <><span className="text-red-600">{formatKz(item.preco_promocional)}</span> <span className="ml-2 text-xs line-through text-slate-400">{formatKz(item.preco)}</span></> : <span>{formatKz(item.preco)}</span>}</div>}
-                                        <span className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-slate-600 group-hover:text-sky-600">Ver detalhes <span>→</span></span>
+
+                                    {/* CONTEÚDO */}
+                                    <div className="flex flex-1 flex-col p-4">
+                                        {/* VISUALIZAÇÕES ANTES DO TÍTULO */}
+                                        <div className="mb-2 flex items-center gap-1 text-[11px] text-zinc-500">
+                                            <span>👁 {views} visualizações</span>
+                                        </div>
+
+                                        <h3 className="line-clamp-2 text-[14px] font-semibold leading-tight text-zinc-900 group-hover:text-violet-600">{item.titulo}</h3>
+
+                                        {item.descricao && (
+                                            <p className="mt-1.5 line-clamp-2 text-[12px] leading-5 text-zinc-500">{item.descricao}</p>
+                                        )}
+
+                                        {item.preco && (
+                                            <div className="mt-3 text-[13px] font-bold">
+                                                {emPromo ? (
+                                                    <>
+                                                        <span className="text-red-600">{formatKz(item.preco_promocional)}</span>
+                                                        <span className="ml-2 text-[11px] line-through text-zinc-400">{formatKz(item.preco)}</span>
+                                                    </>
+                                                ) : (
+                                                    <span className="text-zinc-900">{formatKz(item.preco)}</span>
+                                                )}
+                                            </div>
+                                        )}
                                     </div>
                                 </Link>
                             )
