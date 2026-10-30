@@ -6,7 +6,7 @@ import Footer from "@/components/Footer";
 import EventosSection from "@/components/seccoes/EventosSection";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-const PER_PAGE = 8;
+const PER_PAGE = 4;
 
 function getTipoLabel(tipo: string) {
     const t = (tipo || '').toLowerCase()
