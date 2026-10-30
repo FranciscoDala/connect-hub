@@ -143,7 +143,7 @@ export default async function CategoriaPage({
                                         <div className="p-4 flex flex-col flex-1">
                                             {/* VISUALIZAÇÕES ANTES DO TÍTULO */}
                                             <div className="mb-2 flex items-center gap-1 text-[11px] text-zinc-500">
-                                                <span>👁 {views} visualizações</span>
+                                                <span>{views} visualizações</span>
                                             </div>
 
                                             <h3 className="font-semibold text-[14px] leading-tight line-clamp-2 group-hover:text-violet-600 transition">{post.titulo}</h3>
