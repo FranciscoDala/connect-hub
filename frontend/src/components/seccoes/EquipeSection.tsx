@@ -36,10 +36,10 @@ export default function EquipeSection() {
 
                         {/* CONTEÚDO - MESMO PADRÃO */}
                         <div className="flex flex-1 flex-col p-4">
-                            <div className="mb-2 flex items-center gap-1 text-[11px] text-zinc-500">
-                                <span>Licenciado em Engenharia de Telecomunicações</span>
+                            {/*<div className="mb-2 flex items-center gap-1 text-[11px] text-zinc-500">
+                                <span>Eng. de Telecomunicações</span>
                             </div>
-
+                            */}
                             <h3 className="text-[14px] font-semibold leading-tight text-zinc-900 group-hover:text-violet-600">
                                 Francisco J.M Dala
                             </h3>
