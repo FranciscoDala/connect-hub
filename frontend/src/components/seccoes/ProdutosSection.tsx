@@ -25,15 +25,6 @@ function getTipoStyle(tipo: string) {
     return 'bg-black text-white'
 }
 
-function formatDate(dateStr: string) {
-    if (!dateStr) return null
-    try {
-        return new Date(dateStr).toLocaleDateString('pt-AO', { day: '2-digit', month: 'short', year: 'numeric' }).toUpperCase()
-    } catch {
-        return null
-    }
-}
-
 export default function ProdutosSection({ posts, hideHeader = false }: { posts: Post[]; hideHeader?: boolean }) {
     const produtos = posts
         .filter(p => {
@@ -74,7 +65,6 @@ export default function ProdutosSection({ posts, hideHeader = false }: { posts: 
                             const likes = item.likes_count ?? item.likes ?? 0
                             const tipoLabel = getTipoLabel(item.tipo)
                             const tipoStyle = getTipoStyle(item.tipo)
-                            const dataPostagem = formatDate(item.created_at)
 
                             return (
                                 <Link key={item.id} href={link} className="group relative flex w-full min-w-full shrink-0 snap-center flex-col overflow-hidden rounded-[20px] border border-zinc-200 bg-white transition hover:shadow-lg lg:min-w-0">
@@ -82,21 +72,14 @@ export default function ProdutosSection({ posts, hideHeader = false }: { posts: 
                                     <div className="relative w-full overflow-hidden bg-zinc-100" style={{ aspectRatio: '16 / 10' }}>
                                         <img src={img} alt={item.titulo} className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]" />
 
-                                        {/* BADGES ESQUERDA - TIPO + DATA POSTAGEM */}
-                                        <div className="absolute left-2 top-2 flex items-center gap-1.5">
-                                            <span className={`rounded-full px-2.5 py-1 text-[9px] font-bold tracking-widest ${tipoStyle}`}>
-                                                {tipoLabel}
-                                            </span>
-                                            {dataPostagem && (
-                                                <span className="rounded-full bg-white/90 px-2.5 py-1 text-[9px] font-bold tracking-widest text-zinc-800 shadow backdrop-blur">
-                                                    📅 {dataPostagem}
-                                                </span>
-                                            )}
-                                        </div>
+                                        {/* BADGE TIPO - ESQUERDA */}
+                                        <span className={`absolute left-2 top-2 rounded-full px-2.5 py-1 text-[9px] font-bold tracking-widest ${tipoStyle}`}>
+                                            {tipoLabel}
+                                        </span>
 
                                         {/* DIREITA - PROMO + LIKES */}
                                         <div className="absolute right-2 top-2 flex items-center gap-1.5">
-                                            {emPromo && <span className="rounded-full bg-red-500 px-2.5 py-1 text-[9px] font-bold text-white shadow">PROMO</span>}
+                                            {emPromo && <span className="rounded-full bg-red-500 px-2.5 py-1 text-[9px] font-bold text-white shadow">PROMOÇÃO</span>}
                                             {likes > 0 && (
                                                 <span className="flex items-center gap-1 rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-semibold text-zinc-800 shadow backdrop-blur">
                                                     <svg className="size-3.5 fill-red-600" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
