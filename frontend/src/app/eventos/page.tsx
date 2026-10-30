@@ -26,6 +26,16 @@ function getTipoStyle(tipo: string) {
     return 'bg-black text-white'
 }
 
+function formatEventDate(dateStr: string) {
+    if (!dateStr) return null
+    try {
+        const d = new Date(dateStr)
+        return d.toLocaleDateString('pt-AO', { day: '2-digit', month: 'short', year: 'numeric' }).toUpperCase()
+    } catch {
+        return null
+    }
+}
+
 export default function EventosPage() {
     const [posts, setPosts] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
@@ -96,6 +106,8 @@ export default function EventosPage() {
                                 const likes = item.likes_count ?? item.likes ?? 0
                                 const tipoLabel = getTipoLabel(item.tipo)
                                 const tipoStyle = getTipoStyle(item.tipo)
+                                const eventDateRaw = item.data_inicio || item.data_evento || item.data || null
+                                const eventDate = formatEventDate(eventDateRaw)
 
                                 return (
                                     <Link key={item.id} href={link} className="group relative flex flex-col overflow-hidden rounded-[20px] border border-zinc-200 bg-white transition hover:shadow-lg">
@@ -103,10 +115,17 @@ export default function EventosPage() {
                                         <div className="relative aspect-16/10 w-full shrink-0 overflow-hidden bg-zinc-100">
                                             <img src={img} alt={item.titulo} className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]" />
 
-                                            {/* BADGE TIPO - ESQUERDA */}
-                                            <span className={`absolute left-2 top-2 rounded-full px-2.5 py-1 text-[9px] font-bold tracking-widest ${tipoStyle}`}>
-                                                {tipoLabel}
-                                            </span>
+                                            {/* BADGES ESQUERDA - TIPO + DATA */}
+                                            <div className="absolute left-2 top-2 flex items-center gap-1.5">
+                                                <span className={`rounded-full px-2.5 py-1 text-[9px] font-bold tracking-widest ${tipoStyle}`}>
+                                                    {tipoLabel}
+                                                </span>
+                                                {eventDate && (
+                                                    <span className="rounded-full bg-white/90 px-2.5 py-1 text-[9px] font-bold tracking-widest text-zinc-800 shadow backdrop-blur">
+                                                        📅 {eventDate}
+                                                    </span>
+                                                )}
+                                            </div>
 
                                             {/* CORAÇÃO + LIKES - DIREITA */}
                                             {likes > 0 && (
