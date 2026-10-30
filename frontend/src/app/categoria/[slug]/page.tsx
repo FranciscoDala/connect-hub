@@ -52,14 +52,19 @@ export default async function CategoriaPage({ params }: { params: { slug: string
     return (
         <main className="min-h-screen bg-[#fcfcfc] text-zinc-900">
             <Header />
-            {/* CORRIGIDO: pt extra para não ficar por baixo do Header sticky */}
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 md:pt-10 pb-10">
-                {/* HEADER BEM ENQUADRADO E VISÍVEL */}
-                <div className="relative z-10 pb-6 mb-6 border-b border-zinc-200 bg-[#fcfcfc]">
-                    <div className="flex items-center gap-2 text-xs w-full">
-                        <span className="h-px w-7 bg-sky-600 shrink-0" />
-                        <span className="font-bold uppercase tracking-widest text-sky-800">Categoria</span>
-                        <span className="ml-auto text-[11px] text-slate-500 whitespace-nowrap">Post • 👁 {posts.length}</span>
+
+            {/* ESPAÇADOR PARA O HEADER FIXO - ISSO QUE FALTAVA */}
+            <div className="h-[68px] md:h-[76px] w-full" aria-hidden />
+
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-10">
+                {/* HEADER DA CATEGORIA - AGORA 100% VISÍVEL */}
+                <div className="w-full bg-[#fcfcfc] pt-2 pb-6 mb-6 border-b border-zinc-200">
+                    <div className="flex w-full items-center justify-between gap-2">
+                        <div className="flex items-center gap-2">
+                            <span className="h-px w-7 bg-sky-600 block" />
+                            <span className="text-[11px] font-bold uppercase tracking-widest text-sky-800">Categoria</span>
+                        </div>
+                        <span className="text-[11px] text-slate-500 whitespace-nowrap">Post • 👁 {posts.length}</span>
                     </div>
                     <h1 className="mt-4 text-[28px] font-bold leading-none tracking-tight text-[#132a3a] sm:text-[32px]">{category.nome}</h1>
                 </div>
