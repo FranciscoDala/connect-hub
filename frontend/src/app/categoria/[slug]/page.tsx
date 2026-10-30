@@ -1,6 +1,7 @@
 // app/categoria/[slug]/page.tsx
 import Link from 'next/link'
 import Header from '@/components/Header'
+import Footer from '@/components/Footer'
 import { notFound } from 'next/navigation'
 
 const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
@@ -52,14 +53,15 @@ export default async function CategoriaPage({ params }: { params: { slug: string
         <main className="min-h-screen bg-[#fcfcfc] text-zinc-900">
             <Header />
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-10">
-                <div className="bg-white border border-zinc-200 rounded-3xl p-6 md:p-8 mb-8">
+                {/* HEADER ESTILO PRINT - FESTA / Nigth Club */}
+                <div className="bg-white border-b border-zinc-200 pb-6 mb-8">
                     <div className="flex items-center gap-3 mb-2">
-                        <span className="w-3 h-3 rounded-full" style={{ background: category.cor || '#7c3aed' }} />
-                        <span className="text-[11px] font-bold tracking-[0.2em] text-zinc-500">CATEGORIA</span>
+                        <span className="w-7 h-[2px] bg-[#1d5a73]" />
+                        <span className="text-[11px] font-bold tracking-[0.2em] text-[#1d5a73] uppercase">Categoria</span>
                     </div>
-                    <h1 className="text-[28px] md:text-[40px] font-black tracking-tight leading-[0.9]">{category.nome}</h1>
-                    {category.descricao && <p className="text-zinc-600 mt-3 max-w-2xl text-[14px]">{category.descricao}</p>}
-                    <p className="text-[12px] text-zinc-400 mt-4">{posts.length} posts encontrados</p>
+                    <h1 className="text-[26px] md:text-[34px] font-bold tracking-tight text-[#132a3a] leading-none">{category.nome}</h1>
+                    {category.descricao && <p className="text-zinc-500 mt-3 max-w-2xl text-[13px]">{category.descricao}</p>}
+                    <p className="text-[11px] text-zinc-400 mt-3">{posts.length} posts encontrados</p>
                 </div>
 
                 {posts.length === 0 ? (
@@ -68,7 +70,7 @@ export default async function CategoriaPage({ params }: { params: { slug: string
                         <Link href="/" className="mt-4 inline-block px-5 py-2 rounded-full bg-black text-white text-xs font-bold">VOLTAR PARA HOME</Link>
                     </div>
                 ) : (
-                    <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                         {posts.map((post: any) => {
                             const views = post.views ?? post.views_count ?? 0
                             const comments = post.comments_count ?? 0
@@ -93,6 +95,7 @@ export default async function CategoriaPage({ params }: { params: { slug: string
                     </div>
                 )}
             </div>
+            <Footer />
         </main>
     )
 }
