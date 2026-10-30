@@ -58,14 +58,28 @@ function getTipoStyle(tipo: string) {
     return 'bg-black text-white'
 }
 
-export default async function CategoriaPage({ params }: { params: { slug: string } | Promise<{ slug: string }> }) {
+export default async function CategoriaPage({
+    params,
+    searchParams
+}: {
+    params: { slug: string } | Promise<{ slug: string }>,
+    searchParams?: { page?: string } | Promise<{ page?: string }>
+}) {
     const resolvedParams = params instanceof Promise ? await params : params
+    const resolvedSearchParams = searchParams instanceof Promise ? await searchParams : searchParams
     const slug = decodeURIComponent(resolvedParams.slug)
 
     const category = await getCategory(slug)
     if (!category) return notFound()
 
     const posts = await getPostsByCategory(slug)
+
+    // PAGINAÇÃO 8 POR PÁGINA
+    const PER_PAGE = 8
+    const currentPage = Math.max(1, parseInt(resolvedSearchParams?.page || '1') || 1)
+    const totalPages = Math.ceil(posts.length / PER_PAGE)
+    const start = (currentPage - 1) * PER_PAGE
+    const paginatedPosts = posts.slice(start, start + PER_PAGE)
 
     return (
         <main className="min-h-screen bg-[#fcfcfc] text-zinc-900">
@@ -82,7 +96,7 @@ export default async function CategoriaPage({ params }: { params: { slug: string
                             <span className="h-px w-7 bg-sky-600 block" />
                             <span className="text-[11px] font-bold uppercase tracking-widest text-sky-800">Categoria</span>
                         </div>
-                        <span className="text-[11px] text-slate-500 whitespace-nowrap">Post • 👁 {posts.length}</span>
+                        <span className="text-[11px] font-bold uppercase tracking-widest text-slate-500 whitespace-nowrap">Post • {posts.length}</span>
                     </div>
                     <h1 className="mt-4 text-[28px] font-bold leading-none tracking-tight text-[#132a3a] sm:text-[32px]">{category.nome}</h1>
                 </div>
@@ -93,54 +107,107 @@ export default async function CategoriaPage({ params }: { params: { slug: string
                         <Link href="/" className="mt-4 inline-block px-5 py-2 rounded-full bg-black text-white text-xs font-bold">VOLTAR PARA HOME</Link>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                        {posts.map((post: any) => {
-                            const views = post.views ?? post.views_count ?? 0
-                            const likes = post.likes_count ?? post.likes ?? 0
-                            const tipoLabel = getTipoLabel(post.tipo)
-                            const tipoStyle = getTipoStyle(post.tipo)
+                    <>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                            {paginatedPosts.map((post: any) => {
+                                const views = post.views ?? post.views_count ?? 0
+                                const likes = post.likes_count ?? post.likes ?? 0
+                                const tipoLabel = getTipoLabel(post.tipo)
+                                const tipoStyle = getTipoStyle(post.tipo)
 
-                            return (
-                                <Link key={post.id} href={`/post/${post.slug || post.id}`} className="group relative bg-white border border-zinc-200 rounded-[20px] overflow-hidden hover:shadow-lg transition flex flex-col">
-                                    {/* IMAGEM + BADGES SOBREPOSTOS */}
-                                    <div className="relative aspect-16/10 bg-zinc-100 overflow-hidden">
-                                        {post.thumbnail_url || post.media_url ? (
-                                            <img src={post.thumbnail_url || post.media_url} alt={post.titulo} className="w-full h-full object-cover group-hover:scale-[1.03] transition duration-500" />
-                                        ) : (
-                                            <div className="w-full h-full grid place-items-center font-bold text-xs bg-zinc-100">{post.tipo}</div>
-                                        )}
+                                return (
+                                    <Link key={post.id} href={`/post/${post.slug || post.id}`} className="group relative bg-white border border-zinc-200 rounded-[20px] overflow-hidden hover:shadow-lg transition flex flex-col">
+                                        {/* IMAGEM + BADGES SOBREPOSTOS */}
+                                        <div className="relative aspect-16/10 bg-zinc-100 overflow-hidden">
+                                            {post.thumbnail_url || post.media_url ? (
+                                                <img src={post.thumbnail_url || post.media_url} alt={post.titulo} className="w-full h-full object-cover group-hover:scale-[1.03] transition duration-500" />
+                                            ) : (
+                                                <div className="w-full h-full grid place-items-center font-bold text-xs bg-zinc-100">{post.tipo}</div>
+                                            )}
 
-                                        {/* BADGE DO TIPO - CANTO SUPERIOR ESQUERDO */}
-                                        <span className={`absolute left-2 top-2 rounded-full px-2.5 py-1 text-[9px] font-bold tracking-widest ${tipoStyle}`}>
-                                            {tipoLabel}
-                                        </span>
-
-                                        {/* CORAÇÃO + LIKES - CANTO SUPERIOR DIREITO (SÓ SE TIVER LIKE) */}
-                                        {likes > 0 && (
-                                            <span className="absolute right-2 top-2 flex items-center gap-1 rounded-full bg-white/90 backdrop-blur px-2.5 py-1 text-[11px] font-semibold text-zinc-800 shadow">
-                                                <svg className="size-3.5 fill-red-600" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-                                                {likes}
+                                            {/* BADGE DO TIPO - CANTO SUPERIOR ESQUERDO */}
+                                            <span className={`absolute left-2 top-2 rounded-full px-2.5 py-1 text-[9px] font-bold tracking-widest ${tipoStyle}`}>
+                                                {tipoLabel}
                                             </span>
-                                        )}
-                                    </div>
 
-                                    {/* CONTEÚDO */}
-                                    <div className="p-4 flex flex-col flex-1">
-                                        {/* VISUALIZAÇÕES ANTES DO TÍTULO */}
-                                        <div className="mb-2 flex items-center gap-1 text-[11px] text-zinc-500">
-                                            <span>👁 {views} visualizações</span>
+                                            {/* CORAÇÃO + LIKES - CANTO SUPERIOR DIREITO (SÓ SE TIVER LIKE) */}
+                                            {likes > 0 && (
+                                                <span className="absolute right-2 top-2 flex items-center gap-1 rounded-full bg-white/90 backdrop-blur px-2.5 py-1 text-[11px] font-semibold text-zinc-800 shadow">
+                                                    <svg className="size-3.5 fill-red-600" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                                                    {likes}
+                                                </span>
+                                            )}
                                         </div>
 
-                                        <h3 className="font-semibold text-[14px] leading-tight line-clamp-2 group-hover:text-violet-600 transition">{post.titulo}</h3>
+                                        {/* CONTEÚDO */}
+                                        <div className="p-4 flex flex-col flex-1">
+                                            {/* VISUALIZAÇÕES ANTES DO TÍTULO */}
+                                            <div className="mb-2 flex items-center gap-1 text-[11px] text-zinc-500">
+                                                <span>👁 {views} visualizações</span>
+                                            </div>
 
-                                        {post.descricao && (
-                                            <p className="text-[12px] text-zinc-500 line-clamp-2 mt-1.5">{post.descricao}</p>
-                                        )}
-                                    </div>
-                                </Link>
-                            )
-                        })}
-                    </div>
+                                            <h3 className="font-semibold text-[14px] leading-tight line-clamp-2 group-hover:text-violet-600 transition">{post.titulo}</h3>
+
+                                            {post.descricao && (
+                                                <p className="text-[12px] text-zinc-500 line-clamp-2 mt-1.5">{post.descricao}</p>
+                                            )}
+                                        </div>
+                                    </Link>
+                                )
+                            })}
+                        </div>
+
+                        {/* PAGINAÇÃO */}
+                        {totalPages > 1 && (
+                            <div className="mt-10 flex items-center justify-center gap-2">
+                                {/* Anterior */}
+                                {currentPage > 1 ? (
+                                    <Link href={`/categoria/${encodeURIComponent(slug)}?page=${currentPage - 1}`} className="px-4 py-2 rounded-full border bg-white text-xs font-bold hover:bg-black hover:text-white transition">
+                                        ← Anterior
+                                    </Link>
+                                ) : (
+                                    <span className="px-4 py-2 rounded-full border bg-zinc-100 text-xs font-bold text-zinc-400 cursor-not-allowed">← Anterior</span>
+                                )}
+
+                                {/* Números */}
+                                <div className="flex items-center gap-1.5">
+                                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => {
+                                        const isActive = pageNum === currentPage
+                                        // Mostra só 5 páginas ao redor da atual para não poluir
+                                        if (totalPages > 7) {
+                                            if (pageNum !== 1 && pageNum !== totalPages && Math.abs(pageNum - currentPage) > 2) {
+                                                if (pageNum === 2 && currentPage > 4) return <span key={pageNum} className="px-1 text-zinc-400">...</span>
+                                                if (pageNum === totalPages - 1 && currentPage < totalPages - 3) return <span key={pageNum} className="px-1 text-zinc-400">...</span>
+                                                if (Math.abs(pageNum - currentPage) > 2) return null
+                                            }
+                                        }
+                                        return (
+                                            <Link
+                                                key={pageNum}
+                                                href={`/categoria/${encodeURIComponent(slug)}?page=${pageNum}`}
+                                                className={`size-8 grid place-items-center rounded-full text-xs font-bold transition ${isActive ? 'bg-black text-white' : 'bg-white border hover:bg-zinc-50'}`}
+                                            >
+                                                {pageNum}
+                                            </Link>
+                                        )
+                                    })}
+                                </div>
+
+                                {/* Próximo */}
+                                {currentPage < totalPages ? (
+                                    <Link href={`/categoria/${encodeURIComponent(slug)}?page=${currentPage + 1}`} className="px-4 py-2 rounded-full border bg-white text-xs font-bold hover:bg-black hover:text-white transition">
+                                        Próximo →
+                                    </Link>
+                                ) : (
+                                    <span className="px-4 py-2 rounded-full border bg-zinc-100 text-xs font-bold text-zinc-400 cursor-not-allowed">Próximo →</span>
+                                )}
+                            </div>
+                        )}
+
+                        <div className="mt-4 text-center text-[11px] text-zinc-400">
+                            Página {currentPage} de {totalPages} • Mostrando {paginatedPosts.length} de {posts.length} posts
+                        </div>
+                    </>
                 )}
             </div>
             <Footer />
