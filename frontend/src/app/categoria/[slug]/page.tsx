@@ -40,6 +40,24 @@ async function getPostsByCategory(slug: string) {
     return []
 }
 
+function getTipoLabel(tipo: string) {
+    const t = (tipo || '').toLowerCase()
+    if (t.includes('prod')) return 'PRODUTO'
+    if (t.includes('noticia')) return 'NOTÍCIA'
+    if (t.includes('serv')) return 'SERVIÇO'
+    if (t.includes('evento') || t.includes('festa')) return 'EVENTO'
+    return (tipo || 'POST').toUpperCase()
+}
+
+function getTipoStyle(tipo: string) {
+    const t = (tipo || '').toLowerCase()
+    if (t.includes('prod')) return 'bg-emerald-600 text-white'
+    if (t.includes('noticia')) return 'bg-sky-600 text-white'
+    if (t.includes('serv')) return 'bg-violet-600 text-white'
+    if (t.includes('evento') || t.includes('festa')) return 'bg-orange-500 text-white'
+    return 'bg-black text-white'
+}
+
 export default async function CategoriaPage({ params }: { params: { slug: string } | Promise<{ slug: string }> }) {
     const resolvedParams = params instanceof Promise ? await params : params
     const slug = decodeURIComponent(resolvedParams.slug)
@@ -78,21 +96,46 @@ export default async function CategoriaPage({ params }: { params: { slug: string
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                         {posts.map((post: any) => {
                             const views = post.views ?? post.views_count ?? 0
-                            const comments = post.comments_count ?? 0
-                            const shares = post.shares_count ?? 0
+                            const likes = post.likes_count ?? post.likes ?? 0
+                            const tipoLabel = getTipoLabel(post.tipo)
+                            const tipoStyle = getTipoStyle(post.tipo)
+
                             return (
-                                <Link key={post.id} href={`/post/${post.slug || post.id}`} className="group bg-white border border-zinc-200 rounded-[20px] overflow-hidden hover:shadow-lg transition">
-                                    <div className="aspect-16/10 bg-zinc-100 overflow-hidden">
-                                        {post.thumbnail_url || post.media_url ? <img src={post.thumbnail_url || post.media_url} alt={post.titulo} className="w-full h-full object-cover group-hover:scale-[1.03] transition duration-500" /> : <div className="w-full h-full grid place-items-center font-bold text-xs">{post.tipo}</div>}
+                                <Link key={post.id} href={`/post/${post.slug || post.id}`} className="group relative bg-white border border-zinc-200 rounded-[20px] overflow-hidden hover:shadow-lg transition flex flex-col">
+                                    {/* IMAGEM + BADGES SOBREPOSTOS */}
+                                    <div className="relative aspect-16/10 bg-zinc-100 overflow-hidden">
+                                        {post.thumbnail_url || post.media_url ? (
+                                            <img src={post.thumbnail_url || post.media_url} alt={post.titulo} className="w-full h-full object-cover group-hover:scale-[1.03] transition duration-500" />
+                                        ) : (
+                                            <div className="w-full h-full grid place-items-center font-bold text-xs bg-zinc-100">{post.tipo}</div>
+                                        )}
+
+                                        {/* BADGE DO TIPO - CANTO SUPERIOR ESQUERDO */}
+                                        <span className={`absolute left-2 top-2 rounded-full px-2.5 py-1 text-[9px] font-bold tracking-widest ${tipoStyle}`}>
+                                            {tipoLabel}
+                                        </span>
+
+                                        {/* CORAÇÃO + LIKES - CANTO SUPERIOR DIREITO (SÓ SE TIVER LIKE) */}
+                                        {likes > 0 && (
+                                            <span className="absolute right-2 top-2 flex items-center gap-1 rounded-full bg-white/90 backdrop-blur px-2.5 py-1 text-[11px] font-semibold text-zinc-800 shadow">
+                                                <svg className="size-3.5 fill-red-600" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                                                {likes}
+                                            </span>
+                                        )}
                                     </div>
-                                    <div className="p-4">
-                                        <h3 className="font-semibold text-[14px] leading-tight line-clamp-2 group-hover:text-violet-600 transition">{post.titulo}</h3>
-                                        <p className="text-[12px] text-zinc-500 line-clamp-2 mt-1">{post.descricao}</p>
-                                        <div className="grid grid-cols-3 gap-1.5 mt-3">
-                                            <span className="flex items-center justify-center gap-1 bg-zinc-50 border px-2 py-2 rounded-full text-[11px] w-full">👁 {views}</span>
-                                            <span className="flex items-center justify-center gap-1 bg-zinc-50 border px-2 py-2 rounded-full text-[11px] w-full">💬 {comments}</span>
-                                            <span className="flex items-center justify-center gap-1 bg-zinc-50 border px-2 py-2 rounded-full text-[11px] w-full">↗ {shares}</span>
+
+                                    {/* CONTEÚDO */}
+                                    <div className="p-4 flex flex-col flex-1">
+                                        {/* VISUALIZAÇÕES ANTES DO TÍTULO */}
+                                        <div className="mb-2 flex items-center gap-1 text-[11px] text-zinc-500">
+                                            <span>👁 {views} visualizações</span>
                                         </div>
+
+                                        <h3 className="font-semibold text-[14px] leading-tight line-clamp-2 group-hover:text-violet-600 transition">{post.titulo}</h3>
+
+                                        {post.descricao && (
+                                            <p className="text-[12px] text-zinc-500 line-clamp-2 mt-1.5">{post.descricao}</p>
+                                        )}
                                     </div>
                                 </Link>
                             )
