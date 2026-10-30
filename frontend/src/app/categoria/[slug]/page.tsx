@@ -53,15 +53,10 @@ export default async function CategoriaPage({ params }: { params: { slug: string
         <main className="min-h-screen bg-[#fcfcfc] text-zinc-900">
             <Header />
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-10">
-                {/* HEADER ESTILO PRINT - FESTA / Nigth Club */}
-                <div className="bg-white border-b border-zinc-200 pb-6 mb-8">
-                    <div className="flex items-center gap-3 mb-2">
-                        <span className="w-7 h-[2px] bg-[#1d5a73]" />
-                        <span className="text-[11px] font-bold tracking-[0.2em] text-[#1d5a73] uppercase">Categoria</span>
-                    </div>
-                    <h1 className="text-[26px] md:text-[34px] font-bold tracking-tight text-[#132a3a] leading-none">{category.nome}</h1>
-                    {category.descricao && <p className="text-zinc-500 mt-3 max-w-2xl text-[13px]">{category.descricao}</p>}
-                    <p className="text-[11px] text-zinc-400 mt-3">{posts.length} posts encontrados</p>
+                {/* HEADER IGUAL AO PRINT */}
+                <div className="border-b border-zinc-200 pb-5 mb-8">
+                    <h1 className="text-[28px] md:text-[32px] font-bold tracking-tight text-[#132a3a] leading-none">{category.nome}</h1>
+                    <p className="text-[13px] text-zinc-500 mt-2">{posts.length} posts encontrados</p>
                 </div>
 
                 {posts.length === 0 ? (
