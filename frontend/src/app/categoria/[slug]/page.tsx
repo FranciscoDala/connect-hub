@@ -11,11 +11,11 @@ async function getCategory(slug: string) {
     try {
         const res = await fetch(`${API}/api/v1/categories/slug/${encodeURIComponent(cleanSlug)}`, { next: { revalidate: 30 } })
         if (res.ok) return await res.json()
-    } catch {}
+    } catch { }
     try {
         const res = await fetch(`${API}/api/v1/categories/${encodeURIComponent(cleanSlug)}`, { next: { revalidate: 30 } })
         if (res.ok) return await res.json()
-    } catch {}
+    } catch { }
     try {
         const res = await fetch(`${API}/api/v1/categories`, { next: { revalidate: 30 } })
         if (res.ok) {
@@ -23,7 +23,7 @@ async function getCategory(slug: string) {
             const found = cats.find(c => (c.slug || '').toLowerCase() === cleanSlug.toLowerCase())
             if (found) return found
         }
-    } catch {}
+    } catch { }
     return null
 }
 
@@ -32,11 +32,11 @@ async function getPostsByCategory(slug: string) {
     try {
         const res = await fetch(`${API}/api/v1/categories/slug/${encodeURIComponent(cleanSlug)}/posts?limit=50`, { next: { revalidate: 30 } })
         if (res.ok) return await res.json()
-    } catch {}
+    } catch { }
     try {
         const res = await fetch(`${API}/api/v1/posts?category_slug=${encodeURIComponent(cleanSlug)}&limit=50`, { next: { revalidate: 30 } })
         if (res.ok) return await res.json()
-    } catch {}
+    } catch { }
     return []
 }
 
@@ -54,9 +54,14 @@ export default async function CategoriaPage({ params }: { params: { slug: string
             <Header />
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-10">
                 {/* HEADER IGUAL AO PRINT */}
-                <div className="border-b border-zinc-200 pb-5 mb-8">
-                    <h1 className="text-[28px] md:text-[32px] font-bold tracking-tight text-[#132a3a] leading-none">{category.nome}</h1>
-                    <p className="text-[13px] text-zinc-500 mt-2">{posts.length} posts encontrados</p>
+
+                <div className="px-4 pb-1">
+                    <div className="mt-3 flex items-center gap-2 text-xs">
+                        <span className="h-px w-7 bg-sky-600" />
+                        <span className="font-bold uppercase tracking-widest text-sky-800">Categoria</span>
+                        <span className="ml-auto text-slate-400">Post • 👁 {posts.length}</span>
+                    </div>
+                    <h1 className="mt-3 text-2xl font-semibold leading-tight tracking-tight sm:text-3xl">{category.nome}</h1>
                 </div>
 
                 {posts.length === 0 ? (
