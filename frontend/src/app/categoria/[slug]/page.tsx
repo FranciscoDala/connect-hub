@@ -6,29 +6,53 @@ import { notFound } from 'next/navigation'
 const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 
 async function getCategory(slug: string) {
-    const res = await fetch(`${API}/api/v1/categories/slug/${slug}`, { next: { revalidate: 30 } })
-    if (!res.ok) return null
-    return res.json()
+    const cleanSlug = decodeURIComponent(slug).trim()
+    try {
+        const res = await fetch(`${API}/api/v1/categories/slug/${encodeURIComponent(cleanSlug)}`, { next: { revalidate: 30 } })
+        if (res.ok) return await res.json()
+    } catch {}
+    try {
+        const res = await fetch(`${API}/api/v1/categories/${encodeURIComponent(cleanSlug)}`, { next: { revalidate: 30 } })
+        if (res.ok) return await res.json()
+    } catch {}
+    try {
+        const res = await fetch(`${API}/api/v1/categories`, { next: { revalidate: 30 } })
+        if (res.ok) {
+            const cats: any[] = await res.json()
+            const found = cats.find(c => (c.slug || '').toLowerCase() === cleanSlug.toLowerCase())
+            if (found) return found
+        }
+    } catch {}
+    return null
 }
 
 async function getPostsByCategory(slug: string) {
-    const res = await fetch(`${API}/api/v1/categories/slug/${slug}/posts?limit=50`, { next: { revalidate: 30 } })
-    if (!res.ok) return []
-    return res.json()
+    const cleanSlug = decodeURIComponent(slug).trim()
+    try {
+        const res = await fetch(`${API}/api/v1/categories/slug/${encodeURIComponent(cleanSlug)}/posts?limit=50`, { next: { revalidate: 30 } })
+        if (res.ok) return await res.json()
+    } catch {}
+    try {
+        const res = await fetch(`${API}/api/v1/posts?category_slug=${encodeURIComponent(cleanSlug)}&limit=50`, { next: { revalidate: 30 } })
+        if (res.ok) return await res.json()
+    } catch {}
+    return []
 }
 
-export default async function CategoriaPage({ params }: { params: { slug: string } }) {
-    const category = await getCategory(params.slug)
+export default async function CategoriaPage({ params }: { params: { slug: string } | Promise<{ slug: string }> }) {
+    const resolvedParams = params instanceof Promise ? await params : params
+    const slug = decodeURIComponent(resolvedParams.slug)
+
+    const category = await getCategory(slug)
     if (!category) return notFound()
 
-    const posts = await getPostsByCategory(params.slug)
+    const posts = await getPostsByCategory(slug)
 
     return (
         <main className="min-h-screen bg-[#fcfcfc] text-zinc-900">
             <Header />
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-10">
-                {/* HEADER CATEGORIA */}
-                <div className="bg-white border border-zinc-200 rounded-[24px] p-6 md:p-8 mb-8">
+                <div className="bg-white border border-zinc-200 rounded-3xl p-6 md:p-8 mb-8">
                     <div className="flex items-center gap-3 mb-2">
                         <span className="w-3 h-3 rounded-full" style={{ background: category.cor || '#7c3aed' }} />
                         <span className="text-[11px] font-bold tracking-[0.2em] text-zinc-500">CATEGORIA</span>
@@ -51,7 +75,7 @@ export default async function CategoriaPage({ params }: { params: { slug: string
                             const shares = post.shares_count ?? 0
                             return (
                                 <Link key={post.id} href={`/post/${post.slug || post.id}`} className="group bg-white border border-zinc-200 rounded-[20px] overflow-hidden hover:shadow-lg transition">
-                                    <div className="aspect-[16/10] bg-zinc-100 overflow-hidden">
+                                    <div className="aspect-16/10 bg-zinc-100 overflow-hidden">
                                         {post.thumbnail_url || post.media_url ? <img src={post.thumbnail_url || post.media_url} alt={post.titulo} className="w-full h-full object-cover group-hover:scale-[1.03] transition duration-500" /> : <div className="w-full h-full grid place-items-center font-bold text-xs">{post.tipo}</div>}
                                     </div>
                                     <div className="p-4">

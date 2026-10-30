@@ -33,10 +33,54 @@ def to_post_response(post: Post, db: Session):
     count = db.query(Comment).filter(Comment.post_id == post.id).count()
     return PostResponse.from_orm_with_counts(post, comments_count=count)
 
-# CATEGORIES
+# ========= CATEGORIES - CORRIGIDO E SEGURO =========
 @router.get("/categories", response_model=List[CategoryResponse])
 def list_categories(db: Session = Depends(get_db)):
     return db.query(Category).order_by(Category.nome).all()
+
+# NOVO - Busca categoria por slug (isso que faltava e causava 404)
+@router.get("/categories/slug/{slug}", response_model=CategoryResponse)
+def get_category_by_slug(slug: str, db: Session = Depends(get_db)):
+    clean_slug = slug.lower().strip()
+    cat = db.query(Category).filter(func.lower(Category.slug) == clean_slug).first()
+    if not cat:
+        cat = db.query(Category).filter(Category.slug.ilike(f"%{clean_slug}%")).first()
+    if not cat:
+        cat = db.query(Category).filter(func.lower(Category.nome).ilike(f"%{clean_slug}%")).first()
+    if not cat:
+        raise HTTPException(404, "Categoria não encontrada")
+    return cat
+
+# NOVO - Lista posts de uma categoria por slug
+@router.get("/categories/slug/{slug}/posts", response_model=List[PostResponse])
+def list_posts_by_category_slug(slug: str, db: Session = Depends(get_db), limit: int = Query(50, le=100), offset: int = 0):
+    clean_slug = slug.lower().strip()
+    cat = db.query(Category).filter(func.lower(Category.slug) == clean_slug).first()
+    if not cat:
+        cat = db.query(Category).filter(Category.slug.ilike(f"%{clean_slug}%")).first()
+    if not cat:
+        raise HTTPException(404, "Categoria não encontrada")
+    posts = db.query(Post).filter(Post.category_id == cat.id).filter(func.lower(Post.status) == "published").order_by(Post.created_at.desc()).offset(offset).limit(limit).all()
+    return [to_post_response(p, db) for p in posts]
+
+# Fallback genérico por slug ou id (tem que ficar DEPOIS das rotas /slug/)
+@router.get("/categories/{slug_or_id}", response_model=CategoryResponse)
+def get_category_generic(slug_or_id: str, db: Session = Depends(get_db)):
+    # tenta por ID se for UUID válido
+    try:
+        uid = uuid.UUID(slug_or_id)
+        cat = db.query(Category).filter(Category.id == uid).first()
+        if cat:
+            return cat
+    except:
+        pass
+    clean = slug_or_id.lower().strip()
+    cat = db.query(Category).filter(func.lower(Category.slug) == clean).first()
+    if not cat:
+        cat = db.query(Category).filter(Category.slug.ilike(f"%{clean}%")).first()
+    if not cat:
+        raise HTTPException(404, "Categoria não encontrada")
+    return cat
 
 @router.post("/categories", response_model=CategoryResponse)
 def create_category(data: CategoryCreate, admin=Depends(get_current_admin), db: Session=Depends(get_db)):
@@ -71,27 +115,26 @@ async def upload_post_media(file: UploadFile = File(...), admin=Depends(get_curr
 
 # POSTS LIST
 @router.get("/posts", response_model=List[PostResponse])
-def list_posts(db: Session=Depends(get_db), tipo: Optional[str]=None, category_id: Optional[uuid.UUID]=None, status: Optional[str]=Query(None), q: Optional[str]=None, destaque: Optional[bool]=None, limit: int=Query(50, le=100), offset: int=0, upcoming: Optional[bool]=None):
+def list_posts(db: Session=Depends(get_db), tipo: Optional[str]=None, category_id: Optional[uuid.UUID]=None, category_slug: Optional[str]=None, status: Optional[str]=Query(None), q: Optional[str]=None, destaque: Optional[bool]=None, limit: int=Query(50, le=100), offset: int=0, upcoming: Optional[bool]=None):
     query = db.query(Post)
     if tipo:
         tipos = [t.strip().lower() for t in tipo.split(",") if t.strip()]
         if len(tipos) > 1: query = query.filter(func.lower(Post.tipo).in_(tipos))
         else: query = query.filter(func.lower(Post.tipo) == tipos[0])
     if category_id: query = query.filter(Post.category_id == category_id)
+    if category_slug:
+        cat = db.query(Category).filter(func.lower(Category.slug) == category_slug.lower()).first()
+        if cat:
+            query = query.filter(Post.category_id == cat.id)
     if status: query = query.filter(func.lower(Post.status) == status.lower())
     if destaque is not None: query = query.filter(Post.destaque == destaque)
     if q: query = query.filter(Post.titulo.ilike(f"%{q}%"))
-
-    # filtro especial para eventos futuros
     if upcoming and tipo and 'evento' in tipo.lower():
         query = query.filter(Post.data_inicio >= func.now())
-
-    # ordenação inteligente: se for evento, ordena por data_inicio, senão por created_at
     if tipo and 'evento' in tipo.lower():
         query = query.order_by(Post.data_inicio.asc().nulls_last(), Post.created_at.desc())
     else:
         query = query.order_by(Post.created_at.desc())
-
     posts = query.offset(offset).limit(limit).all()
     return [to_post_response(p, db) for p in posts]
 
@@ -170,24 +213,19 @@ def add_share(post_id: uuid.UUID, db: Session=Depends(get_db)):
     db.commit()
     return {"shares_count": post.shares_count}
 
-# ========= LIKES / DISLIKES =========
 @router.post("/posts/{post_id}/reaction")
 def react_post(post_id: uuid.UUID, data: ReactionCreate, db: Session=Depends(get_db)):
     post = db.query(Post).filter(Post.id == post_id).first()
     if not post: raise HTTPException(404, "Post não encontrado")
-
     existing = db.query(PostReaction).filter(PostReaction.post_id == post_id, PostReaction.client_id == data.client_id).first()
-
     if existing:
         if existing.type == data.type:
-            # toggle off - remove
             db.delete(existing)
             if data.type == 'like': post.likes_count = max(0, (post.likes_count or 0) - 1)
             else: post.dislikes_count = max(0, (post.dislikes_count or 0) - 1)
             db.commit()
             return {"likes_count": post.likes_count, "dislikes_count": post.dislikes_count, "user_reaction": None}
         else:
-            # switch
             old = existing.type
             existing.type = data.type
             if old == 'like':
@@ -211,7 +249,6 @@ def get_my_reaction(post_id: uuid.UUID, client_id: str, db: Session=Depends(get_
     r = db.query(PostReaction).filter(PostReaction.post_id == post_id, PostReaction.client_id == client_id).first()
     return {"user_reaction": r.type if r else None}
 
-# ========= COMMENTS =========
 @router.get("/posts/{post_id}/comments", response_model=List[CommentResponse])
 def list_comments(post_id: uuid.UUID, db: Session=Depends(get_db)):
     return db.query(Comment).filter(Comment.post_id == post_id).order_by(Comment.created_at.desc()).all()
@@ -234,8 +271,7 @@ def update_comment(comment_id: uuid.UUID, data: CommentUpdate, db: Session=Depen
     return c
 
 @router.delete("/comments/{comment_id}")
-def delete_comment(comment_id: uuid.UUID, db: Session=Depends(get_db), admin=Depends(get_current_admin) if False else None):
-    # permite admin ou publico (vamos checar admin opcional)
+def delete_comment(comment_id: uuid.UUID, db: Session=Depends(get_db)):
     c = db.query(Comment).filter(Comment.id == comment_id).first()
     if not c: raise HTTPException(404, "Comentário não encontrado")
     db.delete(c); db.commit()
@@ -248,7 +284,6 @@ def delete_comment_by_post(post_id: uuid.UUID, comment_id: uuid.UUID, db: Sessio
     db.delete(c); db.commit()
     return {"ok": True}
 
-# ========= STATUS EVENTO - NOVO =========
 @router.patch("/posts/{post_id}/status-evento", response_model=PostResponse)
 def update_status_evento(post_id: uuid.UUID, status_evento: str, admin=Depends(get_current_admin), db: Session=Depends(get_db)):
     allowed = ["ativo", "cancelado", "adiado", "esgotado"]
