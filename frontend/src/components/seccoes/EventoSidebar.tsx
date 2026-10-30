@@ -24,7 +24,6 @@ export default function EventoSidebar({ post }: { post: any }) {
     const isEsgotado = ["esgotado", "esgotada", "soldout", "lotado"].includes(statusRaw);
     const isInativo = isCancelado || isAdiado || isEsgotado;
 
-    // Lógica Sem data: se adiado e sem data_inicio, mostra Sem data
     const dataInicioLabel = (() => {
         if (isAdiado && !post.data_inicio) return "Sem data";
         return formatDate(post.data_inicio) || (isAdiado ? "Sem data" : "—");
@@ -34,7 +33,7 @@ export default function EventoSidebar({ post }: { post: any }) {
         <div className="overflow-hidden rounded-2xl-0 border-0 border-slate-200-0 bg-white-0 shadow-sm-0">
             <div className={`px-4 py-3 flex items-center justify-between border-b ${isInativo ? 'bg-red-50 border-red-100' : 'bg-sky-50 border-sky-100'}`}>
                 <span className={`text-[11px] font-bold tracking-widest flex items-center gap-2 ${isInativo ? 'text-red-700' : 'text-sky-800'}`}>
-                    {isInativo ? '' : ''} {isCancelado ? 'EVENTO CANCELADO' : isAdiado ? 'EVENTO ADIADO' : isEsgotado ? 'EVENTO ESGOTADO' : 'INFORMAÇÕES DO EVENTO'}
+                    {isCancelado ? 'EVENTO CANCELADO' : isAdiado ? 'EVENTO ADIADO' : isEsgotado ? 'EVENTO ESGOTADO' : 'INFORMAÇÕES DO EVENTO'}
                 </span>
                 {post.modalidade && !isInativo && (
                     <span className="rounded-full bg-sky-600 px-2.5 py-1 text-[10px] font-bold uppercase text-white">
@@ -67,23 +66,13 @@ export default function EventoSidebar({ post }: { post: any }) {
                     <div><p className="text-[11px] text-slate-400 uppercase tracking-wide">Organizador</p><p className="mt-1 text-[13px] font-bold text-slate-800">{post.organizador || "CONNECT"}</p></div>
                 </div>
 
-                <div className="space-y-2 pt-2">
-                    {isInativo ? (
-                        <button disabled className="flex w-full items-center justify-center rounded-full bg-slate-300 px-5 py-3 text-xs font-bold uppercase tracking-widest text-slate-600 cursor-not-allowed">
-                            {isCancelado ? 'Evento Cancelado' : isAdiado ? (post.data_inicio ? 'Adiado - Nova Data' : 'Adiado - Sem data') : 'Esgotado'}
-                        </button>
-                    ) : (
-                        <a href={post.link_inscricao || "#"} target="_blank" className="flex w-full items-center justify-center rounded-full bg-black px-5 py-3 text-xs font-bold uppercase tracking-widest text-white transition hover:bg-zinc-800 active:scale-[0.98]">
-                            Reservar Convite
-                        </a>
-                    )}
-
-                    {post.link_mapa && (
+                {post.link_mapa && (
+                    <div className="pt-2">
                         <a href={post.link_mapa} target="_blank" className="flex w-full items-center justify-center rounded-full border border-slate-200 bg-white px-5 py-3 text-xs font-bold uppercase tracking-widest text-slate-700 transition hover:bg-slate-50">
                             Ver no Mapa
                         </a>
-                    )}
-                </div>
+                    </div>
+                )}
             </div>
         </div>
     );
