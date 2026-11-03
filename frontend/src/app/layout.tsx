@@ -18,16 +18,16 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
     metadataBase: new URL("https://connect-uuo9.onrender.com"),
-    title: "Connect",
-    description: "Inovamos para liderar o futuro digital em Angola com tecnologia, negócios e soluções conectadas.",
+    title: "CONNECT Angola",
+    description: "Agência digital focada em desenvolvimento de software, sites e aplicativos que geram resultados reais para empresas em Angola.",
     applicationName: "Connect",
     manifest: "/site.webmanifest",
     alternates: {
         canonical: "/",
     },
     openGraph: {
-        title: "Connect",
-        description: "Inovamos para liderar o futuro digital em Angola com tecnologia, negócios e soluções conectadas.",
+        title: "CONNECT Angola",
+        description: "Agência digital focada em desenvolvimento de software, sites e aplicativos que geram resultados reais para empresas em Angola.",
         url: "https://connect-uuo9.onrender.com",
         siteName: "Connect",
         type: "website",
@@ -35,8 +35,8 @@ export const metadata: Metadata = {
     },
     twitter: {
         card: "summary_large_image",
-        title: "Connect",
-        description: "Inovamos para liderar o futuro digital em Angola com tecnologia, negócios e soluções conectadas.",
+        title: "CONNECT Angola",
+        description: "Agência digital focada em desenvolvimento de software, sites e aplicativos que geram resultados reais para empresas em Angola.",
         images: ["/team/ceo.jpeg"],
     },
     icons: {
