@@ -11,24 +11,24 @@ const montserrat = Montserrat({
 
 export const metadata: Metadata = {
     metadataBase: new URL("https://connect-uuo9.onrender.com"),
-    title: "Connect-TICS",
+    title: "Connect",
     description: "Inovamos para liderar o futuro digital em Angola com tecnologia, negócios e soluções conectadas.",
-    applicationName: "Connect-TICS",
+    applicationName: "Connect",
     manifest: "/site.webmanifest",
     alternates: {
         canonical: "/",
     },
     openGraph: {
-        title: "Connect-TICS",
+        title: "Connect",
         description: "Inovamos para liderar o futuro digital em Angola com tecnologia, negócios e soluções conectadas.",
         url: "https://connect-uuo9.onrender.com",
-        siteName: "Connect-TICS",
+        siteName: "Connect",
         type: "website",
-        images: [{ url: "/team/ceo.jpeg", width: 1200, height: 1200, alt: "Francisco J.M Dala - CEO da Connect-TICS" }],
+        images: [{ url: "/team/ceo.jpeg", width: 1200, height: 1200, alt: "Francisco J.M Dala - CEO da Connect" }],
     },
     twitter: {
         card: "summary_large_image",
-        title: "Connect-TICS",
+        title: "Connect",
         description: "Inovamos para liderar o futuro digital em Angola com tecnologia, negócios e soluções conectadas.",
         images: ["/team/ceo.jpeg"],
     },
