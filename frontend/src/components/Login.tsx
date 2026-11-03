@@ -30,7 +30,7 @@ export default function LoginModal({ open, onClose }: { open: boolean; onClose: 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={onClose} />
-            <div className="relative w-full max-w-90 overflow-hidden rounded-4xl border border-white bg-white shadow-2xl">
+            <div className="relative w-full max-w-90 overflow-hidden rounded-xl border border-white bg-white shadow-2xl">
                 {/* HEADER COM X DEPOIS DO LOGIN */}
                 <div className="flex items-center justify-between bg-[#eaf2ff] px-5 py-4">
                     <div className="grid h-9 w-9 place-items-center overflow-hidden rounded-full bg-white shadow-sm">
@@ -92,7 +92,7 @@ export default function LoginModal({ open, onClose }: { open: boolean; onClose: 
                             </button>
                         </div>
 
-                        <button type="submit" disabled={loading} className="mt-1 flex h-11.5 w-full items-center justify-center rounded-full bg-[#0a84ff] text-sm font-semibold text-white shadow-lg shadow-blue-500/30 disabled:opacity-50">
+                        <button type="submit" disabled={loading} className="mt-1 flex h-11.5 w-full items-center justify-center rounded-xl bg-[#0a84ff] text-sm font-semibold text-white shadow-lg shadow-blue-500/30 disabled:opacity-50">
                             {loading ? <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" /> : <span className="text-lg">Acessar</span>}
                         </button>
                     </form>
