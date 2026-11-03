@@ -72,22 +72,27 @@ export default async function Home() {
             <Header />
 
             <section className="relative isolate flex min-h-[88vh] items-center overflow-hidden bg-slate-100 pb-16 pt-28 lg:pt-36" style={{ backgroundImage: `url('${heroBg}')`, backgroundSize: "cover", backgroundPosition: "center" }}>
-                <div className="absolute inset-0 bg-linear-to-b from-white via-white/85 to-white/25 backdrop-blur-[1px] sm:hidden" />
-                <div className="absolute inset-0 hidden bg-linear-to-r from-white via-white/90 to-white/10 sm:block" />
+                <div className="absolute inset-0 bg-gradient-to-b from-white via-white/85 to-white/25 backdrop-blur-[1px] sm:hidden" />
+                <div className="absolute inset-0 hidden bg-gradient-to-r from-white via-white/90 to-white/10 sm:block" />
                 <div className="relative mx-auto w-full max-w-7xl px-5 sm:px-8">
-                    <div className="max-w-85 sm:max-w-xl lg:w-150 lg:max-w-150">
+                    {/* QUADRADO DO BANNER - TITULO + DESCRICAO NO MESMO BLOCO */}
+                    <div className="w-full max-w-[340px] sm:max-w-xl lg:max-w-[600px]">
                         <div className="flex items-center gap-3">
                             <span className="h-px w-8 bg-sky-600" />
                             <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-sky-600 sm:text-xs">
                                 {heroKicker}
                             </p>
                         </div>
-                        <h1 className="mt-3 w-full text-left text-[28px] font-semibold tracking-tight text-wrap-balance wrap-break-word leading-[1.1] text-slate-800 sm:mt-4 sm:text-4xl sm:leading-[1.05] lg:text-[42px] lg:leading-[1.08]">
+                        <h1 className="mt-3 w-full text-left text-[28px] font-semibold tracking-tight leading-[1.1] text-slate-800 sm:mt-4 sm:text-4xl sm:leading-[1.05] lg:text-[42px] lg:leading-[1.08]">
                             {heroTitle}
                         </h1>
-                        {heroDesc && <p className="mt-2 max-w-[90%] text-[12px] leading-5 text-wrap-pretty wrap-break-word text-slate-500 sm:mt-3 sm:max-w-120 sm:text-sm sm:leading-6">{heroDesc}</p>}
+                        {heroDesc && (
+                            <p className="mt-3 w-full text-left text-[13px] leading-5 text-slate-500 sm:text-[15px] sm:leading-6 line-clamp-4">
+                                {heroDesc}
+                            </p>
+                        )}
 
-                        <div className="mt-4 flex flex-row items-center gap-2 sm:mt-6">
+                        <div className="mt-5 flex flex-row items-center gap-2">
                             <Link href="/tecnologia" className="inline-flex h-9 items-center justify-center rounded-full bg-sky-600 px-5 text-[11px] font-semibold text-white sm:min-h-10 sm:px-6 sm:text-[13px]">
                                 Explorar Produtos
                             </Link>
