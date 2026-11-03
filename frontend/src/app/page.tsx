@@ -72,11 +72,11 @@ export default async function Home() {
             <Header />
 
             <section className="relative isolate flex min-h-[88vh] items-center overflow-hidden bg-slate-100 pb-16 pt-28 lg:pt-36" style={{ backgroundImage: `url('${heroBg}')`, backgroundSize: "cover", backgroundPosition: "center" }}>
-                <div className="absolute inset-0 bg-gradient-to-b from-white via-white/85 to-white/25 backdrop-blur-[1px] sm:hidden" />
-                <div className="absolute inset-0 hidden bg-gradient-to-r from-white via-white/90 to-white/10 sm:block" />
+                <div className="absolute inset-0 bg-linear-to-b from-white via-white/85 to-white/25 backdrop-blur-[1px] sm:hidden" />
+                <div className="absolute inset-0 hidden bg-linear-to-r from-white via-white/90 to-white/10 sm:block" />
                 <div className="relative mx-auto w-full max-w-7xl px-5 sm:px-8">
                     {/* QUADRADO DO BANNER - TITULO + DESCRICAO NO MESMO BLOCO */}
-                    <div className="w-full max-w-[340px] sm:max-w-xl lg:max-w-[600px]">
+                    <div className="w-full max-w-85 sm:max-w-xl lg:max-w-150">
                         <div className="flex items-center gap-3">
                             <span className="h-px w-8 bg-sky-600" />
                             <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-sky-600 sm:text-xs">
