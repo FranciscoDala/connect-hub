@@ -5,7 +5,7 @@ import Footer from "@/components/Footer";
 import ProdutosSection from "@/components/seccoes/ProdutosSection";
 import NoticiasSection from "@/components/seccoes/NoticiasSection";
 
-const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const API = process.env.NEXT_PUBLIC_API_URL || "https://connect-backend-iern.onrender.com";
 
 export default function TecnologiaPage() {
     const [posts, setPosts] = useState<any[]>([]);

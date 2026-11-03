@@ -4,7 +4,7 @@ import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import { notFound } from 'next/navigation'
 
-const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+const API = process.env.NEXT_PUBLIC_API_URL || 'https://connect-backend-iern.onrender.com'
 
 async function getCategory(slug: string) {
     const cleanSlug = decodeURIComponent(slug).trim()

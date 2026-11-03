@@ -26,7 +26,8 @@ if ENV_PATH.exists():
 class Settings(BaseSettings):
     PORT: int = 10000
     BASE_URL: str = "https://connect-backend-iern.onrender.com"
-    ALLOWED_ORIGINS: str = "https://connect-uuo9.onrender.com,http://localhost:3000,http://localhost:3001"
+    ALLOWED_ORIGINS: str = "https://connect-uuo9.onrender.com,https://connect-backend-iern.onrender.com,http://localhost:3000,http://localhost:3001"
+    ALLOWED_HOSTS: str = "localhost,127.0.0.1,connect-uuo9.onrender.com,connect-backend-iern.onrender.com"
     DATABASE_URL: str = Field(default="")
     JWT_SECRET: str = ""
     SECRET_KEY: str = ""
@@ -42,6 +43,11 @@ class Settings(BaseSettings):
         v = self.ALLOWED_ORIGINS.strip()
         if v.startswith("["):
             return json.loads(v)
+        return [i.strip() for i in v.split(",") if i.strip()]
+
+    @property
+    def ALLOWED_HOSTS_LIST(self) -> List[str]:
+        v = self.ALLOWED_HOSTS.strip()
         return [i.strip() for i in v.split(",") if i.strip()]
 
     @field_validator("DATABASE_URL", mode="before")

@@ -1,11 +1,14 @@
 ﻿from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
+from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 import os
 import time
+
+from app.core.config import settings
 
 # --- ROUTERS ---
 from app.modules.auth.router import router as auth_router
@@ -20,34 +23,29 @@ import app.modules.categories.models
 import app.modules.posts.models
 import app.modules.banners.models
 
-ENV = os.getenv("ENV", "production")
-IS_PROD = ENV == "production"
+ENV = os.getenv("ENV", settings.ENV)
+IS_PROD = ENV.lower() == "production"
 
 app = FastAPI(
     title="Connect Hub API",
     version="1.0.0",
     description="API Enterprise da Connect",
-    docs_url="/docs",
-    redoc_url="/redoc",
-    openapi_url="/openapi.json",
+    docs_url=None if IS_PROD else "/docs",
+    redoc_url=None if IS_PROD else "/redoc",
+    openapi_url=None if IS_PROD else "/openapi.json",
 )
 
 # --- MIDDLEWARES ---
 app.add_middleware(GZipMiddleware, minimum_size=1000)
-
-origins = [
-    "https://connect-uuo9.onrender.com",
-    "https://connect-backend-iern.onrender.com",
-    "http://localhost:3000",
-    "http://localhost:3001",
-]
+app.add_middleware(TrustedHostMiddleware, allowed_hosts=settings.ALLOWED_HOSTS_LIST)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=settings.ALLOWED_ORIGINS_LIST,
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
-    allow_headers=["*"],
+    allow_headers=["Authorization", "Content-Type", "Accept"],
+    expose_headers=["X-Process-Time"],
     max_age=600,
 )
 
@@ -57,8 +55,10 @@ async def add_security_headers(request: Request, call_next):
     response = await call_next(request)
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["X-Frame-Options"] = "DENY"
-    response.headers["X-XSS-Protection"] = "1; mode=block"
+    response.headers["X-XSS-Protection"] = "0"
     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    response.headers["Permissions-Policy"] = "geolocation=(), microphone=(), camera=()"
+    response.headers["Content-Security-Policy"] = "default-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
     if IS_PROD:
         response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
     if "server" in response.headers:

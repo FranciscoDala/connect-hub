@@ -6,6 +6,7 @@ import uuid, re
 
 from app.db.session import get_db
 from app.shared.deps import get_current_admin
+from app.core.security import sanitize_html, sanitize_text, sanitize_url
 from app.modules.posts.models import Post, Comment, PostReaction
 from app.modules.categories.models import Category
 from app.modules.posts.schemas import (
@@ -84,10 +85,13 @@ def get_category_generic(slug_or_id: str, db: Session = Depends(get_db)):
 
 @router.post("/categories", response_model=CategoryResponse)
 def create_category(data: CategoryCreate, admin=Depends(get_current_admin), db: Session=Depends(get_db)):
-    final_slug = data.slug or slugify(data.nome)
+    nome = sanitize_text(data.nome, max_length=100)
+    slug = sanitize_text(data.slug or slugify(nome), max_length=120)
+    descricao = sanitize_text(data.descricao, max_length=500) if data.descricao else None
+    final_slug = slug or slugify(nome)
     if db.query(Category).filter(Category.slug == final_slug).first():
         raise HTTPException(400, "Slug já existe")
-    cat = Category(nome=data.nome, slug=final_slug, descricao=data.descricao, cor=data.cor)
+    cat = Category(nome=nome, slug=final_slug, descricao=descricao, cor=data.cor)
     db.add(cat); db.commit(); db.refresh(cat)
     return cat
 
@@ -96,8 +100,18 @@ def update_category(cat_id: uuid.UUID, data: CategoryUpdate, admin=Depends(get_c
     cat = db.query(Category).filter(Category.id == cat_id).first()
     if not cat: raise HTTPException(404, "Categoria não encontrada")
     for k, v in data.model_dump(exclude_unset=True).items():
-        if v is not None: setattr(cat, k, v)
-    if data.nome and not data.slug: cat.slug = slugify(data.nome)
+        if v is None:
+            continue
+        if k in {"nome", "slug", "descricao"}:
+            if k == "nome":
+                setattr(cat, k, sanitize_text(v, max_length=100))
+            elif k == "slug":
+                setattr(cat, k, sanitize_text(v, max_length=120))
+            else:
+                setattr(cat, k, sanitize_text(v, max_length=500))
+        else:
+            setattr(cat, k, v)
+    if data.nome and not data.slug: cat.slug = slugify(sanitize_text(data.nome, max_length=100))
     db.commit(); db.refresh(cat)
     return cat
 
@@ -153,10 +167,17 @@ def get_post(post_id: uuid.UUID, db: Session=Depends(get_db)):
 
 @router.post("/posts", response_model=PostResponse)
 def create_post(data: PostCreate, admin=Depends(get_current_admin), db: Session=Depends(get_db)):
-    final_slug = data.slug or slugify(data.titulo)
+    titulo = sanitize_text(data.titulo, max_length=300)
+    final_slug = sanitize_text(data.slug or slugify(titulo), max_length=350) or slugify(titulo)
     if db.query(Post).filter(Post.slug == final_slug).first():
         final_slug = f"{final_slug}-{uuid.uuid4().hex[:4]}"
     payload = data.model_dump(exclude={"slug"})
+    payload["titulo"] = titulo
+    payload["descricao"] = sanitize_text(payload.get("descricao"), max_length=2000) if payload.get("descricao") else ""
+    payload["conteudo"] = sanitize_html(payload.get("conteudo")) if payload.get("conteudo") else ""
+    payload["link_url"] = sanitize_url(payload.get("link_url")) if payload.get("link_url") else None
+    payload["thumbnail_url"] = sanitize_url(payload.get("thumbnail_url")) if payload.get("thumbnail_url") else None
+    payload["media_url"] = sanitize_url(payload.get("media_url")) if payload.get("media_url") else None
     if payload.get("tipo"): payload["tipo"] = payload["tipo"].lower()
     if payload.get("status"): payload["status"] = payload["status"].lower()
     if payload.get("status_evento"): payload["status_evento"] = payload["status_evento"].lower()
@@ -169,11 +190,27 @@ def update_post(post_id: uuid.UUID, data: PostUpdate, admin=Depends(get_current_
     post = db.query(Post).filter(Post.id == post_id).first()
     if not post: raise HTTPException(404, "Post não encontrado")
     payload = data.model_dump(exclude_unset=True)
-    if "titulo" in payload and not payload.get("slug"): payload["slug"] = slugify(payload["titulo"])
+    if "titulo" in payload and payload["titulo"] is not None:
+        payload["titulo"] = sanitize_text(payload["titulo"], max_length=300)
+        if not payload.get("slug"):
+            payload["slug"] = slugify(payload["titulo"])
+    if "descricao" in payload:
+        payload["descricao"] = sanitize_text(payload.get("descricao"), max_length=2000) if payload.get("descricao") else ""
+    if "conteudo" in payload:
+        payload["conteudo"] = sanitize_html(payload.get("conteudo")) if payload.get("conteudo") else ""
+    if "link_url" in payload and payload.get("link_url"):
+        payload["link_url"] = sanitize_url(payload["link_url"])
+    if "thumbnail_url" in payload and payload.get("thumbnail_url"):
+        payload["thumbnail_url"] = sanitize_url(payload["thumbnail_url"])
+    if "media_url" in payload and payload.get("media_url"):
+        payload["media_url"] = sanitize_url(payload["media_url"])
     if "tipo" in payload and payload["tipo"]: payload["tipo"] = payload["tipo"].lower()
     if "status" in payload and payload["status"]: payload["status"] = payload["status"].lower()
     if "status_evento" in payload and payload["status_evento"]: payload["status_evento"] = payload["status_evento"].lower()
-    for k, v in payload.items(): setattr(post, k, v)
+    for k, v in payload.items():
+        if v is None:
+            continue
+        setattr(post, k, v)
     db.commit(); db.refresh(post)
     return to_post_response(post, db)
 
@@ -257,7 +294,9 @@ def list_comments(post_id: uuid.UUID, db: Session=Depends(get_db)):
 def create_comment(post_id: uuid.UUID, data: CommentCreate, db: Session=Depends(get_db)):
     post = db.query(Post).filter(Post.id == post_id).first()
     if not post: raise HTTPException(404, "Post não encontrado")
-    c = Comment(post_id=post_id, nome=data.nome or "Anónimo", conteudo=data.conteudo)
+    nome = sanitize_text(data.nome or "Anónimo", max_length=120)
+    conteudo = sanitize_text(data.conteudo, max_length=2000)
+    c = Comment(post_id=post_id, nome=nome, conteudo=conteudo)
     db.add(c); db.commit(); db.refresh(c)
     return c
 
@@ -265,8 +304,8 @@ def create_comment(post_id: uuid.UUID, data: CommentCreate, db: Session=Depends(
 def update_comment(comment_id: uuid.UUID, data: CommentUpdate, db: Session=Depends(get_db)):
     c = db.query(Comment).filter(Comment.id == comment_id).first()
     if not c: raise HTTPException(404, "Comentário não encontrado")
-    if data.nome is not None: c.nome = data.nome
-    if data.conteudo is not None: c.conteudo = data.conteudo
+    if data.nome is not None: c.nome = sanitize_text(data.nome, max_length=120)
+    if data.conteudo is not None: c.conteudo = sanitize_text(data.conteudo, max_length=2000)
     db.commit(); db.refresh(c)
     return c
 

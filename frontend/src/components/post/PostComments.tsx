@@ -2,7 +2,7 @@
 "use client";
 import { useEffect, useState, useRef } from "react";
 
-const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const API = process.env.NEXT_PUBLIC_API_URL || "https://connect-backend-iern.onrender.com";
 
 function getClientId() {
     if (typeof window === "undefined") return "anon";

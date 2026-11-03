@@ -4,7 +4,7 @@ import Link from 'next/link'
 
 type Post = any
 
-const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const API = process.env.NEXT_PUBLIC_API_URL || "https://connect-backend-iern.onrender.com";
 
 function getClientId() {
     if (typeof window === "undefined") return "anon";

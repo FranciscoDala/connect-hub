@@ -4,11 +4,12 @@ from sqlalchemy.orm import Session
 from jose import jwt, JWTError
 from app.db.session import get_db
 from app.modules.auth.models import User
-import os
+from app.core.config import settings
 
 security = HTTPBearer()
-SECRET_KEY = os.getenv("JWT_SECRET")
-ALGORITHM = "HS256"
+SECRET_KEY = settings.JWT_SECRET or settings.SECRET_KEY
+ALGORITHM = settings.JWT_ALGORITHM
+
 
 def get_current_admin(
     creds: HTTPAuthorizationCredentials = Depends(security),
@@ -24,7 +25,9 @@ def get_current_admin(
     except JWTError:
         raise HTTPException(401, "Token expirado ou inválido")
 
-    user = db.query(User).filter(User.email == email, User.is_active == True).first()
+    user = db.query(User).filter(User.email == email, User.is_active.is_(True)).first()
     if not user:
         raise HTTPException(401, "Usuário não encontrado")
+    if str(getattr(user, "role", "")).lower() != "admin":
+        raise HTTPException(403, "Acesso restrito a administradores")
     return user

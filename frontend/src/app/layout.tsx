@@ -10,9 +10,28 @@ const montserrat = Montserrat({
 });
 
 export const metadata: Metadata = {
-    title: "Connect-tics",
-    description: "Inovamos para liderar",
+    metadataBase: new URL("https://connect-uuo9.onrender.com"),
+    title: "Connect-TICS",
+    description: "Inovamos para liderar o futuro digital em Angola com tecnologia, negócios e soluções conectadas.",
+    applicationName: "Connect-TICS",
     manifest: "/site.webmanifest",
+    alternates: {
+        canonical: "/",
+    },
+    openGraph: {
+        title: "Connect-TICS",
+        description: "Inovamos para liderar o futuro digital em Angola com tecnologia, negócios e soluções conectadas.",
+        url: "https://connect-uuo9.onrender.com",
+        siteName: "Connect-TICS",
+        type: "website",
+        images: [{ url: "/team/ceo.jpeg", width: 1200, height: 1200, alt: "Francisco J.M Dala - CEO da Connect-TICS" }],
+    },
+    twitter: {
+        card: "summary_large_image",
+        title: "Connect-TICS",
+        description: "Inovamos para liderar o futuro digital em Angola com tecnologia, negócios e soluções conectadas.",
+        images: ["/team/ceo.jpeg"],
+    },
     icons: {
         icon: [
             { url: "/favicon.ico" },

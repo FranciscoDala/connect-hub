@@ -5,7 +5,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import EventosSection from "@/components/seccoes/EventosSection";
 
-const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const API = process.env.NEXT_PUBLIC_API_URL || "https://connect-backend-iern.onrender.com";
 const PER_PAGE = 4;
 
 function getTipoLabel(tipo: string) {

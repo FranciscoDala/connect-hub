@@ -43,7 +43,7 @@ type Post = {
 
 async function getBanners(): Promise<Banner[]> {
     try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/banners?ativo=true`, { next: { revalidate: 60 } });
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://connect-backend-iern.onrender.com'}/api/v1/banners?ativo=true`, { next: { revalidate: 60 } });
         if (!res.ok) return [];
         const data = await res.json();
         return Array.isArray(data) ? data : [];
@@ -51,7 +51,7 @@ async function getBanners(): Promise<Banner[]> {
 }
 async function getPosts(): Promise<Post[]> {
     try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/posts`, { next: { revalidate: 60 } });
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://connect-backend-iern.onrender.com'}/api/v1/posts`, { next: { revalidate: 60 } });
         if (!res.ok) return [];
         const data = await res.json();
         return Array.isArray(data) ? data : [];

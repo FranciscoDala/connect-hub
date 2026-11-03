@@ -34,6 +34,8 @@ def login(data: LoginIn, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == data.email).first()
     if not user or not user.is_active:
         raise HTTPException(401, "Credenciais inválidas")
+    if str(user.role).lower() != "admin":
+        raise HTTPException(403, "Acesso restrito a administradores")
     if not pwd_context.verify(data.password, str(user.hashed_password)):
         raise HTTPException(401, "Credenciais inválidas")
 

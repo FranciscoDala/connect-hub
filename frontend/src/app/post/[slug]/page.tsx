@@ -9,7 +9,7 @@ import PostRelacionados from "@/components/post/PostRelacionados";
 import PostSidebar from "@/components/post/PostSidebar";
 import ProdutosRelated from '@/components/post/PostRelated'
 
-const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const API = process.env.NEXT_PUBLIC_API_URL || "https://connect-backend-iern.onrender.com";
 
 function formatKz(v?: number | null) {
     if (v == null) return null;
@@ -28,6 +28,15 @@ function isSameText(a?: string, b?: string) {
     if (!a || !b) return false;
     const clean = (s: string) => s.replace(/<[^>]*>/g, "").trim().toLowerCase();
     return clean(a) === clean(b);
+}
+function sanitizeHtml(value?: string) {
+    if (!value) return "";
+    return value
+        .replace(/<script[\s\S]*?<\/script>/gi, "")
+        .replace(/<iframe[\s\S]*?<\/iframe>/gi, "")
+        .replace(/javascript:/gi, "")
+        .replace(/on\w+\s*=\s*(["'][^"']*|\w+)/gi, "")
+        .replace(/<\s*style[^>]*>[\s\S]*?<\s*\/style\s*>/gi, "");
 }
 
 export default function PostPage() {
@@ -182,8 +191,8 @@ export default function PostPage() {
                                 {isProduto && post.preco && <div className="mt-4 text-xl font-bold">{formatKz(post.preco_promocional || post.preco)}</div>}
                             </div>
                             <div className="border-t border-slate-100 p-4 sm:p-6">
-                                {mostrarConteudo && <div className="prose max-w-none prose-p:text-justify prose-p:text-sm prose-p:leading-7 prose-p:text-slate-600 sm:prose-p:text-[15px]"><div dangerouslySetInnerHTML={{ __html: post.conteudo }} /></div>}
-                                {bannerDentro && <div className="mt-6 rounded-xl border bg-slate-50 p-3"><a href={bannerDentro.link_url} target="_blank"><img src={bannerDentro.imagem_url} className="w-full rounded-lg" alt="" /></a></div>}
+                                {mostrarConteudo && <div className="prose max-w-none prose-p:text-justify prose-p:text-sm prose-p:leading-7 prose-p:text-slate-600 sm:prose-p:text-[15px]"><div dangerouslySetInnerHTML={{ __html: sanitizeHtml(post.conteudo) }} /></div>}
+                                {bannerDentro && <div className="mt-6 rounded-xl border bg-slate-50 p-3"><a href={bannerDentro.link_url} target="_blank" rel="noopener noreferrer"><img src={bannerDentro.imagem_url} className="w-full rounded-lg" alt="" /></a></div>}
                             </div>
                         </div>
 

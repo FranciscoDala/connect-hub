@@ -4,7 +4,7 @@ import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
-const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const API = process.env.NEXT_PUBLIC_API_URL || "https://connect-backend-iern.onrender.com";
 const PER_PAGE = 6;
 const TIPOS_PLATAFORMA = ['plataforma','app','site','sistema','saas','case','projeto','telecom'];
 
