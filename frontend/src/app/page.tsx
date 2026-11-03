@@ -91,7 +91,7 @@ export default async function Home() {
                             <Link href="/tecnologia" className="inline-flex h-9 items-center justify-center rounded-full bg-sky-600 px-5 text-[11px] font-semibold text-white sm:min-h-10 sm:px-6 sm:text-[13px]">
                                 Explorar Produtos
                             </Link>
-                            <Link href="#plataformas" className="inline-flex h-9 items-center justify-center rounded-full border border-slate-200 bg-white px-5 text-[11px] font-semibold text-slate-700 sm:min-h-10 sm:px-6 sm:text-[13px]">
+                            <Link href="/apps" className="inline-flex h-9 items-center justify-center rounded-full border border-slate-200 bg-white px-5 text-[11px] font-semibold text-slate-700 sm:min-h-10 sm:px-6 sm:text-[13px]">
                                 Nossas Plataformas
                             </Link>
                         </div>
