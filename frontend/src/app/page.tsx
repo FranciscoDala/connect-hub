@@ -73,8 +73,9 @@ export default async function Home() {
 
             <section className="relative isolate flex min-h-[88vh] items-center overflow-hidden bg-slate-100 pb-16 pt-28 lg:pt-36" style={{ backgroundImage: `url('${heroBg}')`, backgroundSize: "cover", backgroundPosition: "center" }}>
                 <div className="absolute inset-0 bg-linear-to-b from-white via-white/85 to-white/25 backdrop-blur-[1px] sm:hidden" />
-                <div className="absolute inset-0 hidden bg-linear-to-r from-white from-0% via-white via-58% to-white/10 to-80% sm:block" />
+                <div className="absolute inset-0 hidden bg-linear-to-r from-white via-white/90 to-white/10 sm:block" />
                 <div className="relative mx-auto w-full max-w-7xl px-5 sm:px-8">
+                    {/* SÓ O TITULO TRAVADO, BACKGROUND ORIGINAL */}
                     <div className="max-w-85 sm:max-w-xl lg:max-w-145">
                         <div className="flex items-center gap-3">
                             <span className="h-px w-8 bg-sky-600" />
@@ -82,7 +83,7 @@ export default async function Home() {
                                 {heroKicker}
                             </p>
                         </div>
-                        <h1 className="mt-3 max-w-80 text-[28px] font-semibold tracking-tight text-wrap-balance wrap-break-word leading-[1.1] text-slate-800 sm:mt-4 sm:max-w-130 sm:text-4xl sm:leading-[1.05] lg:max-w-130 lg:text-[42px]">
+                        <h1 className="mt-3 max-w-80 text-[28px] font-semibold tracking-tight text-wrap-balance wrap-break-word leading-[1.1] text-slate-800 sm:mt-4 sm:max-w-130 sm:text-4xl sm:leading-[1.05] lg:max-w-125 lg:text-[42px]">
                             {heroTitle}
                         </h1>
                         {heroDesc && <p className="mt-2 max-w-[90%] text-[12px] leading-5 text-wrap-pretty wrap-break-word text-slate-500 sm:mt-3 sm:max-w-120 sm:text-sm sm:leading-6">{heroDesc}</p>}
@@ -91,7 +92,7 @@ export default async function Home() {
                             <Link href="/tecnologia" className="inline-flex h-9 items-center justify-center rounded-full bg-sky-600 px-5 text-[11px] font-semibold text-white sm:min-h-10 sm:px-6 sm:text-[13px]">
                                 Explorar Produtos
                             </Link>
-                            <Link href="/apps" className="inline-flex h-9 items-center justify-center rounded-full border border-slate-200 bg-white px-5 text-[11px] font-semibold text-slate-700 sm:min-h-10 sm:px-6 sm:text-[13px]">
+                            <Link href="#plataformas" className="inline-flex h-9 items-center justify-center rounded-full border border-slate-200 bg-white px-5 text-[11px] font-semibold text-slate-700 sm:min-h-10 sm:px-6 sm:text-[13px]">
                                 Nossas Plataformas
                             </Link>
                         </div>
