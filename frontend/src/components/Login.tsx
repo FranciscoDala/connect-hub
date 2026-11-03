@@ -31,6 +31,7 @@ export default function LoginModal({ open, onClose }: { open: boolean; onClose: 
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={onClose} />
             <div className="relative w-full max-w-90 overflow-hidden rounded-4xl border border-white bg-white shadow-2xl">
+                {/* HEADER COM X DEPOIS DO LOGIN */}
                 <div className="flex items-center justify-between bg-[#eaf2ff] px-5 py-4">
                     <div className="grid h-9 w-9 place-items-center overflow-hidden rounded-full bg-white shadow-sm">
                         <img
@@ -39,8 +40,13 @@ export default function LoginModal({ open, onClose }: { open: boolean; onClose: 
                             className="h-7 w-7 object-contain"
                         />
                     </div>
-                    <div className="flex items-center gap-1.5 rounded-full bg-white px-3.5 py-1.5 text-xs font-semibold text-[#0a84ff] shadow-sm">
-                        <span className="h-2 w-2 rounded-full bg-[#0a84ff]"></span> Login
+                    <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-1.5 rounded-full bg-white px-3.5 py-1.5 text-xs font-semibold text-[#0a84ff] shadow-sm">
+                            <span className="h-2 w-2 rounded-full bg-[#0a84ff]"></span> Login
+                        </div>
+                        <button onClick={onClose} className="grid h-8 w-8 place-items-center rounded-full border border-slate-200 bg-white text-slate-500 shadow-sm hover:bg-slate-50">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-4 w-4"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                        </button>
                     </div>
                 </div>
 
@@ -90,8 +96,6 @@ export default function LoginModal({ open, onClose }: { open: boolean; onClose: 
                             {loading ? <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" /> : <span className="text-lg">Acessar</span>}
                         </button>
                     </form>
-
-                    <button onClick={onClose} className="absolute right-3 top-17.5 grid h-7 w-7 place-items-center rounded-full border bg-white text-xs text-slate-500 md:hidden">✕</button>
                 </div>
             </div>
         </div>
