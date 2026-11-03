@@ -64,7 +64,7 @@ export default async function Home() {
     const hasBanner = !!bannerTopo
     const heroBg = hasBanner ? bannerTopo.imagem_url : "https://files.cdn-files-a.com/uploads/12300315/2000_6a73745adc7ea.png?format=avif"
     const heroTitle = hasBanner ? bannerTopo.titulo : "CONNECT"
-    const heroDesc = hasBanner ? (bannerTopo.descricao || bannerTopo.conteudo || bannerTopo.subtitulo || "") : "Agência digital focada em desenvolvimento de software, sites e aplicativos que geram resultados reais para empresas em Angola.."
+    const heroDesc = hasBanner ? (bannerTopo.descricao || bannerTopo.conteudo || bannerTopo.subtitulo || "") : "Agência digital focada em desenvolvimento de software, sites e aplicativos que geram resultados reais para empresas em Angola."
     const heroKicker = hasBanner ? (bannerTopo.subtitulo || "DESTAQUE") : "INOVAMOS PARA LIDERAR"
 
     return (
@@ -87,7 +87,7 @@ export default async function Home() {
                             {heroTitle}
                         </h1>
                         {heroDesc && (
-                            <p className="mt-3 w-full text-left text-[13px] leading-5 text-slate-500 sm:text-[15px] sm:leading-6 line-clamp-4">
+                            <p className="mt-3 w-full text-left text-[14px] leading-5 text-slate-500 sm:text-[15px] sm:leading-6 line-clamp-4">
                                 {heroDesc}
                             </p>
                         )}
