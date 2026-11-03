@@ -73,22 +73,21 @@ export default async function Home() {
             <Header />
 
             <section className="relative isolate flex min-h-[88vh] items-center overflow-hidden bg-slate-100 pb-16 pt-28 lg:pt-36" style={{ backgroundImage: `url('${heroBg}')`, backgroundSize: "cover", backgroundPosition: "center" }}>
-                {/* MOBILE - IMAGEM APARECE EMBAIXO */}
                 <div className="absolute inset-0 bg-linear-to-b from-white via-white/85 to-white/25 backdrop-blur-[1px] sm:hidden" />
                 <div className="absolute inset-0 hidden bg-linear-to-r from-white via-white/90 to-white/10 sm:block" />
                 <div className="relative mx-auto w-full max-w-7xl px-5 sm:px-8">
                     <div className="max-w-xl">
                         <div className="flex items-center gap-3">
-                            <span className="hidden h-px w-8 bg-sky-600 sm:block" />
-                            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-sky-600 sm:text-xs"> {heroKicker} </p>
+                            <span className="h-px w-8 bg-sky-600" />
+                            <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-sky-600 sm:text-xs"> {heroKicker} </p>
                         </div>
                         <h1 className="mt-3 line-clamp-3 text-[28px] font-semibold leading-[1.1] tracking-tight text-slate-800 sm:mt-5 sm:text-6xl">
                             {heroTitle}
                         </h1>
-                        {heroDesc && <p className="mt-3 line-clamp-3 max-w-[90%] text-[12px] leading-5 text-slate-500 sm:mt-5 sm:max-w-xl sm:text-sm sm:leading-7">{heroDesc}</p>}
+                        {heroDesc && <p className="mt-2 line-clamp-3 max-w-[90%] text-[12px] leading-5 text-slate-500 sm:mt-5 sm:max-w-xl sm:text-sm sm:leading-7">{heroDesc}</p>}
 
-                        {/* BTNS PEQUENOS LADO A LADO NO CELULAR */}
-                        <div className="mt-10 flex flex-row items-center gap-2 sm:mt-8">
+                        {/* BTNS JUNTOS COM TITULO */}
+                        <div className="mt-4 flex flex-row items-center gap-2 sm:mt-8">
                             <Link href="/tecnologia" className="inline-flex h-9 items-center justify-center rounded-full bg-sky-600 px-5 text-[11px] font-semibold text-white sm:min-h-12 sm:px-7 sm:text-sm">
                                 Explorar Produtos
                             </Link>
