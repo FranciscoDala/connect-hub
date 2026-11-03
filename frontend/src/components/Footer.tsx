@@ -48,7 +48,7 @@ export default function Footer() {
                         <p className="mt-4 max-w-sm text-justify text-sm leading-6 text-zinc-500">Inovamos para liderar</p>
                         <p className="mt-4 max-w-sm text-justify text-sm leading-6 text-zinc-500">Tecnologia é a aplicação prática do conhecimento científico para resolver problemas, criar ferramentas e facilitar as tarefas diárias.</p>
                         <p className="mt-4 flex items-center gap-2 text-xs text-zinc-500">
-                            <span className={`h-2 w-2 rounded-full ${isOpen ? 'bg-green-500' : 'bg-zinc-400'}`} />
+                            <span className={`h-2 w-2 rounded-full ${isOpen ? 'bg-green-500' : 'bg-red-500'}`} />
                             {isOpen ? 'Aberto agora' : 'Fechado'} • {timeString}
                         </p>
                     </div>
@@ -79,11 +79,11 @@ export default function Footer() {
                         <h4 className="text-sm font-bold tracking-widest text-zinc-800">CONNECT</h4>
                         <div className="mt-4 grid gap-1.5 text-sm leading-6 text-zinc-500">
                             <p>Viana, Av. Deolinda Rodrigues Nº 100,  <br /> Luanda, AO • {timeZone}</p>
-                            <div className="mt-3 grid gap-1">
+                            {/*<div className="mt-3 grid gap-1">
                                 <p className="text-xs font-bold uppercase tracking-widest text-zinc-800">{weekDayString} • {dateString}</p>
                                 <p className="text-sm font-semibold text-zinc-900">{timeString} • Luanda</p>
                                 <p className="text-xs">Seg - Sex, 08:00 - 17:00 {isOpen ? '(Aberto)' : '(Fechado)'}</p>
-                            </div>
+                            </div>*/}
                             <a href="mailto:connecttics25@gmail.com" className="mt-2 hover:text-black">connecttics25@gmail.com</a>
                         </div>
                     </div>
