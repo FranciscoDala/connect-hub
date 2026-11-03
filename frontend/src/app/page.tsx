@@ -65,7 +65,6 @@ export default async function Home() {
     const heroBg = hasBanner ? bannerTopo.imagem_url : "https://files.cdn-files-a.com/uploads/12300315/2000_6a73745adc7ea.png?format=avif"
     const heroTitle = hasBanner ? bannerTopo.titulo : "Inovamos para Liderar o Futuro"
     const heroDesc = hasBanner ? (bannerTopo.descricao || bannerTopo.conteudo || bannerTopo.subtitulo || "") : "Connect-TICS é uma plataforma de tecnologia dedicada a levar soluções, inovação e transformação digital para Angola."
-    const heroLink = hasBanner ? (bannerTopo.link_url || "#produtos") : "#produtos"
     const heroKicker = hasBanner ? (bannerTopo.subtitulo || "DESTAQUE") : "INOVAMOS PARA LIDERAR"
 
     return (
@@ -79,19 +78,20 @@ export default async function Home() {
                     <div className="max-w-xl">
                         <div className="flex items-center gap-3">
                             <span className="h-px w-8 bg-sky-600" />
-                            <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-sky-600 sm:text-xs"> {heroKicker} </p>
+                            <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-sky-600 sm:text-xs">
+                                {heroKicker}
+                            </p>
                         </div>
-                        <h1 className="mt-3 line-clamp-3 text-[28px] font-semibold leading-[1.1] tracking-tight text-slate-800 sm:mt-5 sm:text-6xl">
+                        <h1 className="mt-3 text-[28px] font-semibold tracking-tight text-wrap-balance wrap-break-word leading-[1.1] text-slate-800 sm:mt-4 sm:text-4xl sm:leading-[1.05] lg:text-[42px]">
                             {heroTitle}
                         </h1>
-                        {heroDesc && <p className="mt-2 line-clamp-3 max-w-[90%] text-[12px] leading-5 text-slate-500 sm:mt-5 sm:max-w-xl sm:text-sm sm:leading-7">{heroDesc}</p>}
+                        {heroDesc && <p className="mt-2 max-w-[90%] text-[12px] leading-5 text-wrap-pretty wrap-break-word text-slate-500 sm:mt-3 sm:max-w-xl sm:text-sm sm:leading-6">{heroDesc}</p>}
 
-                        {/* BTNS JUNTOS COM TITULO */}
-                        <div className="mt-4 flex flex-row items-center gap-2 sm:mt-8">
-                            <Link href="/tecnologia" className="inline-flex h-9 items-center justify-center rounded-full bg-sky-600 px-5 text-[11px] font-semibold text-white sm:min-h-12 sm:px-7 sm:text-sm">
+                        <div className="mt-4 flex flex-row items-center gap-2 sm:mt-6">
+                            <Link href="/tecnologia" className="inline-flex h-9 items-center justify-center rounded-full bg-sky-600 px-5 text-[11px] font-semibold text-white sm:min-h-10 sm:px-6 sm:text-[13px]">
                                 Explorar Produtos
                             </Link>
-                            <Link href="#plataformas" className="inline-flex h-9 items-center justify-center rounded-full border border-slate-200 bg-white px-5 text-[11px] font-semibold text-slate-700 sm:min-h-12 sm:px-7 sm:text-sm">
+                            <Link href="#plataformas" className="inline-flex h-9 items-center justify-center rounded-full border border-slate-200 bg-white px-5 text-[11px] font-semibold text-slate-700 sm:min-h-10 sm:px-6 sm:text-[13px]">
                                 Nossas Plataformas
                             </Link>
                         </div>
