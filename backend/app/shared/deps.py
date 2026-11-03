@@ -1,7 +1,7 @@
 from fastapi import Depends, HTTPException
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
-from jose import jwt, JWTError
+from jose import jwt, JWTError, ExpiredSignatureError
 from app.db.session import get_db
 from app.modules.auth.models import User
 from app.core.config import settings
@@ -10,18 +10,21 @@ security = HTTPBearer()
 SECRET_KEY = settings.JWT_SECRET or settings.SECRET_KEY
 ALGORITHM = settings.JWT_ALGORITHM
 
-
 def get_current_admin(
     creds: HTTPAuthorizationCredentials = Depends(security),
     db: Session = Depends(get_db)
 ):
     if not SECRET_KEY:
         raise HTTPException(500, "JWT_SECRET não configurado")
+    if not creds:
+        raise HTTPException(401, "Token não fornecido")
     try:
         payload = jwt.decode(creds.credentials, SECRET_KEY, algorithms=[ALGORITHM])
         email = payload.get("sub")
         if not email:
             raise HTTPException(401, "Token inválido")
+    except ExpiredSignatureError:
+        raise HTTPException(401, "Token expirado")
     except JWTError:
         raise HTTPException(401, "Token expirado ou inválido")
 

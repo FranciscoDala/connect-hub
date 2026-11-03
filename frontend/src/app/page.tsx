@@ -63,8 +63,8 @@ export default async function Home() {
     const bannerTopo = banners.find(b => b.posicao === 'home_topo')
     const hasBanner = !!bannerTopo
     const heroBg = hasBanner ? bannerTopo.imagem_url : "https://files.cdn-files-a.com/uploads/12300315/2000_6a73745adc7ea.png?format=avif"
-    const heroTitle = hasBanner ? bannerTopo.titulo : "Inovamos para Liderar o Futuro"
-    const heroDesc = hasBanner ? (bannerTopo.descricao || bannerTopo.conteudo || bannerTopo.subtitulo || "") : "Connect-TICS é uma plataforma de tecnologia dedicada a levar soluções, inovação e transformação digital para Angola."
+    const heroTitle = hasBanner ? bannerTopo.titulo : "CONNECT"
+    const heroDesc = hasBanner ? (bannerTopo.descricao || bannerTopo.conteudo || bannerTopo.subtitulo || "") : "Agência digital focada em desenvolvimento de software, sites e aplicativos que geram resultados reais para empresas em Angola.."
     const heroKicker = hasBanner ? (bannerTopo.subtitulo || "DESTAQUE") : "INOVAMOS PARA LIDERAR"
 
     return (

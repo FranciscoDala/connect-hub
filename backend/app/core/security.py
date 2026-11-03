@@ -1,8 +1,9 @@
 import re
 from urllib.parse import urlparse
-
 import bleach
+from passlib.context import CryptContext
 
+# ===== SEU CODIGO MANTIDO =====
 ALLOWED_HTML_TAGS = {
     "p", "br", "b", "strong", "i", "em", "u", "s", "strike", "sup", "sub",
     "ul", "ol", "li", "blockquote", "code", "pre", "a", "span", "div",
@@ -19,7 +20,6 @@ ALLOWED_HTML_ATTRIBUTES = {
     "td": ["colspan", "rowspan"],
     "th": ["colspan", "rowspan"],
 }
-
 
 def sanitize_html(value: str | None) -> str:
     if value is None:
@@ -38,7 +38,6 @@ def sanitize_html(value: str | None) -> str:
     cleaned = re.sub(r"(?is)(?:href|src)\s*=\s*(?:\"|')\s*(?:javascript:|data:)", "", cleaned)
     return cleaned
 
-
 def sanitize_text(value: str | None, *, max_length: int | None = None) -> str:
     if value is None:
         return ""
@@ -47,7 +46,6 @@ def sanitize_text(value: str | None, *, max_length: int | None = None) -> str:
     if max_length is not None and len(text) > max_length:
         text = text[:max_length].rstrip()
     return text
-
 
 def sanitize_url(value: str | None) -> str | None:
     if value is None:
@@ -61,3 +59,12 @@ def sanitize_url(value: str | None) -> str | None:
     if parsed.scheme in {"http", "https"} and parsed.netloc:
         return value
     return None
+
+# ===== ADIÇÃO SEGURA - NÃO APAGA O DE CIMA =====
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+def get_password_hash(password: str) -> str:
+    return pwd_context.hash(password)
+
+def verify_password(plain: str, hashed: str) -> bool:
+    return pwd_context.verify(plain, hashed)

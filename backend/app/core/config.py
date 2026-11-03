@@ -7,7 +7,6 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 ENV_PATH = Path(__file__).resolve().parents[2] / ".env"
 
-# Lê.env só se existir localmente (no Render vem das env vars)
 if ENV_PATH.exists():
     try:
         text = ENV_PATH.read_text(encoding="utf-8-sig")
@@ -56,7 +55,7 @@ class Settings(BaseSettings):
         if not v:
             v = os.getenv("DATABASE_URL", "")
         if not v:
-            raise ValueError(f"DATABASE_URL vazia. Defina no.env ou no Render Dashboard")
+            raise ValueError(f"DATABASE_URL vazia. Defina no .env ou no Render Dashboard")
         v = v.replace("postgresql+asyncpg://", "postgresql://")
         if "psycopg2" not in v and "postgresql://" in v:
             v = v.replace("postgresql://", "postgresql+psycopg2://", 1)
