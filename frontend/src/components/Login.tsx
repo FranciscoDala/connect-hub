@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { API_URL } from "@/lib/api";
 
 export default function LoginModal({ open, onClose }: { open: boolean; onClose: () => void }) {
-    const [email, setEmail] = useState("admin@connect.ao");
+    const [email, setEmail] = useState("email@connect.ao");
     const [password, setPassword] = useState("");
     const [show, setShow] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -31,7 +31,6 @@ export default function LoginModal({ open, onClose }: { open: boolean; onClose: 
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={onClose} />
             <div className="relative w-full max-w-90 overflow-hidden rounded-4xl border border-white bg-white shadow-2xl">
-                {/* TOPO AZUL CLARO IGUAL PRINT */}
                 <div className="flex items-center justify-between bg-[#eaf2ff] px-5 py-4">
                     <div className="grid h-9 w-9 place-items-center overflow-hidden rounded-full bg-white shadow-sm">
                         <img
@@ -52,7 +51,6 @@ export default function LoginModal({ open, onClose }: { open: boolean; onClose: 
                     {error && <div className="mt-4 rounded-xl border border-red-200 bg-red-50 p-2.5 text-xs text-red-700">{error}</div>}
 
                     <form onSubmit={handleLogin} className="mt-4 grid gap-3">
-                        {/* NIF / BI INPUT */}
                         <div className="relative">
                             <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400">
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="h-4 w-4"><rect x="3" y="7" width="18" height="13" rx="2" /><path d="M7 7V5a2 2 0 0 1 2-2h2" /><path d="M8 11h8" /><path d="M8 15h5" /></svg>
@@ -62,12 +60,11 @@ export default function LoginModal({ open, onClose }: { open: boolean; onClose: 
                                 value={email}
                                 onChange={e => setEmail(e.target.value)}
                                 required
-                                placeholder="003614847LA037"
-                                className="h-11.5 w-full rounded-xl border border-slate-200 bg-[#eef5ff] pl-10 pr-4 text-sm font-medium tracking-wide text-slate-900 outline-none placeholder:text-slate-900/70 focus:border-[#0a84ff] focus:bg-white uppercase"
+                                placeholder="email@connect.ao"
+                                className="h-11.5 w-full rounded-xl border border-slate-200 bg-[#eef5ff] pl-10 pr-4 text-sm font-medium normal-case tracking-normal text-slate-900 outline-none placeholder:text-slate-500 focus:border-[#0a84ff] focus:bg-white"
                             />
                         </div>
 
-                        {/* PASSWORD INPUT */}
                         <div className="relative">
                             <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400">
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="h-4 w-4"><rect x="3" y="11" width="18" height="10" rx="2" /><path d="M7 11V8a5 5 0 0 1 10 0v3" /></svg>
@@ -78,7 +75,7 @@ export default function LoginModal({ open, onClose }: { open: boolean; onClose: 
                                 onChange={e => setPassword(e.target.value)}
                                 required
                                 placeholder="••••••••••••"
-                                className="h-11.5 w-full rounded-xl border border-slate-200 bg-[#eef5ff] pl-10 pr-10 text-sm font-medium tracking-widest text-slate-900 outline-none placeholder:text-slate-900 focus:border-[#0a84ff] focus:bg-white"
+                                className="h-11.5 w-full rounded-xl border border-slate-200 bg-[#eef5ff] pl-10 pr-10 text-sm font-medium normal-case tracking-normal text-slate-900 outline-none placeholder:text-slate-400 focus:border-[#0a84ff] focus:bg-white"
                             />
                             <button type="button" onClick={() => setShow(!show)} className="absolute right-1 top-1 grid h-9.5 w-8 place-items-center text-slate-400">
                                 {show ? (
@@ -90,11 +87,10 @@ export default function LoginModal({ open, onClose }: { open: boolean; onClose: 
                         </div>
 
                         <button type="submit" disabled={loading} className="mt-1 flex h-11.5 w-full items-center justify-center rounded-full bg-[#0a84ff] text-sm font-semibold text-white shadow-lg shadow-blue-500/30 disabled:opacity-50">
-                            {loading ? <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" /> : <span className="text-lg">→</span>}
+                            {loading ? <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" /> : <span className="text-lg">Acessar</span>}
                         </button>
                     </form>
 
-                    {/* BOTAO FECHAR DISCRETO MANTIDO */}
                     <button onClick={onClose} className="absolute right-3 top-17.5 grid h-7 w-7 place-items-center rounded-full border bg-white text-xs text-slate-500 md:hidden">✕</button>
                 </div>
             </div>
