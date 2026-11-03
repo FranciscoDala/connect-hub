@@ -76,14 +76,14 @@ function CustomSelect({ value, options, onChange, placeholder }: { value: string
     const selected = options.find(o => o.value === value);
     return (
         <div ref={ref} className="relative w-full">
-            <button type="button" onClick={() => setOpen(!open)} className={`w-full h-11 bg-white border border-gray-200 rounded-xl px-3 text-sm text-black flex items-center justify-between focus:outline-none focus:border-black transition ${open ? 'border-black ring-2 ring-black/10' : ''}`}>
+            <button type="button" onClick={() => setOpen(!open)} className={`w-full h-11 bg-white border border-gray-200 rounded-xl px-3 text-[16px] text-black flex items-center justify-between focus:outline-none focus:border-black transition ${open ? 'border-black ring-2 ring-black/10' : ''}`}>
                 <span className={`truncate ${selected ? 'text-black font-medium' : 'text-black/40'}`}>{selected ? selected.label : placeholder}</span>
                 <span className={`text-gray-400 transition-transform shrink-0 text-xs ${open ? 'rotate-180' : ''}`}>▼</span>
             </button>
             {open && (
                 <div className="absolute z-50 top-12 left-0 w-full bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden p-1.5 max-h-55 overflow-y-auto">
                     {options.map(o => (
-                        <button key={o.value} type="button" onClick={() => { onChange(o.value); setOpen(false) }} className={`w-full text-left px-3 py-2.5 rounded-xl text-sm flex items-center justify-between transition ${value === o.value ? 'bg-blue-50 font-semibold text-black' : 'hover:bg-gray-50 text-gray-700'}`}>
+                        <button key={o.value} type="button" onClick={() => { onChange(o.value); setOpen(false) }} className={`w-full text-left px-3 py-2.5 rounded-xl text-[16px] flex items-center justify-between transition ${value === o.value ? 'bg-blue-50 font-semibold text-black' : 'hover:bg-gray-50 text-gray-700'}`}>
                             {o.label} {value === o.value && <span>✓</span>}
                         </button>
                     ))}
@@ -111,7 +111,6 @@ export default function AdminPage() {
         titulo: "", slug: "", tipo: "noticia", descricao: "", conteudo: "", category_id: "", status: "published", destaque: false, tags: "", media_url: "", thumbnail_url: "", link_url: "",
         preco: "", preco_promocional: "", estoque: "", sku: "", unidade: "un", em_promocao: false,
         status_plataforma: "em_desenvolvimento", em_utilizacao: false,
-        // evento
         data_inicio: "", data_fim: "", local_evento: "", cidade: "", endereco: "", link_mapa: "", link_inscricao: "", modalidade: "presencial", capacidade: "", organizador: "",
         status_evento: "ativo", data_nova_inicio: ""
     });
@@ -227,7 +226,6 @@ export default function AdminPage() {
             }
 
             if(isEvento){
-                // se for adiado e tiver nova data, usa a nova data como data_inicio
                 let finalInicio = form.data_inicio;
                 if(form.status_evento === 'adiado' && form.data_nova_inicio){
                     finalInicio = form.data_nova_inicio;
@@ -279,10 +277,12 @@ export default function AdminPage() {
 
     const filtered = posts.filter(p => p.titulo.toLowerCase().includes(filter.toLowerCase()));
     const filteredBanners = banners.filter(b => b.titulo.toLowerCase().includes(filter.toLowerCase()));
-    const inputClass = "w-full h-11 bg-white border border-gray-200 rounded-xl px-3 text-sm text-black placeholder:text-black/40 focus:outline-none focus:border-black focus:ring-1 focus:ring-black/10 transition";
+    // FIX ZOOM iOS: 16px obrigatório
+    const inputClass = "w-full h-11 bg-white border border-gray-200 rounded-xl px-3 text-[16px] text-black placeholder:text-black/40 focus:outline-none focus:border-black focus:ring-1 focus:ring-black/10 transition";
+    const textareaClass = "w-full rounded-xl border border-gray-200 px-3 py-3 text-[16px] text-black placeholder:text-black/40 focus:outline-none focus:border-black transition";
     const TabBtn = ({ id, label, show = true }: { id: Tab, label: string, show?: boolean }) => {
         if(!show) return null;
-        return (<button type="button" onClick={() => setTab(id)} className={`px-3.5 py-2 text-sm font-medium rounded-full transition border shrink-0 ${tab === id ? 'bg-black text-white border-black' : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'}`}>{label}</button>)
+        return (<button type="button" onClick={() => setTab(id)} className={`px-3.5 py-2 text-[13px] font-medium rounded-full transition border shrink-0 ${tab === id ? 'bg-black text-white border-black' : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'}`}>{label}</button>)
     };
     const previewAutoThumb = form.media_url ? generateCloudinaryThumb(form.media_url) : "";
     const previewFinalThumb = form.thumbnail_url || previewAutoThumb || form.media_url;
@@ -324,7 +324,7 @@ export default function AdminPage() {
                 <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                     <h2 className="text-sm font-semibold tracking-wide">{mainTab === 'posts' ? `Posts • ${filtered.length}` : `Banners • ${filteredBanners.length}`}</h2>
                     <div className="flex w-full flex-col gap-2 md:w-auto md:flex-row">
-                        <input value={filter} onChange={e => setFilter(e.target.value)} placeholder={mainTab === 'posts' ? "Buscar post..." : "Buscar banner..."} className="h-10 w-full rounded-full border border-zinc-200 bg-white px-4 text-sm outline-none focus:border-zinc-900 md:w-70" />
+                        <input value={filter} onChange={e => setFilter(e.target.value)} placeholder={mainTab === 'posts' ? "Buscar post..." : "Buscar banner..."} className="h-10 w-full rounded-full border border-zinc-200 bg-white px-4 text-[16px] outline-none focus:border-zinc-900 md:w-70" />
                         <div className="flex gap-2">
                             {mainTab === 'posts' ? (
                                 <>
@@ -374,12 +374,10 @@ export default function AdminPage() {
                         <div className="flex h-18 shrink-0 items-start justify-between bg-blue-50 px-5 pt-5"><div className="grid h-9 w-9 place-items-center rounded-full border bg-white shadow-sm text-sm">{isEvento ? '📅' : isProduto ? '📦' : isPlataforma ? '💻' : '📄'}</div><button onClick={() => setShowPostModal(false)} className="grid h-8 w-8 place-items-center rounded-full border bg-white">×</button></div>
                         <div className="border-b px-6 pb-3 pt-5"><h3 className="text-lg font-bold">{editingPost ? 'Editar' : 'Novo'} {isEvento ? 'Evento' : isProduto ? 'Produto' : isPlataforma ? 'Plataforma' : 'Post'}</h3><div className="mt-4 flex gap-1.5 flex-wrap"><TabBtn id="conteudo" label="Conteúdo" /><TabBtn id="evento" label="Evento" show={isEvento} /><TabBtn id="midia" label="Mídia" /><TabBtn id="plataforma" label="Plataforma / Link" show={isPlataforma} /><TabBtn id="produto" label="Preço" show={isProduto} /><TabBtn id="config" label="Config" /></div></div>
                         <div className="flex-1 overflow-y-auto px-6 py-4">
-                            {tab === 'conteudo' && <div className="flex flex-col gap-3"><input value={form.titulo} onChange={e => setForm({ ...form, titulo: e.target.value })} placeholder={isEvento ? "Nome do evento *" : isProduto ? "Nome do produto *" : isPlataforma ? "Nome da plataforma / site *" : "Título *"} className={inputClass} /><div className="grid gap-2 md:grid-cols-2"><CustomSelect value={form.category_id} onChange={v => setForm({ ...form, category_id: v })} placeholder="Categoria" options={cats.map(c => ({ value: c.id, label: c.nome }))} /><CustomSelect value={form.tipo} onChange={v => { setForm({ ...form, tipo: v }); if(v==='produto') setTab('produto'); else if(v==='evento') setTab('evento'); else if(TIPOS_PLATAFORMA.includes(v)) setTab('plataforma'); }} placeholder="Tipo" options={TIPOS} /></div><textarea value={form.descricao} onChange={e => setForm({ ...form, descricao: e.target.value })} rows={3} placeholder={isEvento ? "Resumo do evento - aparece no card" : isPlataforma ? "Descrição curta - aparece no card" : isProduto ? "Descrição curta do produto" : "Descrição curta"} className="w-full rounded-xl border border-gray-200 px-3 py-3 text-sm focus:outline-none focus:border-black" /><textarea value={form.conteudo} onChange={e => setForm({ ...form, conteudo: e.target.value })} rows={5} placeholder={isEvento ? "Programação completa, palestrantes, etc..." : isPlataforma ? "Sobre a plataforma, tecnologias usadas..." : isProduto ? "Ficha técnica / conteúdo detalhado" : "Conteúdo completo"} className="w-full rounded-xl border border-gray-200 px-3 py-3 text-sm focus:outline-none focus:border-black" /></div>}
+                            {tab === 'conteudo' && <div className="flex flex-col gap-3"><input value={form.titulo} onChange={e => setForm({ ...form, titulo: e.target.value })} placeholder={isEvento ? "Nome do evento *" : isProduto ? "Nome do produto *" : isPlataforma ? "Nome da plataforma / site *" : "Título *"} className={inputClass} /><div className="grid gap-2 md:grid-cols-2"><CustomSelect value={form.category_id} onChange={v => setForm({ ...form, category_id: v })} placeholder="Categoria" options={cats.map(c => ({ value: c.id, label: c.nome }))} /><CustomSelect value={form.tipo} onChange={v => { setForm({ ...form, tipo: v }); if(v==='produto') setTab('produto'); else if(v==='evento') setTab('evento'); else if(TIPOS_PLATAFORMA.includes(v)) setTab('plataforma'); }} placeholder="Tipo" options={TIPOS} /></div><textarea value={form.descricao} onChange={e => setForm({ ...form, descricao: e.target.value })} rows={3} placeholder={isEvento ? "Resumo do evento - aparece no card" : isPlataforma ? "Descrição curta - aparece no card" : isProduto ? "Descrição curta do produto" : "Descrição curta"} className={textareaClass} /><textarea value={form.conteudo} onChange={e => setForm({ ...form, conteudo: e.target.value })} rows={5} placeholder={isEvento ? "Programação completa, palestrantes, etc..." : isPlataforma ? "Sobre a plataforma, tecnologias usadas..." : isProduto ? "Ficha técnica / conteúdo detalhado" : "Conteúdo completo"} className={textareaClass} /></div>}
                             {tab === 'evento' && isEvento && (
                                 <div className="flex flex-col gap-3">
                                     <div className="rounded-2xl bg-sky-50 border border-sky-200 p-3 text-xs text-sky-800">📅 Configuração do Evento</div>
-
-                                    {/* STATUS EVENTO */}
                                     <div>
                                         <label className="text-xs font-semibold mb-1 block">Status do Evento</label>
                                         <CustomSelect value={form.status_evento} onChange={v => setForm({ ...form, status_evento: v })} placeholder="Status" options={STATUS_EVENTO} />
@@ -391,23 +389,17 @@ export default function AdminPage() {
                                             </div>
                                         )}
                                     </div>
-
                                     <div className="grid gap-3 md:grid-cols-2">
                                         <div><label className="text-xs font-semibold">Data Início *</label><input type="datetime-local" value={form.data_inicio} onChange={e => setForm({ ...form, data_inicio: e.target.value })} className={inputClass} /></div>
                                         <div><label className="text-xs font-semibold">Data Fim</label><input type="datetime-local" value={form.data_fim} onChange={e => setForm({ ...form, data_fim: e.target.value })} className={inputClass} /></div>
                                     </div>
-
-                                    {/* NOVA DATA QUANDO ADIADO */}
                                     {form.status_evento === 'adiado' && (
                                         <div className="rounded-2xl border-2 border-amber-300 bg-amber-50 p-3 space-y-2">
                                             <label className="text-xs font-bold text-amber-800">Nova data do evento (adiado para quando?)</label>
                                             <input type="datetime-local" value={form.data_nova_inicio} onChange={e => setForm({ ...form, data_nova_inicio: e.target.value })} className={inputClass} />
-                                            <p className="text-[11px] text-amber-700">
-                                                {form.data_nova_inicio ? `Nova data: ${new Date(form.data_nova_inicio).toLocaleString('pt-AO')}` : 'Sem data definida ainda - no site aparecerá "Sem data"'}
-                                            </p>
+                                            <p className="text-[11px] text-amber-700">{form.data_nova_inicio ? `Nova data: ${new Date(form.data_nova_inicio).toLocaleString('pt-AO')}` : 'Sem data definida ainda - no site aparecerá "Sem data"'}</p>
                                         </div>
                                     )}
-
                                     <div className="grid gap-3 md:grid-cols-2">
                                         <div><label className="text-xs font-semibold">Local</label><input value={form.local_evento} onChange={e => setForm({ ...form, local_evento: e.target.value })} placeholder="Hotel Intercontinental" className={inputClass} /></div>
                                         <div><label className="text-xs font-semibold">Cidade</label><input value={form.cidade} onChange={e => setForm({ ...form, cidade: e.target.value })} placeholder="Luanda" className={inputClass} /></div>
@@ -422,7 +414,7 @@ export default function AdminPage() {
                                     <div><label className="text-xs font-semibold">Organizador</label><input value={form.organizador} onChange={e => setForm({ ...form, organizador: e.target.value })} placeholder="CONNECT Angola" className={inputClass} /></div>
                                 </div>
                             )}
-                            {tab === 'midia' && <div className="flex flex-col gap-3"><input value={form.media_url} onChange={e => setForm({ ...form, media_url: e.target.value })} placeholder="Media URL" className={inputClass} /><div><p className="mb-1 text-xs font-semibold">Thumbnail (capa) - Recomendado 1280x720</p><input type="file" accept="image/*" onChange={e => setThumbFile(e.target.files)} className="text-sm" /></div><div><p className="mb-1 text-xs font-semibold">Galeria</p><input type="file" multiple onChange={e => setFiles(e.target.files)} className="text-sm" /></div>{previewFinalThumb && <img src={previewFinalThumb} className="h-40 w-full rounded-xl border object-cover" alt="" />}</div>}
+                            {tab === 'midia' && <div className="flex flex-col gap-3"><input value={form.media_url} onChange={e => setForm({ ...form, media_url: e.target.value })} placeholder="Media URL" className={inputClass} /><div><p className="mb-1 text-xs font-semibold">Thumbnail (capa) - Recomendado 1280x720</p><input type="file" accept="image/*" onChange={e => setThumbFile(e.target.files)} className="text-[16px]" /></div><div><p className="mb-1 text-xs font-semibold">Galeria</p><input type="file" multiple onChange={e => setFiles(e.target.files)} className="text-[16px]" /></div>{previewFinalThumb && <img src={previewFinalThumb} className="h-40 w-full rounded-xl border object-cover" alt="" />}</div>}
                             {tab === 'plataforma' && isPlataforma && (
                                 <div className="flex flex-col gap-3">
                                     <div className="rounded-2xl bg-blue-50 border border-blue-200 p-3 text-xs text-blue-800">🔗 Configuração de Plataforma</div>
@@ -443,7 +435,7 @@ export default function AdminPage() {
                                         <div><label className="text-xs font-semibold">SKU</label><input value={form.sku} onChange={e => setForm({ ...form, sku: e.target.value })} placeholder="EXO-001" className={inputClass} /></div>
                                         <div><label className="text-xs font-semibold">Unidade</label><CustomSelect value={form.unidade} onChange={v => setForm({ ...form, unidade: v })} placeholder="Unidade" options={[{value:'un',label:'Unidade'},{value:'cx',label:'Caixa'},{value:'kit',label:'Kit'},{value:'mês',label:'Mês'}]} /></div>
                                     </div>
-                                    <label className="flex items-center gap-2 rounded-xl border p-3 cursor-pointer hover:bg-zinc-50"><input type="checkbox" checked={form.em_promocao} onChange={e => setForm({ ...form, em_promocao: e.target.checked })} /><span className="text-sm font-medium">Em promoção?</span></label>
+                                    <label className="flex items-center gap-2 rounded-xl border p-3 cursor-pointer hover:bg-zinc-50"><input type="checkbox" checked={form.em_promocao} onChange={e => setForm({ ...form, em_promocao: e.target.checked })} /><span className="text-[16px] font-medium">Em promoção?</span></label>
                                 </div>
                             )}
                             {tab === 'config' && <div className="flex flex-col gap-3"><CustomSelect value={form.status} onChange={v => setForm({ ...form, status: v })} placeholder="Status" options={STATUS} /><input value={form.tags} onChange={e => setForm({ ...form, tags: e.target.value })} placeholder="Tags separadas por vírgula" className={inputClass} /><input value={form.slug} onChange={e => setForm({ ...form, slug: e.target.value })} placeholder="Slug (opcional)" className={inputClass} /><label className="flex items-center gap-2"><input type="checkbox" checked={form.destaque} onChange={e => setForm({ ...form, destaque: e.target.checked })} /> Destaque na home</label></div>}
@@ -453,10 +445,10 @@ export default function AdminPage() {
                 </div>
             )}
             {showBannerModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4"><div className="absolute inset-0 bg-black/60 backdrop-blur-sm" /><div className="relative w-full max-w-md overflow-hidden rounded-3xl bg-white shadow-2xl"><div className="flex h-18 items-start justify-between bg-amber-50 px-5 pt-5"><div className="grid h-9 w-9 place-items-center rounded-full border bg-white">📢</div><button onClick={() => setShowBannerModal(false)} className="grid h-8 w-8 place-items-center rounded-full border bg-white">×</button></div><div className="p-6 space-y-3"><input value={bannerForm.titulo} onChange={e => setBannerForm({ ...bannerForm, titulo: e.target.value })} placeholder="Título banner" className={inputClass} /><CustomSelect value={bannerForm.posicao} onChange={v => setBannerForm({ ...bannerForm, posicao: v as BannerPos })} placeholder="Posição" options={POSICOES} /><input type="file" accept="image/*" onChange={e => setBannerFile(e.target.files)} className="text-sm" /><div className="flex gap-2"><button onClick={() => setShowBannerModal(false)} className="flex-1 h-11 rounded-full border">×</button><button onClick={saveBanner} disabled={loading} className="flex-1 h-11 rounded-full bg-black text-white">SALVAR</button></div></div></div></div>
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4"><div className="absolute inset-0 bg-black/60 backdrop-blur-sm" /><div className="relative w-full max-w-md overflow-hidden rounded-3xl bg-white shadow-2xl"><div className="flex h-18 items-start justify-between bg-amber-50 px-5 pt-5"><div className="grid h-9 w-9 place-items-center rounded-full border bg-white">📢</div><button onClick={() => setShowBannerModal(false)} className="grid h-8 w-8 place-items-center rounded-full border bg-white">×</button></div><div className="p-6 space-y-3"><input value={bannerForm.titulo} onChange={e => setBannerForm({ ...bannerForm, titulo: e.target.value })} placeholder="Título banner" className={inputClass} /><CustomSelect value={bannerForm.posicao} onChange={v => setBannerForm({ ...bannerForm, posicao: v as BannerPos })} placeholder="Posição" options={POSICOES} /><input type="file" accept="image/*" onChange={e => setBannerFile(e.target.files)} className="text-[16px]" /><div className="flex gap-2"><button onClick={() => setShowBannerModal(false)} className="flex-1 h-11 rounded-full border">×</button><button onClick={saveBanner} disabled={loading} className="flex-1 h-11 rounded-full bg-black text-white">SALVAR</button></div></div></div></div>
             )}
             {showCatModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4"><div className="absolute inset-0 bg-black/60 backdrop-blur-sm" /><div className="relative w-full max-w-sm rounded-3xl bg-white p-6 shadow-2xl"><h3 className="text-lg font-bold">{editingCat ? "Editar" : "Nova"} Categoria</h3><div className="mt-4 space-y-3"><input value={catForm.nome} onChange={e => setCatForm({ ...catForm, nome: e.target.value })} placeholder="Nome" className={inputClass} /><div className="flex items-center gap-3 rounded-xl border px-3"><input type="color" value={catForm.cor} onChange={e => setCatForm({ ...catForm, cor: e.target.value })} className="h-8 w-8" /><span className="text-sm">{catForm.cor}</span></div></div><div className="mt-6 flex gap-2"><button onClick={() => setShowCatModal(false)} className="flex-1 h-11 rounded-full border">×</button><button onClick={saveCat} className="flex-1 h-11 rounded-full bg-violet-600 text-white">SALVAR</button></div></div></div>
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4"><div className="absolute inset-0 bg-black/60 backdrop-blur-sm" /><div className="relative w-full max-w-sm rounded-3xl bg-white p-6 shadow-2xl"><h3 className="text-lg font-bold">{editingCat ? "Editar" : "Nova"} Categoria</h3><div className="mt-4 space-y-3"><input value={catForm.nome} onChange={e => setCatForm({ ...catForm, nome: e.target.value })} placeholder="Nome" className={inputClass} /><div className="flex items-center gap-3 rounded-xl border px-3"><input type="color" value={catForm.cor} onChange={e => setCatForm({ ...catForm, cor: e.target.value })} className="h-8 w-8" /><span className="text-[16px]">{catForm.cor}</span></div></div><div className="mt-6 flex gap-2"><button onClick={() => setShowCatModal(false)} className="flex-1 h-11 rounded-full border">×</button><button onClick={saveCat} className="flex-1 h-11 rounded-full bg-violet-600 text-white">SALVAR</button></div></div></div>
             )}
         </main>
     );
