@@ -75,15 +75,16 @@ export default async function Home() {
                 <div className="absolute inset-0 bg-linear-to-b from-white via-white/85 to-white/25 backdrop-blur-[1px] sm:hidden" />
                 <div className="absolute inset-0 hidden bg-linear-to-r from-white via-white/90 to-white/10 sm:block" />
                 <div className="relative mx-auto w-full max-w-7xl px-5 sm:px-8">
-                    {/* SÓ O TITULO TRAVADO, BACKGROUND ORIGINAL */}
-                    <div className="max-w-85 sm:max-w-xl lg:max-w-145">
+                    {/* DIV COM A DIMENSÃO EXATA DO TEU QUADRADO VERMELHO NO DESKTOP */}
+                    <div className="max-w-85 sm:max-w-xl lg:w-150 lg:max-w-150">
                         <div className="flex items-center gap-3">
                             <span className="h-px w-8 bg-sky-600" />
                             <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-sky-600 sm:text-xs">
                                 {heroKicker}
                             </p>
                         </div>
-                        <h1 className="mt-3 max-w-80 text-[28px] font-semibold tracking-tight text-wrap-balance wrap-break-word leading-[1.1] text-slate-800 sm:mt-4 sm:max-w-130 sm:text-4xl sm:leading-[1.05] lg:max-w-125 lg:text-[42px]">
+                        {/* TITULO JUSTIFICADO DENTRO DO QUADRADO */}
+                        <h1 className="mt-3 w-full text-justify text-[28px] font-semibold tracking-tight wrap-break-word leading-[1.1] text-slate-800 sm:mt-4 sm:text-4xl sm:leading-[1.05] lg:text-justify lg:text-[42px] lg:leading-[1.08]">
                             {heroTitle}
                         </h1>
                         {heroDesc && <p className="mt-2 max-w-[90%] text-[12px] leading-5 text-wrap-pretty wrap-break-word text-slate-500 sm:mt-3 sm:max-w-120 sm:text-sm sm:leading-6">{heroDesc}</p>}
