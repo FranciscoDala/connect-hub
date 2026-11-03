@@ -72,15 +72,17 @@ export default async function Home() {
         <main className="min-h-screen bg-slate-50 text-slate-800">
             <Header />
             <section className="relative isolate flex min-h-[88vh] items-center overflow-hidden bg-slate-100 pb-20 pt-32 lg:pt-36" style={{ backgroundImage: `url('${heroBg}')`, backgroundSize: "cover", backgroundPosition: "center" }}>
-                <div className="absolute inset-0 bg-white/75 backdrop-blur-sm sm:hidden" />
+                {/* MOBILE - AGORA APARECE UM POUCO DA IMAGEM EMBAIXO */}
+                <div className="absolute inset-0 bg-linear-to-b from-white via-white/85 to-white/30 backdrop-blur-[1px] sm:hidden" />
                 <div className="absolute inset-0 hidden bg-linear-to-r from-white via-white/90 to-white/10 sm:block" />
                 <div className="relative mx-auto w-full max-w-7xl px-5 sm:px-8">
                     <div className="max-w-2xl">
                         <div className="flex items-center gap-3"><span className="hidden h-px w-8 bg-sky-600 sm:block" /><p className="text-xs font-bold uppercase tracking-widest text-sky-600">{heroKicker}</p></div>
                         <h1 className="mt-5 line-clamp-3 text-4xl font-semibold leading-none tracking-tight text-slate-800 sm:text-6xl">{heroTitle}</h1>
                         {heroDesc && <p className="mt-5 line-clamp-3 max-w-xl text-sm leading-7 text-slate-500">{heroDesc}</p>}
-                        <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                            <Link href={heroLink} className="inline-flex min-h-12 items-center justify-center rounded-full bg-sky-600 px-7 text-sm font-semibold text-white">Explorar Produtos</Link>
+                        {/* BTNS MAIS BAIXO + LINK TECNOLOGIA */}
+                        <div className="mt-16 flex flex-col gap-3 sm:mt-8 sm:flex-row">
+                            <Link href="/tecnologia" className="inline-flex min-h-12 items-center justify-center rounded-full bg-sky-600 px-7 text-sm font-semibold text-white">Explorar Produtos</Link>
                             <Link href="#plataformas" className="inline-flex min-h-12 items-center justify-center rounded-full border border-slate-200 bg-white px-7 text-sm font-semibold text-slate-700">Nossas Plataformas</Link>
                         </div>
                     </div>

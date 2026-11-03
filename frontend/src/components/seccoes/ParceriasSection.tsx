@@ -21,9 +21,12 @@ export default function ParceriasSection() {
                     </p>
                 </div>
 
-                <div className="mx-auto mt-6 grid max-w-6xl gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <div
+                    className="mx-auto mt-6 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 sm:grid sm:grid-cols-2 sm:gap-4 lg:grid-cols-4 lg:gap-4 sm:overflow-visible"
+                    style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' } as any}
+                >
                     {items.map((item, i) => (
-                        <div key={i} className="group relative flex flex-col overflow-hidden rounded-[20px] border border-zinc-200 bg-white transition hover:shadow-lg">
+                        <div key={i} className="group relative flex w-full min-w-full shrink-0 snap-center flex-col overflow-hidden rounded-[20px] border border-zinc-200 bg-white transition hover:shadow-lg sm:min-w-0">
                             {/* TOPO COM BADGES IGUAL PRODUTOS */}
                             <div className="relative flex h-36 w-full items-center justify-center bg-zinc-50">
                                 {/* ESQUERDA - CATEGORIA */}
@@ -58,6 +61,7 @@ export default function ParceriasSection() {
                     ))}
                 </div>
             </div>
+            <style>{`section div::-webkit-scrollbar{display:none}`}</style>
         </section>
     )
 }
