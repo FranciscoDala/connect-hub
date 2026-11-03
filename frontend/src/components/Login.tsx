@@ -31,14 +31,9 @@ export default function LoginModal({ open, onClose }: { open: boolean; onClose: 
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={onClose} />
             <div className="relative w-full max-w-90 overflow-hidden rounded-xl border border-white bg-white shadow-2xl">
-                {/* HEADER COM X DEPOIS DO LOGIN */}
                 <div className="flex items-center justify-between bg-[#eaf2ff] px-5 py-4">
                     <div className="grid h-9 w-9 place-items-center overflow-hidden rounded-full bg-white shadow-sm">
-                        <img
-                            src="/favicon-32x32.png"
-                            alt="CONNECT"
-                            className="h-7 w-7 object-contain"
-                        />
+                        <img src="/favicon-32x32.png" alt="CONNECT" className="h-7 w-7 object-contain" />
                     </div>
                     <div className="flex items-center gap-2">
                         <div className="flex items-center gap-1.5 rounded-full bg-white px-3.5 py-1.5 text-xs font-semibold text-[#0a84ff] shadow-sm">
@@ -67,7 +62,7 @@ export default function LoginModal({ open, onClose }: { open: boolean; onClose: 
                                 onChange={e => setEmail(e.target.value)}
                                 required
                                 placeholder="email@connect.ao"
-                                className="h-11.5 w-full rounded-xl border border-slate-200 bg-[#eef5ff] pl-10 pr-4 text-sm font-medium normal-case tracking-normal text-slate-900 outline-none placeholder:text-slate-500 focus:border-[#0a84ff] focus:bg-white"
+                                className="h-11.5 w-full rounded-xl border border-slate-200 bg-[#eef5ff] pl-10 pr-4 text-[16px] font-medium text-slate-900 outline-none placeholder:text-slate-500 focus:border-[#0a84ff] focus:bg-white"
                             />
                         </div>
 
@@ -81,7 +76,7 @@ export default function LoginModal({ open, onClose }: { open: boolean; onClose: 
                                 onChange={e => setPassword(e.target.value)}
                                 required
                                 placeholder="••••••••••••"
-                                className="h-11.5 w-full rounded-xl border border-slate-200 bg-[#eef5ff] pl-10 pr-10 text-sm font-medium normal-case tracking-normal text-slate-900 outline-none placeholder:text-slate-400 focus:border-[#0a84ff] focus:bg-white"
+                                className="h-11.5 w-full rounded-xl border border-slate-200 bg-[#eef5ff] pl-10 pr-10 text-[16px] font-medium text-slate-900 outline-none placeholder:text-slate-400 focus:border-[#0a84ff] focus:bg-white"
                             />
                             <button type="button" onClick={() => setShow(!show)} className="absolute right-1 top-1 grid h-9.5 w-8 place-items-center text-slate-400">
                                 {show ? (
