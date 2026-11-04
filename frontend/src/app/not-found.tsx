@@ -18,7 +18,7 @@ export default function NotFound() {
                     Página não encontrada.
                 </h1>
 
-                <p className="mt-6 max-w-xl text-justify text-sm leading-6 text-slate-500 sm:text-center">
+                <p className="mt-6 max-w-xl text-center text-sm leading-6 text-slate-500">
                     A página que você está tentando acessar não existe, foi movida ou o link expirou.
                     Volte para o início e continue explorando nossos produtos e tecnologias.
                 </p>

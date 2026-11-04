@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, notFound } from "next/navigation";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PostRelacionados from "@/components/post/PostRelacionados";
@@ -46,13 +46,13 @@ export default function PostPage() {
     const [categories, setCategories] = useState<any[]>([]);
     const [banners, setBanners] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const [isNotFound, setIsNotFound] = useState(false);
     const [likes, setLikes] = useState(0);
     const [dislikes, setDislikes] = useState(0);
     const [myReaction, setMyReaction] = useState<string | null>(null);
     const [showHeart, setShowHeart] = useState(false);
     const [saved, setSaved] = useState(false);
     const lastTap = useRef(0);
-    // Galeria - troca só clicando na miniatura em baixo
     const [activeIndex, setActiveIndex] = useState(0);
 
     useEffect(() => {
@@ -65,9 +65,10 @@ export default function PostPage() {
                     const all = await fetch(`${API}/api/v1/posts?limit=100`).then((r) => r.json());
                     const found = all.find((p: any) => p.slug === slug || p.id === slug);
                     if (found) { setPost(found); setLikes(found.likes_count || 0); setDislikes(found.dislikes_count || 0); }
-                    else { setLoading(false); return; }
+                    else { setIsNotFound(true); }
                 } else { const data = await res.json(); setPost(data); setLikes(data.likes_count || 0); setDislikes(data.dislikes_count || 0); }
-            } catch { } setLoading(false);
+            } catch { setIsNotFound(true); }
+            setLoading(false);
         })();
     }, [slug]);
 
@@ -123,7 +124,6 @@ export default function PostPage() {
         };
     }, [post]);
 
-    // quando muda de produto, volta para a 1ª foto = capa
     useEffect(() => { setActiveIndex(0); }, [post?.id]);
 
     async function react(type: "like" | "dislike") {
@@ -146,7 +146,11 @@ export default function PostPage() {
             </div>
         </div>
     );
-    if (!post) return <div className="min-h-screen grid place-items-center">Post não encontrado</div>;
+
+    // CORRIGIDO: em vez de mostrar "Post não encontrado" cru, manda para a page de not-found
+    if (isNotFound || !post) {
+        notFound();
+    }
 
     const isProduto = ["produto", "product"].includes((post.tipo || "").toLowerCase());
     const cat = categories.find((c: any) => c.id === post.category_id);
@@ -154,7 +158,6 @@ export default function PostPage() {
     const conteudoDuplicado = isSameText(post.descricao, post.conteudo);
     const mostrarConteudo = post.conteudo && !conteudoDuplicado;
 
-    // 1ª foto da galeria SEMPRE é a capa
     const galeriaRaw: string[] = Array.isArray(post.galeria)
         ? (post.galeria as unknown[]).filter((u): u is string => typeof u === 'string' && !!u)
         : [];
@@ -164,7 +167,6 @@ export default function PostPage() {
     const fotoPrincipal = galeria[activeIndex] || post.thumbnail_url || post.media_url;
     const temGaleria = galeria.length > 1;
 
-    // STATUS DO EVENTO - prioriza status_evento
     const statusRaw = (post.status_evento || post.status || post.estado || post.situacao || "").toString().toLowerCase();
     const isCancelado = ["cancelado", "cancelada", "canceled", "cancelled"].includes(statusRaw);
     const isAdiado = ["adiado", "adiada", "postponed", "adiamento"].includes(statusRaw);
@@ -172,7 +174,6 @@ export default function PostPage() {
     const isInativo = isCancelado || isAdiado || isEsgotado;
     const seloImg = isCancelado ? "/selos/cancelado.png" : isAdiado ? "/selos/adiado.png" : "/selos/esgotado.png";
 
-    // ESCONDER PRODUTOS SE FOR FESTA / EVENTO
     const catNome = (cat?.nome || cat?.slug || "").toLowerCase();
     const tipoNome = (post.tipo || "").toLowerCase();
     const isFestaEvento = ["festa", "evento", "eventos", "festas"].some(k => catNome.includes(k) || tipoNome.includes(k));
@@ -189,16 +190,11 @@ export default function PostPage() {
                         <div className="overflow-hidden rounded-none border-0">
                             {(fotoPrincipal) && (
                                 <>
-                                {/* CORRIGIDO: div branca com tamanho FIXO, não muda com a foto.
-                                    Celular: 380px | Tablet: 480px | Desktop: 560px
-                                    A foto fica centrada dentro dela, no tamanho original, sem esticar */}
                                 <div className="relative flex h-[380px] w-full select-none items-center justify-center overflow-hidden bg-white sm:h-[480px] lg:h-[560px]" onDoubleClick={handleDoubleClick} onTouchEnd={handleTouchEnd}>
                                     <img
                                         key={fotoPrincipal}
                                         src={fotoPrincipal}
                                         alt={post.titulo}
-                                        // CORRIGIDO: sem w-full. w-auto + max-w-full + max-h-full = não estica, não perde qualidade
-                                        // Foto pequena fica pequena e nítida. Foto grande encolhe até caber, sem distorcer.
                                         className={`h-auto max-h-full w-auto max-w-full object-contain transition-all duration-300 ${isInativo ? 'grayscale' : ''}`}
                                         style={{ imageRendering: 'auto' }}
                                         draggable={false}
@@ -224,14 +220,12 @@ export default function PostPage() {
                                         </div>
                                     )}
 
-                                    {/* Contador - só mostra, não é botão */}
                                     {temGaleria && !isInativo && (
                                         <span className="absolute bottom-2 right-2 rounded-full bg-black/60 px-2.5 py-1 text-[11px] font-medium text-white">{activeIndex + 1} / {galeria.length}</span>
                                     )}
                                     <style>{`@keyframes igHeart { 0% { transform: scale(0); opacity: 0; } 15% { transform: scale(1.25); opacity: 1; } 30% { transform: scale(0.95); } 45%, 80% { transform: scale(1); opacity: 1; } 100% { transform: scale(1); opacity: 0; } } @keyframes stampIn { 0% { transform: scale(2) rotate(-15deg); opacity: 0; } 100% { transform: scale(1) rotate(-12deg); opacity: 1; } }`}</style>
                                 </div>
 
-                                {/* Miniaturas - é aqui que se troca de foto, clicando */}
                                 {temGaleria && (
                                     <div className="flex gap-2 overflow-x-auto px-1 py-3 [&::-webkit-scrollbar]:hidden">
                                         {galeria.map((url, idx) => (
@@ -283,13 +277,11 @@ export default function PostPage() {
 
                         <PostRelacionados categoryId={post.category_id} currentPostId={post.id} posts={related} />
 
-                        {/* DESKTOP: Nossos Produtos colado no artigo, sem esperar o sidebar - só aparece no lg */}
                         <div className="hidden lg:block">
                             {!isFestaEvento && <ProdutosRelated posts={related} />}
                         </div>
                     </article>
                     <PostSidebar postId={post.id} categoryId={post.category_id} post={post} />
-                    {/* CELULAR: Nossos Produtos embaixo da Ficha - só aparece até lg, some no desktop */}
                     <div className="order-3 col-span-12 lg:hidden">
                         {!isFestaEvento && <ProdutosRelated posts={related} />}
                     </div>
