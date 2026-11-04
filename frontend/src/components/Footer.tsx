@@ -17,13 +17,38 @@ export default function Footer() {
     }, []);
 
     useEffect(() => {
-        fetch(`${API}/api/v1/categories`)
-            .then(r => r.json())
-            .then((data: Category[]) => {
+        let isMounted = true;
+
+        const fetchCategorias = async () => {
+            try {
+                const res = await fetch(`${API}/api/v1/categories`, { cache: 'no-store' });
+                if (!isMounted) return;
+                const data = await res.json();
                 const list = Array.isArray(data) ? data : [];
                 setCategorias(list.slice(0, 8));
-            })
-            .catch(() => {});
+            } catch {
+                if (!isMounted) return;
+                setCategorias([]);
+            }
+        };
+
+        fetchCategorias();
+
+        const interval = window.setInterval(() => {
+            fetchCategorias();
+        }, 15000);
+
+        const handleVisibility = () => {
+            if (!document.hidden) fetchCategorias();
+        };
+
+        document.addEventListener('visibilitychange', handleVisibility);
+
+        return () => {
+            isMounted = false;
+            window.clearInterval(interval);
+            document.removeEventListener('visibilitychange', handleVisibility);
+        };
     }, []);
 
     const timeZone = "Africa/Luanda";

@@ -12,12 +12,17 @@ export default function TecnologiaPage() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        (async () => {
+        let isMounted = true;
+
+        const loadData = async () => {
             try {
                 const [postsRes, catsRes] = await Promise.all([
-                    fetch(`${API}/api/v1/posts?limit=100`).then(r => r.json()),
-                    fetch(`${API}/api/v1/categories`).then(r => r.json()).catch(() => [])
+                    fetch(`${API}/api/v1/posts?limit=100`, { cache: 'no-store' }).then(r => r.json()),
+                    fetch(`${API}/api/v1/categories`, { cache: 'no-store' }).then(r => r.json()).catch(() => [])
                 ]);
+
+                if (!isMounted) return;
+
                 const cats = Array.isArray(catsRes) ? catsRes : [];
                 const postsList = Array.isArray(postsRes) ? postsRes : [];
                 const catMap = new Map(cats.map((c: any) => [c.id, c]));
@@ -37,9 +42,30 @@ export default function TecnologiaPage() {
                     });
                 }
                 setPosts(filtrados);
-            } catch {}
-            setLoading(false);
-        })();
+            } catch {
+                if (isMounted) setPosts([]);
+            } finally {
+                if (isMounted) setLoading(false);
+            }
+        };
+
+        loadData();
+
+        const interval = window.setInterval(() => {
+            loadData();
+        }, 15000);
+
+        const handleVisibility = () => {
+            if (!document.hidden) loadData();
+        };
+
+        document.addEventListener('visibilitychange', handleVisibility);
+
+        return () => {
+            isMounted = false;
+            window.clearInterval(interval);
+            document.removeEventListener('visibilitychange', handleVisibility);
+        };
     }, []);
 
     return (

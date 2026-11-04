@@ -107,30 +107,54 @@ export default function PostSidebar({ postId, categoryId, post }: Props) {
     const [banner, setBanner] = useState<Banner | null>(null);
 
     useEffect(() => {
-        fetch(`${API}/api/v1/posts?limit=12`)
-            .then((r) => r.json())
-            .then((data: any[]) => {
-                const filtered = data.filter((p) => p.id !== postId);
+        let isMounted = true;
+
+        const fetchSidebarData = async () => {
+            try {
+                const [postsRes, categoriesRes, bannersRes] = await Promise.all([
+                    fetch(`${API}/api/v1/posts?limit=12`, { cache: 'no-store' }).then((r) => r.json()),
+                    fetch(`${API}/api/v1/categories`, { cache: 'no-store' }).then((r) => r.json()),
+                    fetch(`${API}/api/v1/banners?ativo=true`, { cache: 'no-store' }).then((r) => r.json())
+                ]);
+
+                if (!isMounted) return;
+
+                const postsData = Array.isArray(postsRes) ? postsRes : [];
+                const filtered = postsData.filter((p) => p.id !== postId);
                 setRecentes(filtered.slice(0, 5));
-                const sorted = [...filtered]
-                    .sort((a, b) => (b.views || 0) - (a.views || 0))
-                    .slice(0, 5);
-                setLidas(sorted);
-            })
-            .catch(() => { });
+                setLidas([...filtered].sort((a, b) => (b.views || 0) - (a.views || 0)).slice(0, 5));
 
-        fetch(`${API}/api/v1/categories`)
-            .then((r) => r.json())
-            .then(setCategories)
-            .catch(() => { });
+                setCategories(Array.isArray(categoriesRes) ? categoriesRes : []);
 
-        fetch(`${API}/api/v1/banners?ativo=true`)
-            .then((r) => r.json())
-            .then((all: Banner[]) => {
-                const b = all.find((x) => x.posicao === "sidebar");
+                const banners = Array.isArray(bannersRes) ? bannersRes : [];
+                const b = banners.find((x: Banner) => x.posicao === "sidebar");
                 if (b) setBanner(b);
-            })
-            .catch(() => { });
+            } catch {
+                if (!isMounted) return;
+                setRecentes([]);
+                setLidas([]);
+                setCategories([]);
+                setBanner(null);
+            }
+        };
+
+        fetchSidebarData();
+
+        const interval = window.setInterval(() => {
+            fetchSidebarData();
+        }, 15000);
+
+        const handleVisibility = () => {
+            if (!document.hidden) fetchSidebarData();
+        };
+
+        document.addEventListener('visibilitychange', handleVisibility);
+
+        return () => {
+            isMounted = false;
+            window.clearInterval(interval);
+            document.removeEventListener('visibilitychange', handleVisibility);
+        };
     }, [postId]);
 
     const list = tab === "recentes" ? recentes : lidas;

@@ -73,12 +73,54 @@ export default function PostPage() {
 
     useEffect(() => {
         if (!post) return;
+
+        let isMounted = true;
         const cid = getClientId();
-        fetch(`${API}/api/v1/posts/${post.id}/view`, { method: "POST" }).catch(() => { });
-        fetch(`${API}/api/v1/posts/${post.id}/reaction?client_id=${cid}`).then((r) => r.json()).then((d) => setMyReaction(d.user_reaction)).catch(() => { });
-        fetch(`${API}/api/v1/categories`).then((r) => r.json()).then(setCategories).catch(() => { });
-        fetch(`${API}/api/v1/banners?ativo=true`).then((r) => r.json()).then(setBanners).catch(() => { });
-        if (post.category_id) { fetch(`${API}/api/v1/posts?category_id=${post.category_id}&limit=8`).then((r) => r.json()).then((d: any[]) => setRelated(d.filter((p) => p.id !== post.id).slice(0, 8))).catch(() => { }); }
+
+        const refreshPostMeta = async () => {
+            try {
+                fetch(`${API}/api/v1/posts/${post.id}/view`, { method: "POST" }).catch(() => { });
+                fetch(`${API}/api/v1/posts/${post.id}/reaction?client_id=${cid}`).then((r) => r.json()).then((d) => {
+                    if (isMounted) setMyReaction(d.user_reaction);
+                }).catch(() => { });
+
+                const [categoriesRes, bannersRes, relatedRes] = await Promise.all([
+                    fetch(`${API}/api/v1/categories`, { cache: 'no-store' }).then((r) => r.json()).catch(() => []),
+                    fetch(`${API}/api/v1/banners?ativo=true`, { cache: 'no-store' }).then((r) => r.json()).catch(() => []),
+                    post.category_id ? fetch(`${API}/api/v1/posts?category_id=${post.category_id}&limit=8`, { cache: 'no-store' }).then((r) => r.json()).catch(() => []) : Promise.resolve([])
+                ]);
+
+                if (!isMounted) return;
+                setCategories(Array.isArray(categoriesRes) ? categoriesRes : []);
+                setBanners(Array.isArray(bannersRes) ? bannersRes : []);
+                if (Array.isArray(relatedRes)) {
+                    setRelated(relatedRes.filter((p: any) => p.id !== post.id).slice(0, 8));
+                }
+            } catch {
+                if (!isMounted) return;
+                setCategories([]);
+                setBanners([]);
+                setRelated([]);
+            }
+        };
+
+        refreshPostMeta();
+
+        const interval = window.setInterval(() => {
+            refreshPostMeta();
+        }, 15000);
+
+        const handleVisibility = () => {
+            if (!document.hidden) refreshPostMeta();
+        };
+
+        document.addEventListener('visibilitychange', handleVisibility);
+
+        return () => {
+            isMounted = false;
+            window.clearInterval(interval);
+            document.removeEventListener('visibilitychange', handleVisibility);
+        };
     }, [post]);
 
     // quando muda de produto, volta para a 1ª foto = capa
