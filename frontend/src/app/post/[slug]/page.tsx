@@ -128,8 +128,9 @@ export default function PostPage() {
                 <div className="flex items-center gap-2 text-xs"><Link href="/" className="text-slate-400">INÍCIO</Link><span className="text-slate-300">/</span><span className="font-bold uppercase tracking-widest text-sky-700">{cat?.nome || post.tipo}</span></div>
             </div>
             <div className="mx-auto max-w-7xl px-5 pb-20 sm:px-8">
-                <div className="grid grid-cols-12 gap-6 lg:gap-8">
-                    <article className="col-span-12 lg:col-span-8">
+                {/* MUDANÇA: flex no celular para poder usar order, grid no desktop */}
+                <div className="flex flex-col gap-6 lg:grid lg:grid-cols-12 lg:gap-8">
+                    <article className="order-1 col-span-12 lg:col-span-8">
                         <div className="overflow-hidden rounded-none border-0">
                             {(post.thumbnail_url || post.media_url) && (
                                 <div className="relative select-none cursor-pointer rounded-none overflow-hidden bg-black-0 flex items-center justify-center" onDoubleClick={handleDoubleClick} onTouchEnd={handleTouchEnd}>
@@ -197,9 +198,12 @@ export default function PostPage() {
                         </div>
 
                         <PostRelacionados categoryId={post.category_id} currentPostId={post.id} posts={related} />
-                        {!isFestaEvento && <ProdutosRelated posts={related} />}
                     </article>
                     <PostSidebar postId={post.id} categoryId={post.category_id} post={post} />
+                    {/* MUDANÇA: Nossos Produtos saiu de dentro do article e veio para aqui - no celular fica embaixo da Ficha, no desktop continua embaixo do artigo */}
+                    <div className="order-3 col-span-12 lg:col-span-8">
+                        {!isFestaEvento && <ProdutosRelated posts={related} />}
+                    </div>
                 </div>
             </div>
             <Footer />

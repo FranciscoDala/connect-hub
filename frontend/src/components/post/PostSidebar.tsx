@@ -119,7 +119,7 @@ export default function PostSidebar({ postId, categoryId, post }: Props) {
     const ficha: FichaItem[] = post?.ficha_informativa || [];
 
     return (
-        <aside className="col-span-12 space-y-4 lg:col-span-4 lg:sticky lg:top-24 lg:self-start">
+        <aside className="order-2 col-span-12 space-y-4 lg:col-span-4 lg:sticky lg:top-24 lg:self-start">
 
             {/* 0. INFO EVENTO - SÓ APARECE SE FOR EVENTO */}
             {post && <EventoSidebar post={post} />}
