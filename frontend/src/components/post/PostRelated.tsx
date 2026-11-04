@@ -48,7 +48,7 @@ export default function ProdutosRelated({ posts }: { posts: Post[] }) {
             const tipo = (p.tipo || '').toLowerCase()
             return status === 'published' && (tipo === 'produto' || tipo === 'product')
         })
-        .slice(0, 8)
+        .slice(0, 3)
 
     useEffect(() => {
         if (produtos.length === 0) return;
@@ -85,7 +85,7 @@ export default function ProdutosRelated({ posts }: { posts: Post[] }) {
                         <p className="mt-4 text-sm font-semibold text-slate-700">Sem produtos disponíveis</p>
                     </div>
                 ) : (
-                    <div className="mt-10 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-4 lg:grid lg:grid-cols-4 lg:gap-4 lg:overflow-visible" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' } as any}>
+                    <div className="mt-10 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-4 lg:grid lg:grid-cols-3 lg:gap-4 lg:overflow-visible" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' } as any}>
                         {produtos.map((item: any) => {
                             const img = item.thumbnail_url || item.media_url || '/connect.png'
                             const link = `/post/${item.slug || item.id}`
