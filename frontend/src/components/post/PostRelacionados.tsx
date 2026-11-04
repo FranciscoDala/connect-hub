@@ -19,10 +19,38 @@ type Props = {
     posts?: RelatedPost[];
     categoryId?: string;
     currentPostId?: string;
+    categorySlug?: string;
+    categoryName?: string;
 };
 
-export default function PostRelacionados({ posts: initialPosts, categoryId, currentPostId }: Props) {
+export default function PostRelacionados({ posts: initialPosts, categoryId, currentPostId, categorySlug, categoryName }: Props) {
     const [posts, setPosts] = useState<RelatedPost[]>(initialPosts?.slice(0, 4) || []);
+    const [resolvedSlug, setResolvedSlug] = useState<string | undefined>(categorySlug);
+    const [resolvedName, setResolvedName] = useState<string | undefined>(categoryName);
+
+    // Se a page já mandou o slug, usa ele. Se não, vai buscar nas categorias pelo ID
+    useEffect(() => {
+        if (categorySlug) {
+            setResolvedSlug(categorySlug);
+            return;
+        }
+        if (!categoryId) return;
+        fetch(`${API}/api/v1/categories`, { cache: 'no-store' })
+            .then((r) => r.json())
+            .then((data: any[]) => {
+                const list = Array.isArray(data) ? data : [];
+                const cat = list.find((c: any) => c.id === categoryId);
+                if (cat) {
+                    setResolvedSlug(cat.slug || cat.id);
+                    setResolvedName(cat.nome || cat.name);
+                }
+            })
+            .catch(() => { });
+    }, [categoryId, categorySlug]);
+
+    useEffect(() => {
+        if (categoryName) setResolvedName(categoryName);
+    }, [categoryName]);
 
     useEffect(() => {
         if (!categoryId) return;
@@ -44,6 +72,9 @@ export default function PostRelacionados({ posts: initialPosts, categoryId, curr
         .slice(0, 4);
 
     if (limited.length === 0) return null;
+
+    // CORRIGIDO: vai para a categoria deste post, não para a home
+    const categoriaHref = resolvedSlug ? `/categoria/${resolvedSlug}` : "/";
 
     return (
         <div className="mt-14">
@@ -80,10 +111,10 @@ export default function PostRelacionados({ posts: initialPosts, categoryId, curr
 
             <div className="mt-2 flex justify-end">
                 <Link
-                    href={categoryId ? `/?categoria=${categoryId}` : "/"}
+                    href={categoriaHref}
                     className="flex items-center gap-1 text-xs font-medium text-sky-700 hover:underline"
                 >
-                    Ver todas relacionadas <span>›</span>
+                    Ver todas relacionadas{resolvedName ? ` em ${resolvedName}` : ""} <span>›</span>
                 </Link>
             </div>
         </div>

@@ -190,75 +190,75 @@ export default function PostPage() {
                         <div className="overflow-hidden rounded-none border-0">
                             {(fotoPrincipal) && (
                                 <>
-                                <div className="relative flex h-[380px] w-full select-none items-center justify-center overflow-hidden bg-white sm:h-[480px] lg:h-[560px]" onDoubleClick={handleDoubleClick} onTouchEnd={handleTouchEnd}>
-                                    <img
-                                        key={fotoPrincipal}
-                                        src={fotoPrincipal}
-                                        alt={post.titulo}
-                                        className={`h-auto max-h-full w-auto max-w-full object-contain transition-all duration-300 ${isInativo ? 'grayscale' : ''}`}
-                                        style={{ imageRendering: 'auto' }}
-                                        draggable={false}
-                                    />
-                                    {isInativo && (
-                                        <div className="absolute inset-0 bg-black/20 flex items-center justify-center p-8">
-                                            <img
-                                                src={seloImg}
-                                                alt={statusRaw}
-                                                className="w-85/100 max-w-105 h-auto object-contain drop-shadow-[0_4px_20px_rgba(0,0,0,0.5)] animate-[stampIn_0.4s_ease-out]"
-                                            />
-                                        </div>
-                                    )}
+                                    <div className="relative flex h-[380px] w-full select-none items-center justify-center overflow-hidden bg-white sm:h-[480px] lg:h-[560px]" onDoubleClick={handleDoubleClick} onTouchEnd={handleTouchEnd}>
+                                        <img
+                                            key={fotoPrincipal}
+                                            src={fotoPrincipal}
+                                            alt={post.titulo}
+                                            className={`h-auto max-h-full w-auto max-w-full object-contain transition-all duration-300 ${isInativo ? 'grayscale' : ''}`}
+                                            style={{ imageRendering: 'auto' }}
+                                            draggable={false}
+                                        />
+                                        {isInativo && (
+                                            <div className="absolute inset-0 bg-black/20 flex items-center justify-center p-8">
+                                                <img
+                                                    src={seloImg}
+                                                    alt={statusRaw}
+                                                    className="w-85/100 max-w-105 h-auto object-contain drop-shadow-[0_4px_20px_rgba(0,0,0,0.5)] animate-[stampIn_0.4s_ease-out]"
+                                                />
+                                            </div>
+                                        )}
 
-                                    {myReaction === "like" && !isInativo && (
-                                        <div className="absolute right-3 top-3 grid size-8 place-items-center rounded-full bg-white/90 shadow backdrop-blur">
-                                            <svg className="size-5 fill-red-600" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-                                        </div>
-                                    )}
-                                    {showHeart && (
-                                        <div className="pointer-events-none absolute inset-0 grid place-items-center">
-                                            <svg className="size-28 animate-[igHeart_0.9s_ease-out_forwards] fill-red-600 drop-shadow-[0_4px_20px_rgba(0,0,0,0.6)]" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-                                        </div>
-                                    )}
+                                        {myReaction === "like" && !isInativo && (
+                                            <div className="absolute right-3 top-3 grid size-8 place-items-center rounded-full bg-white/90 shadow backdrop-blur">
+                                                <svg className="size-5 fill-red-600" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" /></svg>
+                                            </div>
+                                        )}
+                                        {showHeart && (
+                                            <div className="pointer-events-none absolute inset-0 grid place-items-center">
+                                                <svg className="size-28 animate-[igHeart_0.9s_ease-out_forwards] fill-red-600 drop-shadow-[0_4px_20px_rgba(0,0,0,0.6)]" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" /></svg>
+                                            </div>
+                                        )}
 
-                                    {temGaleria && !isInativo && (
-                                        <span className="absolute bottom-2 right-2 rounded-full bg-black/60 px-2.5 py-1 text-[11px] font-medium text-white">{activeIndex + 1} / {galeria.length}</span>
-                                    )}
-                                    <style>{`@keyframes igHeart { 0% { transform: scale(0); opacity: 0; } 15% { transform: scale(1.25); opacity: 1; } 30% { transform: scale(0.95); } 45%, 80% { transform: scale(1); opacity: 1; } 100% { transform: scale(1); opacity: 0; } } @keyframes stampIn { 0% { transform: scale(2) rotate(-15deg); opacity: 0; } 100% { transform: scale(1) rotate(-12deg); opacity: 1; } }`}</style>
-                                </div>
-
-                                {temGaleria && (
-                                    <div className="flex gap-2 overflow-x-auto px-1 py-3 [&::-webkit-scrollbar]:hidden">
-                                        {galeria.map((url, idx) => (
-                                            <button
-                                                key={url + idx}
-                                                onClick={() => setActiveIndex(idx)}
-                                                className={`h-16 w-20 shrink-0 overflow-hidden rounded-lg border-2 bg-white transition sm:h-20 sm:w-24 ${idx === activeIndex ? 'border-black opacity-100' : 'border-stone-50 opacity-60 hover:opacity-100'}`}
-                                            >
-                                                <img src={url} alt={`${post.titulo} - foto ${idx + 1}`} className="h-full w-full object-cover" draggable={false} />
-                                            </button>
-                                        ))}
+                                        {temGaleria && !isInativo && (
+                                            <span className="absolute bottom-2 right-2 rounded-full bg-black/60 px-2.5 py-1 text-[11px] font-medium text-white">{activeIndex + 1} / {galeria.length}</span>
+                                        )}
+                                        <style>{`@keyframes igHeart { 0% { transform: scale(0); opacity: 0; } 15% { transform: scale(1.25); opacity: 1; } 30% { transform: scale(0.95); } 45%, 80% { transform: scale(1); opacity: 1; } 100% { transform: scale(1); opacity: 0; } } @keyframes stampIn { 0% { transform: scale(2) rotate(-15deg); opacity: 0; } 100% { transform: scale(1) rotate(-12deg); opacity: 1; } }`}</style>
                                     </div>
-                                )}
+
+                                    {temGaleria && (
+                                        <div className="flex gap-2 overflow-x-auto px-1 py-3 [&::-webkit-scrollbar]:hidden">
+                                            {galeria.map((url, idx) => (
+                                                <button
+                                                    key={url + idx}
+                                                    onClick={() => setActiveIndex(idx)}
+                                                    className={`h-16 w-20 shrink-0 overflow-hidden rounded-lg border-2 bg-white transition sm:h-20 sm:w-24 ${idx === activeIndex ? 'border-black opacity-100' : 'border-stone-50 opacity-60 hover:opacity-100'}`}
+                                                >
+                                                    <img src={url} alt={`${post.titulo} - foto ${idx + 1}`} className="h-full w-full object-cover" draggable={false} />
+                                                </button>
+                                            ))}
+                                        </div>
+                                    )}
                                 </>
                             )}
 
                             <div className="flex items-center gap-5 px-4 py-3">
                                 <button onClick={() => react("like")} className="group">
                                     {myReaction === "like" ? (
-                                        <svg className="size-6.5 fill-red-600" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                                        <svg className="size-6.5 fill-red-600" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" /></svg>
                                     ) : (
-                                        <svg className="size-6.5 fill-none stroke-black transition group-active:scale-90" strokeWidth="1.7" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                                        <svg className="size-6.5 fill-none stroke-black transition group-active:scale-90" strokeWidth="1.7" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" /></svg>
                                     )}
                                 </button>
 
                                 <button onClick={share} className="group">
                                     <svg className="size-6.5 transition group-active:scale-90" fill="none" stroke="currentColor" strokeWidth="1.7" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" />
                                     </svg>
                                 </button>
 
                                 <button onClick={() => setSaved(!saved)} className="ml-auto">
-                                    <svg className={`size-6.5 transition ${saved ? "fill-black" : "fill-none"} stroke-black`} strokeWidth="1.7" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 4a2 2 0 012-2h10a2 2 0 012 2v16l-7-5-7 5V4z"/></svg>
+                                    <svg className={`size-6.5 transition ${saved ? "fill-black" : "fill-none"} stroke-black`} strokeWidth="1.7" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 4a2 2 0 012-2h10a2 2 0 012 2v16l-7-5-7 5V4z" /></svg>
                                 </button>
                             </div>
 
@@ -274,8 +274,14 @@ export default function PostPage() {
                                 {bannerDentro && <div className="mt-6 rounded-xl border bg-slate-50 p-3"><a href={bannerDentro.link_url} target="_blank" rel="noopener noreferrer"><img src={bannerDentro.imagem_url} className="w-full rounded-lg" alt="" /></a></div>}
                             </div>
                         </div>
-
-                        <PostRelacionados categoryId={post.category_id} currentPostId={post.id} posts={related} />
+                        
+                        <PostRelacionados
+                            categoryId={post.category_id}
+                            categorySlug={cat?.slug}
+                            categoryName={cat?.nome}
+                            currentPostId={post.id}
+                            posts={related}
+                        />
 
                         <div className="hidden lg:block">
                             {!isFestaEvento && <ProdutosRelated posts={related} />}
