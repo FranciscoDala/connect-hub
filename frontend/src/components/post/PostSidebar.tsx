@@ -19,11 +19,61 @@ type PostMini = {
 type Category = { id: string; nome: string; slug?: string };
 type Banner = { imagem_url: string; link_url: string; posicao: string };
 
+type FichaItem = {
+    id?: string;
+    campo: string;
+    valor: string;
+};
+
 type Props = {
     postId: string;
     categoryId?: string;
     post?: any;
 };
+
+// ===== FICHA INFORMATIVA - IGUAL AO PRINT =====
+function FichaInformativa({ ficha }: { ficha: FichaItem[] }) {
+    const [expandido, setExpandido] = useState(false);
+
+    if (!ficha || ficha.length === 0) return null;
+
+    const visiveis = expandido ? ficha : ficha.slice(0, 3);
+    const temMais = ficha.length > 3;
+
+    return (
+        <div className="overflow-hidden rounded-none bg-white">
+            {/* Título igual ao print */}
+            <div className="flex items-center justify-between px-1 py-2">
+                <h3 className="text-[15px] font-bold text-black">Ficha informativa:</h3>
+                <span className="h-[2px] w-4 bg-black" />
+            </div>
+
+            {/* Tabela */}
+            <div>
+                {visiveis.map((item, i) => (
+                    <div
+                        key={item.id || `${item.campo}-${i}`}
+                        className={`grid grid-cols-2 gap-2 px-3 py-2.5 text-[14px] ${i % 2 === 0 ? "bg-[#f1f1f1]" : "bg-white"}`}
+                    >
+                        <span className="text-slate-600">{item.campo}</span>
+                        <span className="text-right font-medium text-[#0e5a8a] break-words">{item.valor}</span>
+                    </div>
+                ))}
+            </div>
+
+            {/* Mostrar mais / menos */}
+            {temMais && (
+                <button
+                    onClick={() => setExpandido(!expandido)}
+                    className="flex w-full items-center justify-center gap-2 bg-white py-3 text-[14px] font-medium text-black hover:bg-slate-50"
+                >
+                    {expandido ? "Mostrar menos" : "Mostrar mais"}
+                    <span className="text-[18px] leading-none">{expandido ? "−" : "+"}</span>
+                </button>
+            )}
+        </div>
+    );
+}
 
 export default function PostSidebar({ postId, categoryId, post }: Props) {
     const [tab, setTab] = useState<"recentes" | "lidas">("recentes");
@@ -61,11 +111,19 @@ export default function PostSidebar({ postId, categoryId, post }: Props) {
 
     const list = tab === "recentes" ? recentes : lidas;
 
+    // Só mostra ficha se for produto e tiver ficha
+    const tipo = (post?.tipo || "").toLowerCase();
+    const isProduto = ["produto", "product"].includes(tipo);
+    const ficha: FichaItem[] = post?.ficha_informativa || [];
+
     return (
         <aside className="col-span-12 space-y-4 lg:col-span-4 lg:sticky lg:top-24 lg:self-start">
 
             {/* 0. INFO EVENTO - SÓ APARECE SE FOR EVENTO */}
             {post && <EventoSidebar post={post} />}
+
+            {/* 0.1 FICHA INFORMATIVA - SÓ APARECE SE FOR PRODUTO COM FICHA */}
+            {isProduto && <FichaInformativa ficha={ficha} />}
 
             {/* 1. MAIS RECENTES / LIDAS */}
             <div className="overflow-hidden rounded-none shadow-0">
