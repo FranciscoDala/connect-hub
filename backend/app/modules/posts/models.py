@@ -41,6 +41,8 @@ CAMPOS_FICHA_INFORMATIVA = [
     "Wi-fi",
     "Wireless",
     "Capacidade",
+    "Gramagem",
+    "Nº de Folhas",
     "Tamanho",
     "Quantidade",
     "Dimensões",
