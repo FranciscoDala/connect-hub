@@ -82,7 +82,7 @@ export default function PostPage() {
         if (post.category_id) { fetch(`${API}/api/v1/posts?category_id=${post.category_id}&limit=8`).then((r) => r.json()).then((d: any[]) => setRelated(d.filter((p) => p.id !== post.id).slice(0, 8))).catch(() => { }); }
     }, [post]);
 
-    // NOVO: quando muda de produto, volta para a 1ª foto
+    // NOVO: quando muda de produto, volta para a 1ª foto = capa
     useEffect(() => { setActiveIndex(0); }, [post?.id]);
 
     async function react(type: "like" | "dislike") {
@@ -113,9 +113,13 @@ export default function PostPage() {
     const conteudoDuplicado = isSameText(post.descricao, post.conteudo);
     const mostrarConteudo = post.conteudo && !conteudoDuplicado;
 
-    // NOVO: Galeria - junta galeria + thumbnail, sem duplicados. Produto antigo com 1 foto continua igual
+    // CORRIGIDO: 1ª foto da galeria SEMPRE é a capa
+    // Se tem galeria, usa a ordem da galeria tal como vem do backend. Thumbnail não entra no fim a estragar a ordem.
+    // Só se não houver galeria é que usa thumbnail / media_url como única foto (produto antigo)
     const galeriaRaw: string[] = Array.isArray(post.galeria) ? post.galeria : [];
-    const galeria: string[] = [...new Set([...galeriaRaw, post.thumbnail_url, post.media_url].filter(Boolean))];
+    const galeria: string[] = galeriaRaw.length > 0
+        ? [...new Set(galeriaRaw.filter(Boolean))]
+        : [...new Set([post.thumbnail_url, post.media_url].filter(Boolean))];
     const fotoPrincipal = galeria[activeIndex] || post.thumbnail_url || post.media_url;
     const temGaleria = galeria.length > 1;
 
@@ -155,7 +159,7 @@ export default function PostPage() {
                 <div className="flex flex-col gap-6 lg:grid lg:grid-cols-12 lg:gap-8">
                     <article className="order-1 col-span-12 lg:col-span-8">
                         <div className="overflow-hidden rounded-none border-0">
-                            {(post.thumbnail_url || post.media_url) && (
+                            {(fotoPrincipal) && (
                                 <>
                                 <div className="relative select-none cursor-pointer rounded-none overflow-hidden bg-black-0 flex items-center justify-center" onDoubleClick={handleDoubleClick} onTouchStart={onTouchStartGaleria} onTouchEnd={onTouchEndGaleria}>
                                     <img

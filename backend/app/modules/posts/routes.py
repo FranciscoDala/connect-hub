@@ -198,15 +198,14 @@ def create_post(data: PostCreate, admin=Depends(get_current_admin), db: Session=
     payload["link_url"] = sanitize_url(payload.get("link_url")) if payload.get("link_url") else None
     payload["thumbnail_url"] = sanitize_url(payload.get("thumbnail_url")) if payload.get("thumbnail_url") else None
     payload["media_url"] = sanitize_url(payload.get("media_url")) if payload.get("media_url") else None
-    # NOVO: limpa galeria e usa 1ª foto como thumbnail se não vier thumbnail
-    payload["galeria"] = limpar_galeria(payload.get("galeria"))
-    if payload["galeria"] and not payload.get("thumbnail_url"):
-        payload["thumbnail_url"] = payload["galeria"][0]
-    if payload["galeria"] and not payload.get("media_url"):
-        payload["media_url"] = payload["galeria"][0]
     if payload.get("tipo"): payload["tipo"] = payload["tipo"].lower()
     if payload.get("status"): payload["status"] = payload["status"].lower()
     if payload.get("status_evento"): payload["status_evento"] = payload["status_evento"].lower()
+    # CORRIGIDO: 1ª foto da galeria SEMPRE é a capa - mesmo que venha outro thumbnail
+    payload["galeria"] = limpar_galeria(payload.get("galeria"))
+    if payload["galeria"] and payload.get("tipo") == "produto":
+        payload["thumbnail_url"] = payload["galeria"][0]
+        payload["media_url"] = payload["galeria"][0]
     post = Post(**payload, slug=final_slug, author_id=admin.id)
     db.add(post); db.commit(); db.refresh(post)
     # NOVO: grava a ficha que tu enviaste no cadastro
@@ -235,12 +234,16 @@ def update_post(post_id: uuid.UUID, data: PostUpdate, admin=Depends(get_current_
         payload["thumbnail_url"] = sanitize_url(payload["thumbnail_url"])
     if "media_url" in payload and payload.get("media_url"):
         payload["media_url"] = sanitize_url(payload["media_url"])
-    # NOVO: limpa galeria no editar
-    if "galeria" in payload:
-        payload["galeria"] = limpar_galeria(payload.get("galeria"))
     if "tipo" in payload and payload["tipo"]: payload["tipo"] = payload["tipo"].lower()
     if "status" in payload and payload["status"]: payload["status"] = payload["status"].lower()
     if "status_evento" in payload and payload["status_evento"]: payload["status_evento"] = payload["status_evento"].lower()
+    # CORRIGIDO: limpa galeria e 1ª foto SEMPRE vira a capa no editar também
+    if "galeria" in payload:
+        payload["galeria"] = limpar_galeria(payload.get("galeria"))
+        tipo_final = payload.get("tipo") or (post.tipo or "").lower()
+        if payload["galeria"] and tipo_final == "produto":
+            payload["thumbnail_url"] = payload["galeria"][0]
+            payload["media_url"] = payload["galeria"][0]
     for k, v in payload.items():
         if v is None:
             continue

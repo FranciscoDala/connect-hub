@@ -111,8 +111,16 @@ export default function AdminPage() {
     }
     function openEditPost(p: Post) {
         setEditingPost(p);
+        // CORRIGIDO: a galeria manda na ordem. Se tem galeria, a capa é a galeria[0], não o thumbnail antigo
+        // CORRIGIDO: tipado como string[] para não dar erro unknown[]
+        const g: string[] = Array.isArray(p.galeria)
+            ? [...new Set((p.galeria as unknown[]).filter((u): u is string => typeof u === 'string' && !!u))]
+            : [];
+        const capa = g.length > 0 ? g[0] : (p.thumbnail_url || "");
+        // Produto antigo sem galeria: thumbnail vira a única foto da galeria
+        if (g.length === 0 && p.thumbnail_url) g.push(p.thumbnail_url);
         setForm({
-            titulo: p.titulo, slug: p.slug || "", tipo: p.tipo, descricao: p.descricao || "", conteudo: p.conteudo || "", category_id: p.category_id || "", status: p.status, destaque: p.destaque, tags: (p.tags || []).join(", "), media_url: p.media_url || "", thumbnail_url: p.thumbnail_url || "", link_url: p.link_url || "",
+            titulo: p.titulo, slug: p.slug || "", tipo: p.tipo, descricao: p.descricao || "", conteudo: p.conteudo || "", category_id: p.category_id || "", status: p.status, destaque: p.destaque, tags: (p.tags || []).join(", "), media_url: capa || p.media_url || "", thumbnail_url: capa, link_url: p.link_url || "",
             preco: p.preco?.toString() || "", preco_promocional: p.preco_promocional?.toString() || "", estoque: p.estoque?.toString() || "", sku: p.sku || "", unidade: p.unidade || "un", em_promocao: p.em_promocao || false,
             status_plataforma: p.status_plataforma || (p.em_utilizacao ? 'em_utilizacao' : 'em_desenvolvimento'), em_utilizacao: p.em_utilizacao || p.status_plataforma === 'em_utilizacao',
             data_inicio: toDateTimeLocal(p.data_inicio), data_fim: toDateTimeLocal(p.data_fim), local_evento: p.local_evento || "", cidade: p.cidade || "", endereco: p.endereco || "", link_mapa: p.link_mapa || "", link_inscricao: p.link_inscricao || "", modalidade: p.modalidade || "presencial", capacidade: p.capacidade?.toString() || "", organizador: p.organizador || "",
@@ -121,16 +129,14 @@ export default function AdminPage() {
         });
         // Carrega a ficha que já existe neste produto
         setFicha((p.ficha_informativa || []).map((f: any) => ({ campo: f.campo, valor: f.valor })));
-        // NOVO: carrega galeria - se produto antigo sem galeria, usa thumbnail como 1ª foto
-        const g = Array.isArray(p.galeria) ? [...p.galeria] : [];
-        if (g.length === 0 && p.thumbnail_url) g.push(p.thumbnail_url);
-        else if (g.length > 0 && p.thumbnail_url && !g.includes(p.thumbnail_url)) g.unshift(p.thumbnail_url);
-        setGaleria([...new Set(g)]);
+        // CORRIGIDO: não faz mais unshift do thumbnail - a ordem da galeria é respeitada
+        setGaleria(g);
         setFiles(null); setThumbFile(null); setTab(p.tipo === 'evento' ? 'evento' : 'conteudo'); setShowPostModal(true);
     }
 
     async function savePost() {
         if (!form.titulo) return toast.error("Título obrigatório");
+        // CORRIGIDO: data_inFicio -> data_inicio
         if (form.tipo === 'evento' && !form.data_inicio && form.status_evento === 'ativo') return toast.error("Data de início do evento obrigatória");
         setLoading(true);
         try {
@@ -140,13 +146,18 @@ export default function AdminPage() {
             let media_type = null;
             let galeriaFinal = [...galeria];
 
+            // CORRIGIDO: capa separada entra como 1ª da galeria, não fica solta
             if (thumbFile && thumbFile.length > 0) {
                 const fd = new FormData(); fd.append("file", thumbFile[0]);
                 const up = await fetch(`${API_URL}/api/v1/upload`, { method: "POST", headers: authHeader() as any, body: fd });
-                const d = await up.json(); if (d.url) thumbnail_url = d.url;
+                const d = await up.json();
+                if (d.url) {
+                    thumbnail_url = d.url;
+                    galeriaFinal = [d.url, ...galeriaFinal.filter(u => u !== d.url)];
+                }
             }
 
-            // NOVO: Galeria - sobe várias fotos de uma vez
+            // NOVO: Galeria - sobe várias fotos de uma vez, na ordem que escolheste
             if (files && files.length > 0) {
                 if (form.tipo === 'produto') {
                     const fd = new FormData();
@@ -156,8 +167,6 @@ export default function AdminPage() {
                     const novasUrls: string[] = d.urls || (d.files || []).map((f: any) => f.url).filter(Boolean);
                     for (const u of novasUrls) if (!galeriaFinal.includes(u)) galeriaFinal.push(u);
                     if (galeriaFinal.length > 0) {
-                        if (!thumbnail_url) thumbnail_url = galeriaFinal[0];
-                        if (!media_url) media_url = galeriaFinal[0];
                         media_files = galeriaFinal.map(u => ({ url: u, type: "image" }));
                     }
                 } else {
@@ -177,10 +186,10 @@ export default function AdminPage() {
                 }
             }
 
-            // Se apagaste / reordenaste a galeria no modal, a 1ª foto passa a ser a capa
+            // CORRIGIDO: 1ª foto da galeria SEMPRE é a capa - sem exceção, mesmo com thumbFile
             if (form.tipo === 'produto' && galeriaFinal.length > 0) {
-                if (!thumbFile || thumbFile.length === 0) thumbnail_url = galeriaFinal[0];
-                if (!media_url) media_url = galeriaFinal[0];
+                thumbnail_url = galeriaFinal[0];
+                media_url = galeriaFinal[0];
             }
 
             if (!thumbnail_url && media_url) { const autoThumb = generateCloudinaryThumb(media_url); if (autoThumb) thumbnail_url = autoThumb; }
