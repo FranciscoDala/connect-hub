@@ -59,8 +59,9 @@ CAMPOS_FICHA_INFORMATIVA = [
     "Peso",
     "Tecnologia de impressão",
     "Tinteiro",
-    "Velocidade impressão cor",
-    "Velocidade impressão preto",
+    "Velocidade de impressão",
+    "Velocidade de impressão cor",
+    "Velocidade de impressão preto",
 ]
 
 class Post(Base):
