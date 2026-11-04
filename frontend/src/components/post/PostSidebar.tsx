@@ -50,12 +50,12 @@ function FichaInformativa({ ficha }: { ficha: FichaItem[] }) {
                 </div>
             </div>
 
-            {/* Tabela */}
+            {/* Tabela - SEM padding-x */}
             <div>
                 {visiveis.map((item, i) => (
                     <div
                         key={item.id || `${item.campo}-${i}`}
-                        className={`grid grid-cols-2 gap-2 px-3 py-2.5 text-[14px] ${i % 2 === 0 ? "bg-[#f8f8f8]" : "bg-transparent"}`}
+                        className={`grid grid-cols-2 gap-2 py-2.5 text-[14px] ${i % 2 === 0 ? "bg-[#f8f8f8]" : "bg-transparent"}`}
                     >
                         <span className="text-slate-600">{item.campo}</span>
                         <span className="text-right font-medium text-[#0e5a8a] break-words">{item.valor}</span>
