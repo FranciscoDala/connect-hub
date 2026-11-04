@@ -260,7 +260,19 @@ export default function PostModal({ show, editingPost, form, setForm, tab, setTa
                             </div>
                             <div className="grid gap-3 md:grid-cols-3">
                                 <div><label className="text-xs font-semibold">Estoque</label><input value={form.estoque} onChange={e => setForm({ ...form, estoque: e.target.value })} type="number" placeholder="10" className={inputClass} /></div>
-                                <div><label className="text-xs font-semibold">SKU</label><input value={form.sku} onChange={e => setForm({ ...form, sku: e.target.value })} placeholder="EXO-001" className={inputClass} /></div>
+                                <div>
+                                    <label className="text-xs font-semibold">SKU / Referência 🔒</label>
+                                    {/* SKU AUTOMÁTICO E SÓ LEITURA: sem onChange, readOnly + disabled. Cadastro mostra "Será gerado automaticamente", edição mostra o SKU real. */}
+                                    <input
+                                        value={form.sku || ""}
+                                        readOnly
+                                        disabled
+                                        placeholder={editingPost ? "Será gerado ao guardar" : "Será gerado automaticamente"}
+                                        title="SKU gerado automaticamente pelo sistema. Não editável."
+                                        className="w-full h-11 bg-zinc-100 border border-gray-200 rounded-xl px-3 text-[16px] text-zinc-500 cursor-not-allowed placeholder:text-zinc-400 focus:outline-none"
+                                    />
+                                    <p className="mt-1 text-[11px] text-zinc-500">{form.sku ? `Ref: ${form.sku} - travada, não pode ser editada.` : "Gerada automaticamente ao guardar. Ex: CON-001"}</p>
+                                </div>
                                 <div><label className="text-xs font-semibold">Unidade</label><CustomSelect value={form.unidade} onChange={v => setForm({ ...form, unidade: v })} placeholder="Unidade" options={[{value:'un',label:'Unidade'},{value:'cx',label:'Caixa'},{value:'kit',label:'Kit'},{value:'mês',label:'Mês'}]} /></div>
                             </div>
                             <label className="flex items-center gap-2 rounded-xl border p-3 cursor-pointer hover:bg-zinc-50"><input type="checkbox" checked={form.em_promocao} onChange={e => setForm({ ...form, em_promocao: e.target.checked })} /><span className="text-[16px] font-medium">Em promoção?</span></label>

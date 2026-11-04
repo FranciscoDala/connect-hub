@@ -84,6 +84,7 @@ class PostCreate(BaseModel):
     preco: Optional[float] = None
     preco_promocional: Optional[float] = None
     estoque: Optional[int] = 0
+    # SKU / REFERÊNCIA - SÓ LEITURA: o frontend manda mas o backend ignora e gera CON-XXX sozinho. Não editável.
     sku: Optional[str] = None
     unidade: Optional[str] = "un"
     em_promocao: bool = False
@@ -124,6 +125,7 @@ class PostUpdate(BaseModel):
     preco: Optional[float] = None
     preco_promocional: Optional[float] = None
     estoque: Optional[int] = None
+    # SKU / REFERÊNCIA - SÓ LEITURA: na edição o backend ignora sempre, mantém o antigo. Não editável.
     sku: Optional[str] = None
     unidade: Optional[str] = None
     em_promocao: Optional[bool] = None

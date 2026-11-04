@@ -220,7 +220,8 @@ export default function AdminPage() {
                 payload.preco = form.preco ? parseFloat(form.preco) : null;
                 payload.preco_promocional = form.preco_promocional ? parseFloat(form.preco_promocional) : null;
                 payload.estoque = form.estoque ? parseInt(form.estoque) : 0;
-                payload.sku = form.sku || null;
+                // SKU AUTOMÁTICO E SÓ LEITURA: não envia SKU. O backend gera CON-XXX sozinho no cadastro,
+                // mantém o antigo na edição, e gera um para produto antigo sem SKU. Nunca editável.
                 payload.unidade = form.unidade || "un";
                 payload.em_promocao = form.em_promocao;
                 // NOVO: envia a ficha - só campo + valor que tu digitaste
@@ -344,7 +345,7 @@ export default function AdminPage() {
                                     <div className="hidden col-span-2 md:block"><span className="rounded-full border border-violet-100 bg-violet-50 px-2.5 py-1 text-xs font-medium text-violet-700">{catName}</span></div>
                                     <div className="hidden col-span-1 md:flex"><span className={`rounded-full border px-2.5 py-1 text-xs font-medium ${p.status === 'published' ? 'bg-green-50 text-green-700 border-green-200' : 'bg-zinc-100'}`}>{p.status}</span></div>
                                     <div className="hidden col-span-2 md:flex"><span className="rounded-full border bg-zinc-50 px-2 py-1 text-xs">{views} views {p.tipo==='evento' && p.inscritos_count ? `• ${p.inscritos_count} inscritos` : ''}</span></div>
-                                    <div className="col-span-12 mt-3 flex justify-end gap-1.5 border-t pt-3 md:col-span-2 md:mt-0 md:border-0 md:pt-0"><button onClick={() => openEditPost(p)} className="grid h-9 w-9 place-items-center rounded-full border bg-white hover:bg-zinc-900 hover:text-white">✎</button><button onClick={() => deletePost(p.id)} className="grid h-9 w-9 place-items-center rounded-full border bg-white text-zinc-500 hover:bg-red-500 hover:text-white">🗑</button></div>
+                                    <div className="col-span-12 mt-3 flex justify-end gap-1.5 border-t pt-3 md:col-span-2 md:mt-0 md:border-0 md:pt-0"><button onClick={() => openEditPost(p)} className="grid h-9 w-9 place-items-center rounded-full border bg-white hover:bg-zinc-900 hover:text-white">✎</button><button onClick={() => deletePost(p.id)} className="grid h-9 w-9 place-items-center rounded-full border bg-white text-zinc-500 hover:bg-red-500 hover:text-red-500">🗑</button></div>
                                 </div>
                             )
                         })}

@@ -74,6 +74,7 @@ class Post(Base):
     preco: Mapped[float | None] = mapped_column(Numeric(12,2), nullable=True)
     preco_promocional: Mapped[float | None] = mapped_column(Numeric(12,2), nullable=True)
     estoque: Mapped[int] = mapped_column(Integer, default=0)
+    # SKU / REFERÊNCIA - AUTOMÁTICO E SÓ LEITURA: gerado pelo backend, nunca editável no cadastro nem na edição
     sku: Mapped[str | None] = mapped_column(String(50), nullable=True, index=True)
     unidade: Mapped[str] = mapped_column(String(10), default="un")
     em_promocao: Mapped[bool] = mapped_column(Boolean, default=False)

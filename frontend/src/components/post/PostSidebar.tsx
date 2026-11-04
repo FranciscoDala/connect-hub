@@ -34,11 +34,19 @@ type Props = {
 // ===== FICHA INFORMATIVA =====
 function FichaInformativa({ ficha }: { ficha: FichaItem[] }) {
     const [expandido, setExpandido] = useState(false);
+    const [copiado, setCopiado] = useState(false);
 
     if (!ficha || ficha.length === 0) return null;
 
     const visiveis = expandido ? ficha : ficha.slice(0, 3);
     const temMais = ficha.length > 3;
+
+    function copiarRef(valor: string) {
+        navigator.clipboard?.writeText(valor).then(() => {
+            setCopiado(true);
+            setTimeout(() => setCopiado(false), 1500);
+        }).catch(() => {});
+    }
 
     return (
         <div className="overflow-hidden rounded-none bg-transparent">
@@ -52,15 +60,29 @@ function FichaInformativa({ ficha }: { ficha: FichaItem[] }) {
 
             {/* Tabela - SEM padding-x */}
             <div>
-                {visiveis.map((item, i) => (
-                    <div
-                        key={item.id || `${item.campo}-${i}`}
-                        className={`grid grid-cols-2 gap-2 py-2.5 text-[14px] ${i % 2 === 0 ? "bg-[#f8f8f8]" : "bg-transparent"}`}
-                    >
-                        <span className="text-slate-600">{item.campo}</span>
-                        <span className="text-right font-medium text-[#0e5a8a] break-words">{item.valor}</span>
-                    </div>
-                ))}
+                {visiveis.map((item, i) => {
+                    const isRef = item.campo.toLowerCase() === "referência" || item.campo.toLowerCase() === "referencia";
+                    return (
+                        <div
+                            key={item.id || `${item.campo}-${i}`}
+                            className={`grid grid-cols-2 gap-2 py-2.5 text-[14px] ${i % 2 === 0 ? "bg-[#f8f8f8]" : "bg-transparent"}`}
+                        >
+                            <span className="text-slate-600">{item.campo}</span>
+                            {isRef ? (
+                                <button
+                                    type="button"
+                                    onClick={() => copiarRef(item.valor)}
+                                    title="Copiar referência"
+                                    className="text-right font-bold text-[#0e5a8a] break-words hover:underline"
+                                >
+                                    {item.valor} <span className="text-[11px] font-medium text-slate-400">{copiado ? "✓ Copiado" : "⧉ Copiar"}</span>
+                                </button>
+                            ) : (
+                                <span className="text-right font-medium text-[#0e5a8a] break-words">{item.valor}</span>
+                            )}
+                        </div>
+                    );
+                })}
             </div>
 
             {/* Mostrar mais / menos */}
@@ -116,7 +138,16 @@ export default function PostSidebar({ postId, categoryId, post }: Props) {
     // Só mostra ficha se for produto e tiver ficha
     const tipo = (post?.tipo || "").toLowerCase();
     const isProduto = ["produto", "product"].includes(tipo);
-    const ficha: FichaItem[] = post?.ficha_informativa || [];
+    const fichaOriginal: FichaItem[] = post?.ficha_informativa || [];
+    const sku = (post?.sku || "").toString().trim();
+
+    // REFERÊNCIA NA FICHA: 1ª linha da Ficha Informativa, sempre visível.
+    // Se já existir uma linha "Referência" na ficha, não duplica. Se não existir e tiver SKU, adiciona no topo.
+    // Se o produto não tiver SKU, não mostra linha vazia.
+    const jaTemRef = fichaOriginal.some((f) => f.campo.toLowerCase() === "referência" || f.campo.toLowerCase() === "referencia");
+    const ficha: FichaItem[] = isProduto && sku && !jaTemRef
+        ? [{ campo: "Referência", valor: sku }, ...fichaOriginal]
+        : fichaOriginal;
 
     return (
         <aside className="order-2 col-span-12 space-y-4 lg:col-span-4 lg:sticky lg:top-24 lg:self-start">
@@ -124,8 +155,8 @@ export default function PostSidebar({ postId, categoryId, post }: Props) {
             {/* 0. INFO EVENTO - SÓ APARECE SE FOR EVENTO */}
             {post && <EventoSidebar post={post} />}
 
-            {/* 0.1 FICHA INFORMATIVA - SÓ APARECE SE FOR PRODUTO COM FICHA */}
-            {isProduto && <FichaInformativa ficha={ficha} />}
+            {/* 0.1 FICHA INFORMATIVA - SÓ APARECE SE FOR PRODUTO COM FICHA OU COM REFERÊNCIA */}
+            {isProduto && ficha.length > 0 && <FichaInformativa ficha={ficha} />}
 
             {/* 1. MAIS RECENTES / LIDAS */}
             <div className="overflow-hidden rounded-none shadow-0">

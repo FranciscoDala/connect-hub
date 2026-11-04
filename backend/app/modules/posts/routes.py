@@ -48,6 +48,37 @@ def limpar_galeria(galeria) -> List[str]:
             limpa.append(u)
     return limpa[:10]
 
+# ===== NOVO: SKU AUTOMÁTICO E SÓ LEITURA - CON-001, CON-002... =====
+# O frontend mostra o campo mas travado (readOnly). O backend é que gera.
+# Na criação: ignora qualquer SKU que venha do frontend e gera um novo.
+# Na edição: ignora sempre o SKU que vier, mantém o antigo. Só gera se o produto antigo estiver sem SKU.
+SKU_PREFIXO = "CON-"
+
+def gerar_proximo_sku(db: Session) -> str:
+    # Procura o maior número já usado em CON-XXX, mesmo que o produto tenha sido apagado o número não volta a ser usado
+    # porque procuramos o MAX de todos os que existem. Se apagares o último, o próximo continua a seguir.
+    skus = db.query(Post.sku).filter(Post.sku.isnot(None), Post.sku.like(f"{SKU_PREFIXO}%")).all()
+    maior = 0
+    for (sku_val,) in skus:
+        if not sku_val:
+            continue
+        m = re.search(r"(\d+)\s*$", str(sku_val).strip())
+        if m:
+            try:
+                n = int(m.group(1))
+                if n > maior:
+                    maior = n
+            except:
+                pass
+    # Garante que não gera um SKU que já existe (segurança extra)
+    proximo = maior + 1
+    while True:
+        candidato = f"{SKU_PREFIXO}{proximo:03d}"
+        existe = db.query(Post).filter(Post.sku == candidato).first()
+        if not existe:
+            return candidato
+        proximo += 1
+
 # ========= CATEGORIES - CORRIGIDO E SEGURO =========
 @router.get("/categories", response_model=List[CategoryResponse])
 def list_categories(db: Session = Depends(get_db)):
@@ -192,6 +223,8 @@ def create_post(data: PostCreate, admin=Depends(get_current_admin), db: Session=
     if db.query(Post).filter(Post.slug == final_slug).first():
         final_slug = f"{final_slug}-{uuid.uuid4().hex[:4]}"
     payload = data.model_dump(exclude={"slug", "ficha_informativa"})
+    # SKU AUTOMÁTICO: ignora o que vier do frontend, o backend gera. O input no admin é só leitura.
+    payload.pop("sku", None)
     payload["titulo"] = titulo
     payload["descricao"] = sanitize_text(payload.get("descricao"), max_length=2000) if payload.get("descricao") else ""
     payload["conteudo"] = sanitize_html(payload.get("conteudo")) if payload.get("conteudo") else ""
@@ -206,6 +239,11 @@ def create_post(data: PostCreate, admin=Depends(get_current_admin), db: Session=
     if payload["galeria"] and payload.get("tipo") == "produto":
         payload["thumbnail_url"] = payload["galeria"][0]
         payload["media_url"] = payload["galeria"][0]
+    # SKU AUTOMÁTICO: só gera para produto. Notícia / evento / etc. ficam sem SKU.
+    if payload.get("tipo") == "produto":
+        payload["sku"] = gerar_proximo_sku(db)
+    else:
+        payload["sku"] = None
     post = Post(**payload, slug=final_slug, author_id=admin.id)
     db.add(post); db.commit(); db.refresh(post)
     # NOVO: grava a ficha que tu enviaste no cadastro
@@ -220,6 +258,8 @@ def update_post(post_id: uuid.UUID, data: PostUpdate, admin=Depends(get_current_
     post = db.query(Post).filter(Post.id == post_id).first()
     if not post: raise HTTPException(404, "Post não encontrado")
     payload = data.model_dump(exclude_unset=True, exclude={"ficha_informativa"})
+    # SKU SÓ LEITURA: ignora sempre o SKU que vier do frontend na edição. Nunca deixa editar.
+    payload.pop("sku", None)
     if "titulo" in payload and payload["titulo"] is not None:
         payload["titulo"] = sanitize_text(payload["titulo"], max_length=300)
         if not payload.get("slug"):
@@ -248,6 +288,10 @@ def update_post(post_id: uuid.UUID, data: PostUpdate, admin=Depends(get_current_
         if v is None:
             continue
         setattr(post, k, v)
+    # SKU AUTOMÁTICO PARA ANTIGOS: se é produto e ainda está sem SKU (criado antes), gera agora na primeira edição.
+    # Se já tem SKU, mantém o antigo, nunca muda.
+    if (post.tipo or "").lower() == "produto" and not post.sku:
+        post.sku = gerar_proximo_sku(db)
     db.commit()
     # NOVO: se enviares ficha, substitui a antiga
     if data.ficha_informativa is not None:
