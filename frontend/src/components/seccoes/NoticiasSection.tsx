@@ -126,7 +126,7 @@ export default function NoticiasSection({ posts, hideHeader = false }: { posts: 
                 {/* VER MAIS - só no desktop, em baixo no lado direito */}
                 {noticias.length > 4 && (
                     <div className="mt-6 hidden justify-end lg:flex">
-                        <Link href="/noticias" className="inline-flex items-center gap-2 rounded-full border border-zinc-900 px-5 py-2.5 text-xs font-semibold text-zinc-900 transition hover:bg-zinc-900 hover:text-white">
+                        <Link href="/tecnologia" className="inline-flex items-center gap-2 rounded-full border border-zinc-900 px-5 py-2.5 text-xs font-semibold text-zinc-900 transition hover:bg-zinc-900 hover:text-white">
                             Ver mais
                             <span aria-hidden>→</span>
                         </Link>
