@@ -16,7 +16,7 @@ from app.modules.posts.schemas import (
     ReactionCreate,
     FichaCreate, FichaUpdate, FichaResponse
 )
-from app.core.upload_Imagem import upload_media
+from app.core.upload_Imagem import upload_media, upload_multiple_media
 
 router = APIRouter(prefix="/api/v1", tags=["posts"])
 
@@ -34,6 +34,19 @@ def slugify(text: str) -> str:
 def to_post_response(post: Post, db: Session):
     count = db.query(Comment).filter(Comment.post_id == post.id).count()
     return PostResponse.from_orm_with_counts(post, comments_count=count)
+
+# NOVO: limpa galeria - tira vazios, duplicados, limita a 10 fotos
+def limpar_galeria(galeria) -> List[str]:
+    if not galeria:
+        return []
+    limpa: List[str] = []
+    for url in galeria:
+        if not url:
+            continue
+        u = sanitize_url(str(url).strip())
+        if u and u not in limpa:
+            limpa.append(u)
+    return limpa[:10]
 
 # ========= CATEGORIES - CORRIGIDO E SEGURO =========
 @router.get("/categories", response_model=List[CategoryResponse])
@@ -128,6 +141,12 @@ def delete_category(cat_id: uuid.UUID, admin=Depends(get_current_admin), db: Ses
 async def upload_post_media(file: UploadFile = File(...), admin=Depends(get_current_admin)):
     return await upload_media(file, folder="connect-hub/posts")
 
+# NOVO: UPLOAD MÚLTIPLO - para galeria do produto
+@router.post("/upload-multiple")
+async def upload_post_media_multiple(files: List[UploadFile] = File(...), admin=Depends(get_current_admin)):
+    resultados = await upload_multiple_media(files, folder="connect-hub/posts")
+    return {"files": resultados, "urls": [r["url"] for r in resultados if r.get("url")]}
+
 # POSTS LIST
 @router.get("/posts", response_model=List[PostResponse])
 def list_posts(db: Session=Depends(get_db), tipo: Optional[str]=None, category_id: Optional[uuid.UUID]=None, category_slug: Optional[str]=None, status: Optional[str]=Query(None), q: Optional[str]=None, destaque: Optional[bool]=None, limit: int=Query(50, le=100), offset: int=0, upcoming: Optional[bool]=None):
@@ -179,6 +198,12 @@ def create_post(data: PostCreate, admin=Depends(get_current_admin), db: Session=
     payload["link_url"] = sanitize_url(payload.get("link_url")) if payload.get("link_url") else None
     payload["thumbnail_url"] = sanitize_url(payload.get("thumbnail_url")) if payload.get("thumbnail_url") else None
     payload["media_url"] = sanitize_url(payload.get("media_url")) if payload.get("media_url") else None
+    # NOVO: limpa galeria e usa 1ª foto como thumbnail se não vier thumbnail
+    payload["galeria"] = limpar_galeria(payload.get("galeria"))
+    if payload["galeria"] and not payload.get("thumbnail_url"):
+        payload["thumbnail_url"] = payload["galeria"][0]
+    if payload["galeria"] and not payload.get("media_url"):
+        payload["media_url"] = payload["galeria"][0]
     if payload.get("tipo"): payload["tipo"] = payload["tipo"].lower()
     if payload.get("status"): payload["status"] = payload["status"].lower()
     if payload.get("status_evento"): payload["status_evento"] = payload["status_evento"].lower()
@@ -210,6 +235,9 @@ def update_post(post_id: uuid.UUID, data: PostUpdate, admin=Depends(get_current_
         payload["thumbnail_url"] = sanitize_url(payload["thumbnail_url"])
     if "media_url" in payload and payload.get("media_url"):
         payload["media_url"] = sanitize_url(payload["media_url"])
+    # NOVO: limpa galeria no editar
+    if "galeria" in payload:
+        payload["galeria"] = limpar_galeria(payload.get("galeria"))
     if "tipo" in payload and payload["tipo"]: payload["tipo"] = payload["tipo"].lower()
     if "status" in payload and payload["status"]: payload["status"] = payload["status"].lower()
     if "status_evento" in payload and payload["status_evento"]: payload["status_evento"] = payload["status_evento"].lower()

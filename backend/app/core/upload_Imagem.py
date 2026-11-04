@@ -6,6 +6,7 @@ from cloudinary import CloudinaryImage
 from fastapi import HTTPException, UploadFile
 from app.core.config import settings
 import imghdr
+from typing import List
 
 cloudinary.config(
     cloud_name=settings.CLOUDINARY_CLOUD_NAME,
@@ -79,6 +80,27 @@ async def upload_media(file: UploadFile, folder: str = "connect-hub/posts") -> d
         }
     except Exception as e:
         raise HTTPException(502, f"Falha upload Cloudinary: {e}")
+
+# ===== NOVO: UPLOAD MÚLTIPLO PARA GALERIA DO PRODUTO =====
+async def upload_multiple_media(files: List[UploadFile], folder: str = "connect-hub/posts") -> List[dict]:
+    """Sobe várias fotos de uma vez e devolve lista de {url, public_id, type...}"""
+    if not files:
+        return []
+
+    resultados: List[dict] = []
+    for file in files:
+        # ignora input vazio do form (quando o user não escolheu foto)
+        if not file or not file.filename:
+            continue
+        resultado = await upload_media(file, folder=folder)
+        resultados.append(resultado)
+
+    return resultados
+
+async def upload_multiple_images(files: List[UploadFile], folder: str = "connect-hub/posts") -> List[str]:
+    """Sobe várias fotos e devolve só a lista de urls - é o que vai para o campo galeria"""
+    resultados = await upload_multiple_media(files, folder=folder)
+    return [r["url"] for r in resultados if r.get("url")]
 
 # mantém compatibilidade com teu código antigo
 async def upload_image(file: UploadFile, folder: str = "produtos") -> str:

@@ -105,12 +105,15 @@ type Props = {
     setFiles: (f: FileList | null) => void;
     thumbFile: FileList | null;
     setThumbFile: (f: FileList | null) => void;
+    // NOVO: Galeria
+    galeria: string[];
+    setGaleria: (g: string[]) => void;
     loading: boolean;
     onClose: () => void;
     onSave: () => void;
 };
 
-export default function PostModal({ show, editingPost, form, setForm, tab, setTab, cats, ficha, setFicha, camposFicha, files, setFiles, thumbFile, setThumbFile, loading, onClose, onSave }: Props) {
+export default function PostModal({ show, editingPost, form, setForm, tab, setTab, cats, ficha, setFicha, camposFicha, files, setFiles, thumbFile, setThumbFile, galeria, setGaleria, loading, onClose, onSave }: Props) {
     const [novoCampo, setNovoCampo] = useState("");
     const [novoValor, setNovoValor] = useState("");
 
@@ -141,6 +144,21 @@ export default function PostModal({ show, editingPost, form, setForm, tab, setTa
     }
     function updateFichaValor(campo: string, valor: string) {
         setFicha(ficha.map(f => f.campo === campo ? { ...f, valor } : f));
+    }
+
+    // ===== NOVO: GALERIA =====
+    function removeFotoGaleria(url: string) {
+        setGaleria(galeria.filter(u => u !== url));
+    }
+    function tornarCapa(url: string) {
+        setGaleria([url, ...galeria.filter(u => u !== url)]);
+    }
+    function moverFoto(index: number, direcao: -1 | 1) {
+        const nova = [...galeria];
+        const novoIndex = index + direcao;
+        if (novoIndex < 0 || novoIndex >= nova.length) return;
+        [nova[index], nova[novoIndex]] = [nova[novoIndex], nova[index]];
+        setGaleria(nova);
     }
 
     return (
@@ -190,7 +208,41 @@ export default function PostModal({ show, editingPost, form, setForm, tab, setTa
                             <div><label className="text-xs font-semibold">Organizador</label><input value={form.organizador} onChange={e => setForm({ ...form, organizador: e.target.value })} placeholder="CONNECT Angola" className={inputClass} /></div>
                         </div>
                     )}
-                    {tab === 'midia' && <div className="flex flex-col gap-3"><input value={form.media_url} onChange={e => setForm({ ...form, media_url: e.target.value })} placeholder="Media URL" className={inputClass} /><div><p className="mb-1 text-xs font-semibold">Thumbnail (capa) - Recomendado 1280x720</p><input type="file" accept="image/*" onChange={e => setThumbFile(e.target.files)} className="text-[16px]" /></div><div><p className="mb-1 text-xs font-semibold">Galeria</p><input type="file" multiple onChange={e => setFiles(e.target.files)} className="text-[16px]" /></div>{previewFinalThumb && <img src={previewFinalThumb} className="h-40 w-full rounded-xl border object-cover" alt="" />}</div>}
+                    {tab === 'midia' && (
+                        <div className="flex flex-col gap-3">
+                            <input value={form.media_url} onChange={e => setForm({ ...form, media_url: e.target.value })} placeholder="Media URL" className={inputClass} />
+                            <div><p className="mb-1 text-xs font-semibold">Thumbnail (capa) - Recomendado 1280x720</p><input type="file" accept="image/*" onChange={e => setThumbFile(e.target.files)} className="text-[16px]" /></div>
+
+                            {/* NOVO: GALERIA DO PRODUTO */}
+                            <div className="rounded-2xl border border-amber-200 bg-amber-50/50 p-3 space-y-3">
+                                <div>
+                                    <p className="text-xs font-bold">Galeria do Produto - várias fotos</p>
+                                    <p className="text-[11px] text-zinc-500">A 1ª foto é a capa. Podes escolher várias fotos de uma vez. Máx 10.</p>
+                                </div>
+                                <input type="file" multiple accept="image/*" onChange={e => setFiles(e.target.files)} className="text-[16px]" />
+                                {files && files.length > 0 && <p className="text-[11px] font-medium text-amber-700">{files.length} foto(s) nova(s) vão ser adicionadas ao guardar.</p>}
+                                {galeria.length > 0 && (
+                                    <div className="grid grid-cols-3 gap-2">
+                                        {galeria.map((url, idx) => (
+                                            <div key={url + idx} className={`relative overflow-hidden rounded-xl border bg-white ${idx === 0 ? 'ring-2 ring-amber-500' : ''}`}>
+                                                <img src={url} className="h-24 w-full object-cover" alt="" />
+                                                {idx === 0 && <span className="absolute left-1 top-1 rounded-full bg-amber-500 px-2 py-0.5 text-[10px] font-bold text-white">CAPA</span>}
+                                                <button type="button" onClick={() => removeFotoGaleria(url)} className="absolute right-1 top-1 grid h-6 w-6 place-items-center rounded-full bg-white shadow text-xs hover:bg-red-500 hover:text-white">×</button>
+                                                <div className="flex gap-1 p-1">
+                                                    <button type="button" onClick={() => moverFoto(idx, -1)} disabled={idx === 0} className="flex-1 rounded-md border bg-white py-1 text-[11px] disabled:opacity-30">◀</button>
+                                                    <button type="button" onClick={() => tornarCapa(url)} disabled={idx === 0} className="flex-1 rounded-md border bg-white py-1 text-[11px] disabled:opacity-30">★ Capa</button>
+                                                    <button type="button" onClick={() => moverFoto(idx, 1)} disabled={idx === galeria.length - 1} className="flex-1 rounded-md border bg-white py-1 text-[11px] disabled:opacity-30">▶</button>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                                {galeria.length === 0 && <p className="text-xs text-zinc-400 text-center py-2">Sem fotos na galeria ainda. Escolhe em cima.</p>}
+                            </div>
+
+                            {previewFinalThumb && <img src={previewFinalThumb} className="h-40 w-full rounded-xl border object-cover" alt="" />}
+                        </div>
+                    )}
                     {tab === 'plataforma' && isPlataforma && (
                         <div className="flex flex-col gap-3">
                             <div className="rounded-2xl bg-blue-50 border border-blue-200 p-3 text-xs text-blue-800">🔗 Configuração de Plataforma</div>

@@ -59,6 +59,8 @@ export default function AdminPage() {
     const [camposFicha, setCamposFicha] = useState<string[]>([]);
     const [files, setFiles] = useState<FileList | null>(null);
     const [thumbFile, setThumbFile] = useState<FileList | null>(null);
+    // NOVO: Galeria - fotos já salvas do produto
+    const [galeria, setGaleria] = useState<string[]>([]);
     const [loading, setLoading] = useState(false);
     const [catForm, setCatForm] = useState({ nome: "", slug: "", descricao: "", cor: "#7c3aed" });
     const [bannerForm, setBannerForm] = useState({ titulo: "", imagem_url: "", link_url: "", posicao: "home_topo" as BannerPos, ativo: true, data_inicio: "", data_fim: "" });
@@ -104,6 +106,7 @@ export default function AdminPage() {
         setEditingPost(null);
         setForm({ titulo: "", slug: "", tipo: "noticia", descricao: "", conteudo: "", category_id: "", status: "published", destaque: false, tags: "", media_url: "", thumbnail_url: "", link_url: "", preco: "", preco_promocional: "", estoque: "1", sku: "", unidade: "un", em_promocao: false, status_plataforma: "em_desenvolvimento", em_utilizacao: false, data_inicio: "", data_fim: "", local_evento: "", cidade: "", endereco: "", link_mapa: "", link_inscricao: "", modalidade: "presencial", capacidade: "", organizador: "", status_evento: "ativo", data_nova_inicio: "" });
         setFicha([]);
+        setGaleria([]);
         setFiles(null); setThumbFile(null); setTab('conteudo'); setShowPostModal(true);
     }
     function openEditPost(p: Post) {
@@ -118,6 +121,11 @@ export default function AdminPage() {
         });
         // Carrega a ficha que já existe neste produto
         setFicha((p.ficha_informativa || []).map((f: any) => ({ campo: f.campo, valor: f.valor })));
+        // NOVO: carrega galeria - se produto antigo sem galeria, usa thumbnail como 1ª foto
+        const g = Array.isArray(p.galeria) ? [...p.galeria] : [];
+        if (g.length === 0 && p.thumbnail_url) g.push(p.thumbnail_url);
+        else if (g.length > 0 && p.thumbnail_url && !g.includes(p.thumbnail_url)) g.unshift(p.thumbnail_url);
+        setGaleria([...new Set(g)]);
         setFiles(null); setThumbFile(null); setTab(p.tipo === 'evento' ? 'evento' : 'conteudo'); setShowPostModal(true);
     }
 
@@ -130,25 +138,51 @@ export default function AdminPage() {
             let thumbnail_url = form.thumbnail_url.trim();
             let media_files = null;
             let media_type = null;
+            let galeriaFinal = [...galeria];
+
             if (thumbFile && thumbFile.length > 0) {
                 const fd = new FormData(); fd.append("file", thumbFile[0]);
                 const up = await fetch(`${API_URL}/api/v1/upload`, { method: "POST", headers: authHeader() as any, body: fd });
                 const d = await up.json(); if (d.url) thumbnail_url = d.url;
             }
+
+            // NOVO: Galeria - sobe várias fotos de uma vez
             if (files && files.length > 0) {
-                const uploaded: any[] = [];
-                for (let i = 0; i < files.length; i++) { const fd = new FormData(); fd.append("file", files[i]); const up = await fetch(`${API_URL}/api/v1/upload`, { method: "POST", headers: authHeader() as any, body: fd }); const d = await up.json(); uploaded.push(d); }
-                media_files = uploaded;
-                const videoFile = uploaded.find((u: any) => u.url?.match(/\.(mp4|mov|webm|m4v)/i) || u.type?.includes("video"));
-                const mainFile = videoFile || uploaded[0];
-                if (mainFile?.url) media_url = mainFile.url;
-                if (mainFile?.type) media_type = mainFile.type;
-                if (!thumbnail_url) {
-                    const imgFile = uploaded.find((u: any) => u.url?.match(/\.(jpg|jpeg|png|webp)/i) || u.type?.includes("image"));
-                    if (imgFile?.url && !videoFile) thumbnail_url = imgFile.url;
-                    else if (videoFile?.url) thumbnail_url = generateCloudinaryThumb(videoFile.url);
+                if (form.tipo === 'produto') {
+                    const fd = new FormData();
+                    for (let i = 0; i < files.length; i++) fd.append("files", files[i]);
+                    const up = await fetch(`${API_URL}/api/v1/upload-multiple`, { method: "POST", headers: authHeader() as any, body: fd });
+                    const d = await up.json();
+                    const novasUrls: string[] = d.urls || (d.files || []).map((f: any) => f.url).filter(Boolean);
+                    for (const u of novasUrls) if (!galeriaFinal.includes(u)) galeriaFinal.push(u);
+                    if (galeriaFinal.length > 0) {
+                        if (!thumbnail_url) thumbnail_url = galeriaFinal[0];
+                        if (!media_url) media_url = galeriaFinal[0];
+                        media_files = galeriaFinal.map(u => ({ url: u, type: "image" }));
+                    }
+                } else {
+                    // Comportamento antigo para notícia / vídeo / etc - mantém como estava
+                    const uploaded: any[] = [];
+                    for (let i = 0; i < files.length; i++) { const fd = new FormData(); fd.append("file", files[i]); const up = await fetch(`${API_URL}/api/v1/upload`, { method: "POST", headers: authHeader() as any, body: fd }); const d = await up.json(); uploaded.push(d); }
+                    media_files = uploaded;
+                    const videoFile = uploaded.find((u: any) => u.url?.match(/\.(mp4|mov|webm|m4v)/i) || u.type?.includes("video"));
+                    const mainFile = videoFile || uploaded[0];
+                    if (mainFile?.url) media_url = mainFile.url;
+                    if (mainFile?.type) media_type = mainFile.type;
+                    if (!thumbnail_url) {
+                        const imgFile = uploaded.find((u: any) => u.url?.match(/\.(jpg|jpeg|png|webp)/i) || u.type?.includes("image"));
+                        if (imgFile?.url && !videoFile) thumbnail_url = imgFile.url;
+                        else if (videoFile?.url) thumbnail_url = generateCloudinaryThumb(videoFile.url);
+                    }
                 }
             }
+
+            // Se apagaste / reordenaste a galeria no modal, a 1ª foto passa a ser a capa
+            if (form.tipo === 'produto' && galeriaFinal.length > 0) {
+                if (!thumbFile || thumbFile.length === 0) thumbnail_url = galeriaFinal[0];
+                if (!media_url) media_url = galeriaFinal[0];
+            }
+
             if (!thumbnail_url && media_url) { const autoThumb = generateCloudinaryThumb(media_url); if (autoThumb) thumbnail_url = autoThumb; }
             if (!thumbnail_url && media_url && media_url.match(/\.(jpg|jpeg|png|webp)/i)) thumbnail_url = media_url;
 
@@ -163,6 +197,10 @@ export default function AdminPage() {
                 tags: form.tags.split(",").map(t => t.trim()).filter(Boolean),
                 media_url, thumbnail_url, link_url: form.link_url || null, media_type: media_type || form.tipo, media_files,
             };
+
+            if (form.tipo === 'produto') {
+                payload.galeria = galeriaFinal;
+            }
 
             if (isPlatTipo) {
                 payload.status_plataforma = form.status_plataforma;
@@ -327,6 +365,8 @@ export default function AdminPage() {
                 setFiles={setFiles}
                 thumbFile={thumbFile}
                 setThumbFile={setThumbFile}
+                galeria={galeria}
+                setGaleria={setGaleria}
                 loading={loading}
                 onClose={() => setShowPostModal(false)}
                 onSave={savePost}

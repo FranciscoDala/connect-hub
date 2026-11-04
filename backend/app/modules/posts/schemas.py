@@ -76,6 +76,8 @@ class PostCreate(BaseModel):
     thumbnail_url: Optional[str] = None
     link_url: Optional[str] = None
     media_files: Optional[Any] = None
+    # NOVO: Galeria - lista de urls do Cloudinary
+    galeria: Optional[List[str]] = None
     status: str = Field(default="published")
     destaque: bool = False
     tags: Optional[List[str]] = None
@@ -114,6 +116,8 @@ class PostUpdate(BaseModel):
     thumbnail_url: Optional[str] = None
     link_url: Optional[str] = None
     media_files: Optional[Any] = None
+    # NOVO: Galeria - se enviares, substitui a galeria toda
+    galeria: Optional[List[str]] = None
     status: Optional[str] = None
     destaque: Optional[bool] = None
     tags: Optional[List[str]] = None
@@ -155,6 +159,8 @@ class PostResponse(BaseModel):
     thumbnail_url: Optional[str] = None
     link_url: Optional[str] = None
     media_files: Optional[Any] = None
+    # NOVO: Galeria
+    galeria: List[str] = []
     status: str
     destaque: bool
     tags: Optional[List[str]] = None
@@ -195,6 +201,12 @@ class PostResponse(BaseModel):
 
     @classmethod
     def from_orm_with_counts(cls, post, comments_count: int = 0):
+        # Compatibilidade: produto antigo sem galeria devolve [thumbnail_url] para a galeria não ficar vazia no frontend
+        galeria_raw = getattr(post, 'galeria', None) or []
+        if not galeria_raw and getattr(post, 'thumbnail_url', None):
+            galeria_raw = [post.thumbnail_url]
+        elif not galeria_raw and getattr(post, 'media_url', None):
+            galeria_raw = [post.media_url]
         return cls(
             id=post.id,
             titulo=post.titulo,
@@ -209,6 +221,7 @@ class PostResponse(BaseModel):
             thumbnail_url=post.thumbnail_url,
             link_url=post.link_url,
             media_files=post.media_files,
+            galeria=galeria_raw,
             status=post.status,
             destaque=post.destaque,
             tags=post.tags,

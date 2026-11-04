@@ -59,6 +59,8 @@ class Post(Base):
     thumbnail_url: Mapped[str | None] = mapped_column(Text, nullable=True)
     link_url: Mapped[str | None] = mapped_column(Text, nullable=True)
     media_files: Mapped[List[dict] | None] = mapped_column(JSONB, nullable=True)
+    # NOVO: Galeria com várias imagens do produto - lista de urls do Cloudinary
+    galeria: Mapped[List[str] | None] = mapped_column(JSONB, nullable=True, default=list)
 
     status: Mapped[str] = mapped_column(String(20), default="published")
     destaque: Mapped[bool] = mapped_column(Boolean, default=False)

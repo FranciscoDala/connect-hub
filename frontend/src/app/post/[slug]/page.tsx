@@ -1,4 +1,3 @@
-// app/post/[slug]/page.tsx
 "use client";
 import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
@@ -53,6 +52,9 @@ export default function PostPage() {
     const [showHeart, setShowHeart] = useState(false);
     const [saved, setSaved] = useState(false);
     const lastTap = useRef(0);
+    // NOVO: Galeria
+    const [activeIndex, setActiveIndex] = useState(0);
+    const touchStartX = useRef<number | null>(null);
 
     useEffect(() => {
         if (!slug) return;
@@ -79,6 +81,9 @@ export default function PostPage() {
         fetch(`${API}/api/v1/banners?ativo=true`).then((r) => r.json()).then(setBanners).catch(() => { });
         if (post.category_id) { fetch(`${API}/api/v1/posts?category_id=${post.category_id}&limit=8`).then((r) => r.json()).then((d: any[]) => setRelated(d.filter((p) => p.id !== post.id).slice(0, 8))).catch(() => { }); }
     }, [post]);
+
+    // NOVO: quando muda de produto, volta para a 1ª foto
+    useEffect(() => { setActiveIndex(0); }, [post?.id]);
 
     async function react(type: "like" | "dislike") {
         const client_id = getClientId();
@@ -108,6 +113,25 @@ export default function PostPage() {
     const conteudoDuplicado = isSameText(post.descricao, post.conteudo);
     const mostrarConteudo = post.conteudo && !conteudoDuplicado;
 
+    // NOVO: Galeria - junta galeria + thumbnail, sem duplicados. Produto antigo com 1 foto continua igual
+    const galeriaRaw: string[] = Array.isArray(post.galeria) ? post.galeria : [];
+    const galeria: string[] = [...new Set([...galeriaRaw, post.thumbnail_url, post.media_url].filter(Boolean))];
+    const fotoPrincipal = galeria[activeIndex] || post.thumbnail_url || post.media_url;
+    const temGaleria = galeria.length > 1;
+
+    // NOVO: Swipe no celular - arrastar a foto principal para passar
+    function onTouchStartGaleria(e: React.TouchEvent) { touchStartX.current = e.touches[0].clientX; }
+    function onTouchEndGaleria(e: React.TouchEvent) {
+        if (touchStartX.current === null) return;
+        const dx = e.changedTouches[0].clientX - touchStartX.current;
+        if (Math.abs(dx) > 50 && temGaleria) {
+            if (dx < 0) setActiveIndex((i) => Math.min(i + 1, galeria.length - 1));
+            else setActiveIndex((i) => Math.max(i - 1, 0));
+        }
+        touchStartX.current = null;
+        handleTouchEnd();
+    }
+
     // STATUS DO EVENTO - prioriza status_evento
     const statusRaw = (post.status_evento || post.status || post.estado || post.situacao || "").toString().toLowerCase();
     const isCancelado = ["cancelado", "cancelada", "canceled", "cancelled"].includes(statusRaw);
@@ -132,9 +156,11 @@ export default function PostPage() {
                     <article className="order-1 col-span-12 lg:col-span-8">
                         <div className="overflow-hidden rounded-none border-0">
                             {(post.thumbnail_url || post.media_url) && (
-                                <div className="relative select-none cursor-pointer rounded-none overflow-hidden bg-black-0 flex items-center justify-center" onDoubleClick={handleDoubleClick} onTouchEnd={handleTouchEnd}>
+                                <>
+                                <div className="relative select-none cursor-pointer rounded-none overflow-hidden bg-black-0 flex items-center justify-center" onDoubleClick={handleDoubleClick} onTouchStart={onTouchStartGaleria} onTouchEnd={onTouchEndGaleria}>
                                     <img
-                                        src={post.thumbnail_url || post.media_url}
+                                        key={fotoPrincipal}
+                                        src={fotoPrincipal}
                                         alt={post.titulo}
                                         className={`block w-full h-auto max-h-[85vh] lg:max-h-187.5 rounded-none object-contain object-center transition-all duration-300 ${isInativo ? 'grayscale' : ''}`}
                                         draggable={false}
@@ -159,8 +185,33 @@ export default function PostPage() {
                                             <svg className="size-28 animate-[igHeart_0.9s_ease-out_forwards] fill-red-600 drop-shadow-[0_4px_20px_rgba(0,0,0,0.6)]" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
                                         </div>
                                     )}
+
+                                    {/* NOVO: Setas quando tem várias fotos - desktop */}
+                                    {temGaleria && !isInativo && (
+                                        <>
+                                            <button onClick={(e) => { e.stopPropagation(); setActiveIndex((i) => Math.max(i - 1, 0)); }} className="absolute left-2 top-1/2 -translate-y-1/2 grid size-9 place-items-center rounded-full bg-white/90 shadow hover:bg-white disabled:opacity-30" disabled={activeIndex === 0}>‹</button>
+                                            <button onClick={(e) => { e.stopPropagation(); setActiveIndex((i) => Math.min(i + 1, galeria.length - 1)); }} className="absolute right-2 top-1/2 -translate-y-1/2 grid size-9 place-items-center rounded-full bg-white/90 shadow hover:bg-white disabled:opacity-30" disabled={activeIndex === galeria.length - 1}>›</button>
+                                            <span className="absolute bottom-2 right-2 rounded-full bg-black/60 px-2.5 py-1 text-[11px] font-medium text-white">{activeIndex + 1} / {galeria.length}</span>
+                                        </>
+                                    )}
                                     <style>{`@keyframes igHeart { 0% { transform: scale(0); opacity: 0; } 15% { transform: scale(1.25); opacity: 1; } 30% { transform: scale(0.95); } 45%, 80% { transform: scale(1); opacity: 1; } 100% { transform: scale(1); opacity: 0; } } @keyframes stampIn { 0% { transform: scale(2) rotate(-15deg); opacity: 0; } 100% { transform: scale(1) rotate(-12deg); opacity: 1; } }`}</style>
                                 </div>
+
+                                {/* CORRIGIDO: Miniaturas sem vermelho / azul - borda 2px da cor do background (stone-50) só para fazer a divisão */}
+                                {temGaleria && (
+                                    <div className="flex gap-2 overflow-x-auto px-1 py-3 [&::-webkit-scrollbar]:hidden">
+                                        {galeria.map((url, idx) => (
+                                            <button
+                                                key={url + idx}
+                                                onClick={() => setActiveIndex(idx)}
+                                                className={`h-16 w-20 shrink-0 overflow-hidden rounded-lg border-2 border-stone-50 bg-white transition sm:h-20 sm:w-24 ${idx === activeIndex ? 'opacity-100' : 'opacity-60 hover:opacity-100'}`}
+                                            >
+                                                <img src={url} alt={`${post.titulo} - foto ${idx + 1}`} className="h-full w-full object-cover" draggable={false} />
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
+                                </>
                             )}
 
                             <div className="flex items-center gap-5 px-4 py-3">
