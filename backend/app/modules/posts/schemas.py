@@ -46,6 +46,24 @@ class ReactionCreate(BaseModel):
     type: str = Field(..., pattern="^(like|dislike)$")
     client_id: str = Field(..., min_length=2)
 
+# ===== FICHA INFORMATIVA - NOVO =====
+class FichaCreate(BaseModel):
+    campo: str = Field(..., max_length=100)
+    valor: str
+
+class FichaUpdate(BaseModel):
+    campo: Optional[str] = None
+    valor: Optional[str] = None
+
+class FichaResponse(BaseModel):
+    id: uuid.UUID
+    post_id: uuid.UUID
+    campo: str
+    valor: str
+    created_at: datetime
+    updated_at: datetime
+    class Config: from_attributes = True
+
 class PostCreate(BaseModel):
     titulo: str = Field(..., max_length=300)
     slug: Optional[str] = None
@@ -81,6 +99,8 @@ class PostCreate(BaseModel):
     capacidade: Optional[int] = 0
     organizador: Optional[str] = None
     status_evento: Optional[str] = Field(default="ativo")  # ativo | cancelado | adiado | esgotado
+    # ficha - tu preenches os valores ao cadastrar
+    ficha_informativa: Optional[List[FichaCreate]] = None
 
 class PostUpdate(BaseModel):
     titulo: Optional[str] = None
@@ -118,6 +138,8 @@ class PostUpdate(BaseModel):
     inscritos_count: Optional[int] = None
     organizador: Optional[str] = None
     status_evento: Optional[str] = None  # ativo | cancelado | adiado | esgotado
+    # ficha - se enviares, substitui a ficha toda
+    ficha_informativa: Optional[List[FichaCreate]] = None
 
 class PostResponse(BaseModel):
     id: uuid.UUID
@@ -165,6 +187,7 @@ class PostResponse(BaseModel):
     inscritos_count: int = 0
     organizador: Optional[str] = None
     status_evento: Optional[str] = None
+    ficha_informativa: List[FichaResponse] = []
     created_at: datetime
     updated_at: datetime
     published_at: Optional[datetime] = None
@@ -217,6 +240,7 @@ class PostResponse(BaseModel):
             inscritos_count=getattr(post, 'inscritos_count', 0) or 0,
             organizador=getattr(post, 'organizador', None),
             status_evento=getattr(post, 'status_evento', 'ativo') or 'ativo',
+            ficha_informativa=getattr(post, 'ficha_informativa', []) or [],
             created_at=post.created_at,
             updated_at=post.updated_at,
             published_at=post.published_at

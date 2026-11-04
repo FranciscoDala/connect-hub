@@ -11,6 +11,35 @@ from app.db.base import Base
 if TYPE_CHECKING:
     from app.modules.categories.models import Category
 
+# ===== LISTA UNIVERSAL DE CAMPOS DA FICHA - SÓ NOMES, SEM VALORES =====
+# Os valores és tu que vais adicionar ao cadastrar o produto.
+CAMPOS_FICHA_INFORMATIVA = [
+    "Marca",
+    "Bluetooth",
+    "Câmara frontal",
+    "Capacidade de armazenamento",
+    "Cor",
+    "Garantia",
+    "HDMI",
+    "Memória RAM",
+    "Modelo",
+    "Núcleos",
+    "Placa gráfica",
+    "Resolução",
+    "Resolução ecrã",
+    "Sistema operativo",
+    "Tipo de disco",
+    "Tipo de memória",
+    "Wi-fi",
+    "Capacidade",
+    "Tamanho",
+    "Quantidade",
+    "Dimensões",
+    "Geração do processador",
+    "USB",
+    "Velocidade",
+]
+
 class Post(Base):
     __tablename__ = "posts"
     __table_args__ = {"extend_existing": True}
@@ -73,6 +102,20 @@ class Post(Base):
 
     comments: Mapped[List["Comment"]] = relationship("Comment", back_populates="post", cascade="all, delete-orphan")
     reactions: Mapped[List["PostReaction"]] = relationship("PostReaction", back_populates="post", cascade="all, delete-orphan")
+    # NOVO: Ficha informativa universal - 1 produto pode ter N linhas de ficha
+    ficha_informativa: Mapped[List["FichaInformativa"]] = relationship("FichaInformativa", back_populates="post", cascade="all, delete-orphan")
+
+class FichaInformativa(Base):
+    __tablename__ = "ficha_informativa"
+    __table_args__ = {"extend_existing": True}
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    post_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("posts.id", ondelete="CASCADE"), nullable=False, index=True)
+    post: Mapped["Post"] = relationship("Post", back_populates="ficha_informativa")
+    campo: Mapped[str] = mapped_column(String(100), nullable=False)
+    valor: Mapped[str] = mapped_column(Text, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
 class Comment(Base):
     __tablename__ = "comments"

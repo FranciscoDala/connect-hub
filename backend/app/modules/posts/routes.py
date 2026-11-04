@@ -7,13 +7,14 @@ import uuid, re
 from app.db.session import get_db
 from app.shared.deps import get_current_admin
 from app.core.security import sanitize_html, sanitize_text, sanitize_url
-from app.modules.posts.models import Post, Comment, PostReaction
+from app.modules.posts.models import Post, Comment, PostReaction, FichaInformativa, CAMPOS_FICHA_INFORMATIVA
 from app.modules.categories.models import Category
 from app.modules.posts.schemas import (
     PostCreate, PostUpdate, PostResponse,
     CategoryCreate, CategoryUpdate, CategoryResponse,
     CommentCreate, CommentUpdate, CommentResponse,
-    ReactionCreate
+    ReactionCreate,
+    FichaCreate, FichaUpdate, FichaResponse
 )
 from app.core.upload_Imagem import upload_media
 
@@ -171,7 +172,7 @@ def create_post(data: PostCreate, admin=Depends(get_current_admin), db: Session=
     final_slug = sanitize_text(data.slug or slugify(titulo), max_length=350) or slugify(titulo)
     if db.query(Post).filter(Post.slug == final_slug).first():
         final_slug = f"{final_slug}-{uuid.uuid4().hex[:4]}"
-    payload = data.model_dump(exclude={"slug"})
+    payload = data.model_dump(exclude={"slug", "ficha_informativa"})
     payload["titulo"] = titulo
     payload["descricao"] = sanitize_text(payload.get("descricao"), max_length=2000) if payload.get("descricao") else ""
     payload["conteudo"] = sanitize_html(payload.get("conteudo")) if payload.get("conteudo") else ""
@@ -183,13 +184,18 @@ def create_post(data: PostCreate, admin=Depends(get_current_admin), db: Session=
     if payload.get("status_evento"): payload["status_evento"] = payload["status_evento"].lower()
     post = Post(**payload, slug=final_slug, author_id=admin.id)
     db.add(post); db.commit(); db.refresh(post)
+    # NOVO: grava a ficha que tu enviaste no cadastro
+    if data.ficha_informativa:
+        for item in data.ficha_informativa:
+            db.add(FichaInformativa(post_id=post.id, campo=sanitize_text(item.campo, max_length=100), valor=sanitize_text(item.valor, max_length=2000)))
+        db.commit(); db.refresh(post)
     return to_post_response(post, db)
 
 @router.put("/posts/{post_id}", response_model=PostResponse)
 def update_post(post_id: uuid.UUID, data: PostUpdate, admin=Depends(get_current_admin), db: Session=Depends(get_db)):
     post = db.query(Post).filter(Post.id == post_id).first()
     if not post: raise HTTPException(404, "Post não encontrado")
-    payload = data.model_dump(exclude_unset=True)
+    payload = data.model_dump(exclude_unset=True, exclude={"ficha_informativa"})
     if "titulo" in payload and payload["titulo"] is not None:
         payload["titulo"] = sanitize_text(payload["titulo"], max_length=300)
         if not payload.get("slug"):
@@ -211,7 +217,14 @@ def update_post(post_id: uuid.UUID, data: PostUpdate, admin=Depends(get_current_
         if v is None:
             continue
         setattr(post, k, v)
-    db.commit(); db.refresh(post)
+    db.commit()
+    # NOVO: se enviares ficha, substitui a antiga
+    if data.ficha_informativa is not None:
+        db.query(FichaInformativa).filter(FichaInformativa.post_id == post_id).delete()
+        for item in data.ficha_informativa:
+            db.add(FichaInformativa(post_id=post_id, campo=sanitize_text(item.campo, max_length=100), valor=sanitize_text(item.valor, max_length=2000)))
+        db.commit()
+    db.refresh(post)
     return to_post_response(post, db)
 
 @router.delete("/posts/{post_id}")
@@ -334,3 +347,39 @@ def update_status_evento(post_id: uuid.UUID, status_evento: str, admin=Depends(g
     post.status_evento = se
     db.commit(); db.refresh(post)
     return to_post_response(post, db)
+
+# ===== FICHA INFORMATIVA - NOVO =====
+@router.get("/ficha-campos", response_model=List[str])
+def list_campos_ficha():
+    # lista dos 24 nomes pra o frontend mostrar no select do cadastro - sem valores
+    return CAMPOS_FICHA_INFORMATIVA
+
+@router.get("/posts/{post_id}/ficha", response_model=List[FichaResponse])
+def list_ficha(post_id: uuid.UUID, db: Session=Depends(get_db)):
+    post = db.query(Post).filter(Post.id == post_id).first()
+    if not post: raise HTTPException(404, "Post não encontrado")
+    return db.query(FichaInformativa).filter(FichaInformativa.post_id == post_id).order_by(FichaInformativa.created_at.asc()).all()
+
+@router.post("/posts/{post_id}/ficha", response_model=FichaResponse)
+def add_ficha(post_id: uuid.UUID, data: FichaCreate, admin=Depends(get_current_admin), db: Session=Depends(get_db)):
+    post = db.query(Post).filter(Post.id == post_id).first()
+    if not post: raise HTTPException(404, "Post não encontrado")
+    f = FichaInformativa(post_id=post_id, campo=sanitize_text(data.campo, max_length=100), valor=sanitize_text(data.valor, max_length=2000))
+    db.add(f); db.commit(); db.refresh(f)
+    return f
+
+@router.put("/ficha/{ficha_id}", response_model=FichaResponse)
+def update_ficha(ficha_id: uuid.UUID, data: FichaUpdate, admin=Depends(get_current_admin), db: Session=Depends(get_db)):
+    f = db.query(FichaInformativa).filter(FichaInformativa.id == ficha_id).first()
+    if not f: raise HTTPException(404, "Ficha não encontrada")
+    if data.campo is not None: f.campo = sanitize_text(data.campo, max_length=100)
+    if data.valor is not None: f.valor = sanitize_text(data.valor, max_length=2000)
+    db.commit(); db.refresh(f)
+    return f
+
+@router.delete("/ficha/{ficha_id}")
+def delete_ficha(ficha_id: uuid.UUID, admin=Depends(get_current_admin), db: Session=Depends(get_db)):
+    f = db.query(FichaInformativa).filter(FichaInformativa.id == ficha_id).first()
+    if not f: raise HTTPException(404, "Ficha não encontrada")
+    db.delete(f); db.commit()
+    return {"ok": True}
