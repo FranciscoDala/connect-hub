@@ -48,7 +48,8 @@ export default function ProdutosRelated({ posts }: { posts: Post[] }) {
     }, [posts]);
 
     return (
-        <section id="produtos" className="py-2 sm:py-28">
+        // CORREÇÃO: era py-2 sm:py-28 (112px em cima no desktop = buraco gigante). Agora é só pt-6 pb-2
+        <section id="produtos" className="pt-6 pb-2">
             <div className="mx-auto max-w-7xl">
                 <div className="flex items-center gap-3">
                     <span className="h-px w-8 bg-sky-600" />
