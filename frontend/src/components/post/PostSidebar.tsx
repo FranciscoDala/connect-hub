@@ -31,7 +31,7 @@ type Props = {
     post?: any;
 };
 
-// ===== FICHA INFORMATIVA - IGUAL AO PRINT =====
+// ===== FICHA INFORMATIVA - HEADER IGUAL AO NOTÍCIAS E MÍDIA =====
 function FichaInformativa({ ficha }: { ficha: FichaItem[] }) {
     const [expandido, setExpandido] = useState(false);
 
@@ -42,10 +42,12 @@ function FichaInformativa({ ficha }: { ficha: FichaItem[] }) {
 
     return (
         <div className="overflow-hidden rounded-none bg-white">
-            {/* Título igual ao print */}
-            <div className="flex items-center justify-between px-1 py-2">
-                <h3 className="text-[15px] font-bold text-black">Ficha informativa:</h3>
-                <span className="h-[2px] w-4 bg-black" />
+            {/* HEADER NOVO - igual ao NOTÍCIAS E MÍDIA */}
+            <div className="mb-3">
+                <div className="flex items-center gap-3">
+                    <span className="h-px w-8 bg-blue-500" />
+                    <p className="text-xs font-bold uppercase tracking-widest text-sky-600">Ficha Informativa</p>
+                </div>
             </div>
 
             {/* Tabela */}
@@ -53,7 +55,7 @@ function FichaInformativa({ ficha }: { ficha: FichaItem[] }) {
                 {visiveis.map((item, i) => (
                     <div
                         key={item.id || `${item.campo}-${i}`}
-                        className={`grid grid-cols-2 gap-2 px-3 py-2.5 text-[14px] ${i % 2 === 0 ? "bg-[#f1f1f1]" : "bg-white"}`}
+                        className={`grid grid-cols-2 gap-2 px-3 py-2.5 text-[14px] ${i % 2 === 0 ? "bg-[#f1f1f1]" : "bg-white-0"}`}
                     >
                         <span className="text-slate-600">{item.campo}</span>
                         <span className="text-right font-medium text-[#0e5a8a] break-words">{item.valor}</span>
