@@ -50,7 +50,6 @@ function FichaInformativa({ ficha }: { ficha: FichaItem[] }) {
 
     return (
         <div className="overflow-hidden rounded-none bg-transparent">
-            {/* HEADER - igual ao NOTÍCIAS E MÍDIA */}
             <div className="mb-3">
                 <div className="flex items-center gap-3">
                     <span className="h-px w-8 bg-blue-500" />
@@ -58,7 +57,6 @@ function FichaInformativa({ ficha }: { ficha: FichaItem[] }) {
                 </div>
             </div>
 
-            {/* Tabela - SEM padding-x */}
             <div>
                 {visiveis.map((item, i) => {
                     const isRef = item.campo.toLowerCase() === "referência" || item.campo.toLowerCase() === "referencia";
@@ -85,7 +83,6 @@ function FichaInformativa({ ficha }: { ficha: FichaItem[] }) {
                 })}
             </div>
 
-            {/* Mostrar mais / menos */}
             {temMais && (
                 <button
                     onClick={() => setExpandido(!expandido)}
@@ -99,12 +96,22 @@ function FichaInformativa({ ficha }: { ficha: FichaItem[] }) {
     );
 }
 
+// ===== SPINNER IGUAL AO DA PAGE DO POST =====
+function SidebarSpinner() {
+    return (
+        <div className="flex flex-col items-center justify-center gap-3 py-10">
+            <div className="size-8 animate-spin rounded-full border-2 border-slate-200 border-t-black"></div>
+        </div>
+    );
+}
+
 export default function PostSidebar({ postId, categoryId, post }: Props) {
     const [tab, setTab] = useState<"recentes" | "lidas">("recentes");
     const [recentes, setRecentes] = useState<PostMini[]>([]);
     const [lidas, setLidas] = useState<PostMini[]>([]);
     const [categories, setCategories] = useState<Category[]>([]);
     const [banner, setBanner] = useState<Banner | null>(null);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         let isMounted = true;
@@ -135,6 +142,8 @@ export default function PostSidebar({ postId, categoryId, post }: Props) {
                 setLidas([]);
                 setCategories([]);
                 setBanner(null);
+            } finally {
+                if (isMounted) setLoading(false);
             }
         };
 
@@ -159,15 +168,11 @@ export default function PostSidebar({ postId, categoryId, post }: Props) {
 
     const list = tab === "recentes" ? recentes : lidas;
 
-    // Só mostra ficha se for produto e tiver ficha
     const tipo = (post?.tipo || "").toLowerCase();
     const isProduto = ["produto", "product"].includes(tipo);
     const fichaOriginal: FichaItem[] = post?.ficha_informativa || [];
     const sku = (post?.sku || "").toString().trim();
 
-    // REFERÊNCIA NA FICHA: 1ª linha da Ficha Informativa, sempre visível.
-    // Se já existir uma linha "Referência" na ficha, não duplica. Se não existir e tiver SKU, adiciona no topo.
-    // Se o produto não tiver SKU, não mostra linha vazia.
     const jaTemRef = fichaOriginal.some((f) => f.campo.toLowerCase() === "referência" || f.campo.toLowerCase() === "referencia");
     const ficha: FichaItem[] = isProduto && sku && !jaTemRef
         ? [{ campo: "Referência", valor: sku }, ...fichaOriginal]
@@ -176,10 +181,8 @@ export default function PostSidebar({ postId, categoryId, post }: Props) {
     return (
         <aside className="order-2 col-span-12 space-y-4 lg:col-span-4 lg:sticky lg:top-24 lg:self-start">
 
-            {/* 0. INFO EVENTO - SÓ APARECE SE FOR EVENTO */}
             {post && <EventoSidebar post={post} />}
 
-            {/* 0.1 FICHA INFORMATIVA - SÓ APARECE SE FOR PRODUTO COM FICHA OU COM REFERÊNCIA */}
             {isProduto && ficha.length > 0 && <FichaInformativa ficha={ficha} />}
 
             {/* 1. MAIS RECENTES / LIDAS */}
@@ -204,8 +207,10 @@ export default function PostSidebar({ postId, categoryId, post }: Props) {
                 </div>
 
                 <div>
-                    {list.length === 0 ? (
-                        <div className="py-10 text-center text-xs text-slate-400">Carregando...</div>
+                    {loading ? (
+                        <SidebarSpinner />
+                    ) : list.length === 0 ? (
+                        <div className="py-10 text-center text-xs text-slate-400">Ainda não há posts aqui.</div>
                     ) : (
                         list.map((p) => (
                             <Link
