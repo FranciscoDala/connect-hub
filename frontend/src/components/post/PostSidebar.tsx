@@ -31,7 +31,7 @@ type Props = {
     post?: any;
 };
 
-// ===== FICHA INFORMATIVA - HEADER IGUAL AO NOTÍCIAS E MÍDIA =====
+// ===== FICHA INFORMATIVA =====
 function FichaInformativa({ ficha }: { ficha: FichaItem[] }) {
     const [expandido, setExpandido] = useState(false);
 
@@ -41,8 +41,8 @@ function FichaInformativa({ ficha }: { ficha: FichaItem[] }) {
     const temMais = ficha.length > 3;
 
     return (
-        <div className="overflow-hidden rounded-none bg-white">
-            {/* HEADER NOVO - igual ao NOTÍCIAS E MÍDIA */}
+        <div className="overflow-hidden rounded-none bg-transparent">
+            {/* HEADER - igual ao NOTÍCIAS E MÍDIA */}
             <div className="mb-3">
                 <div className="flex items-center gap-3">
                     <span className="h-px w-8 bg-blue-500" />
@@ -55,7 +55,7 @@ function FichaInformativa({ ficha }: { ficha: FichaItem[] }) {
                 {visiveis.map((item, i) => (
                     <div
                         key={item.id || `${item.campo}-${i}`}
-                        className={`grid grid-cols-2 gap-2 px-3 py-2.5 text-[14px] ${i % 2 === 0 ? "bg-[#f1f1f1]" : "bg-white-0"}`}
+                        className={`grid grid-cols-2 gap-2 px-3 py-2.5 text-[14px] ${i % 2 === 0 ? "bg-[#f8f8f8]" : "bg-transparent"}`}
                     >
                         <span className="text-slate-600">{item.campo}</span>
                         <span className="text-right font-medium text-[#0e5a8a] break-words">{item.valor}</span>
@@ -67,7 +67,7 @@ function FichaInformativa({ ficha }: { ficha: FichaItem[] }) {
             {temMais && (
                 <button
                     onClick={() => setExpandido(!expandido)}
-                    className="flex w-full items-center justify-center gap-2 bg-white py-3 text-[14px] font-medium text-black hover:bg-slate-50"
+                    className="flex w-full items-center justify-center gap-2 bg-transparent py-3 text-[14px] font-medium text-black hover:bg-black/[0.02]"
                 >
                     {expandido ? "Mostrar menos" : "Mostrar mais"}
                     <span className="text-[18px] leading-none">{expandido ? "−" : "+"}</span>
