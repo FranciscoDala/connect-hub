@@ -62,10 +62,10 @@ export default function TecnologiaPage() {
                 </div>
             ) : (
                 <>
-                    {/* PRODUTOS SEM HEADER E COM FUNDO TRANSPARENTE E COLADO */}
+                    {/* PRODUTOS SEM HEADER E COM FUNDO TRANSPARENTE E COLADO - página cheia, sem Ver mais */}
                     <ProdutosSection posts={posts} hideHeader />
-                    {/* NOTICIAS COM HEADER VISÍVEL */}
-                    <NoticiasSection posts={posts} />
+                    {/* NOTICIAS COM HEADER VISÍVEL - página cheia, sem Ver mais */}
+                    <NoticiasSection posts={posts} showVerMais={false} />
                 </>
             )}
             <Footer />

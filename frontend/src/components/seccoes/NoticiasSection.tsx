@@ -43,7 +43,7 @@ function formatDate(dateStr: string) {
     }
 }
 
-export default function NoticiasSection({ posts, hideHeader = false }: { posts: Post[]; hideHeader?: boolean }) {
+export default function NoticiasSection({ posts, hideHeader = false, showVerMais = true }: { posts: Post[]; hideHeader?: boolean; showVerMais?: boolean }) {
     const noticias = posts
         .filter(p => {
             const status = (p.status || '').toLowerCase()
@@ -77,8 +77,8 @@ export default function NoticiasSection({ posts, hideHeader = false }: { posts: 
                         const tipoStyle = getTipoStyle(post.tipo)
 
                         return (
-                            // DESKTOP: só mostra os 4 primeiros, do 5º em diante fica escondido. CELULAR: mostra todos para arrastar, não mexi.
-                            <Link key={post.id} href={href} className={`group relative flex w-full min-w-full snap-center shrink-0 flex-col overflow-hidden rounded-[20px] border border-zinc-200 bg-white transition hover:shadow-lg lg:min-w-0 ${idx >= 4 ? 'lg:hidden' : ''}`}>
+                            // CORRIGIDO: só limita para 4 se showVerMais=true. Se for página cheia, mostra todos.
+                            <Link key={post.id} href={href} className={`group relative flex w-full min-w-full snap-center shrink-0 flex-col overflow-hidden rounded-[20px] border border-zinc-200 bg-white transition hover:shadow-lg lg:min-w-0 ${idx >= 4 && showVerMais ? 'lg:hidden' : ''}`}>
                                 {/* IMAGEM + BADGES */}
                                 <div className="relative w-full overflow-hidden bg-zinc-100" style={{ aspectRatio: '16 / 10' }}>
                                     <img src={img} alt={post.titulo} className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]" />
@@ -123,10 +123,10 @@ export default function NoticiasSection({ posts, hideHeader = false }: { posts: 
                     })}
                 </div>
 
-                {/* VER MAIS - só no desktop, em baixo no lado direito */}
-                {noticias.length > 4 && (
+                {/* VER MAIS - só se showVerMais=true. Padding-y diminuído: py-2.5 -> py-2 */}
+                {noticias.length > 4 && showVerMais && (
                     <div className="mt-6 hidden justify-end lg:flex">
-                        <Link href="/tecnologia" className="inline-flex items-center gap-2 rounded-full border border-zinc-900 px-5 py-2.5 text-xs font-semibold text-zinc-900 transition hover:bg-zinc-900 hover:text-white">
+                        <Link href="/noticias" className="inline-flex items-center gap-2 rounded-full border border-zinc-900 px-5 py-2 text-xs font-semibold text-zinc-900 transition hover:bg-zinc-900 hover:text-white">
                             Ver mais
                             <span aria-hidden>→</span>
                         </Link>
