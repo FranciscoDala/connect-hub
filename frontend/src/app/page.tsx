@@ -48,6 +48,22 @@ type Post = {
     tags?: string[];
 }
 
+// AJUSTE: normaliza o tipo para não falhar se vier "Produto", "produtos", "product", etc.
+function normalizarTexto(v?: string) {
+    return (v || '').toLowerCase().trim()
+}
+
+function temPostDoTipo(posts: Post[], palavras: string[]) {
+    return posts.some((p) => {
+        const status = normalizarTexto(p.status)
+        // Não conta rascunho / inativo como post válido para mostrar a secção
+        if (['rascunho', 'draft', 'inativo', 'inactive', 'arquivado'].includes(status)) return false
+        const tipo = normalizarTexto(p.tipo)
+        const categoria = normalizarTexto(p.category?.nome)
+        return palavras.some((palavra) => tipo.includes(palavra) || categoria.includes(palavra))
+    })
+}
+
 function SkeletonCard({ className = '' }: { className?: string }) {
     return <div className={`animate-pulse rounded-[20px] border border-slate-200 bg-slate-200/80 ${className}`} />
 }
@@ -179,6 +195,12 @@ export default function Home() {
     const heroDesc = bannerTopo ? (bannerTopo.descricao || bannerTopo.conteudo || bannerTopo.subtitulo || '') : 'Agência digital focada em desenvolvimento de software, sites e aplicativos que geram resultados reais para empresas em Angola.'
     const heroKicker = bannerTopo?.subtitulo || 'INOVAMOS PARA LIDERAR'
 
+    // AJUSTE PRINCIPAL: cada secção só aparece se tiver pelo menos 1 post válido daquele tipo
+    const temEventos = temPostDoTipo(posts, ['evento', 'event', 'festa'])
+    const temProdutos = temPostDoTipo(posts, ['produto', 'product'])
+    const temPlataformas = temPostDoTipo(posts, ['plataforma', 'platform', 'app', 'aplicativo'])
+    const temNoticias = temPostDoTipo(posts, ['noticia', 'news', 'blog', 'artigo'])
+
     return (
         <main className="min-h-screen bg-slate-50 text-slate-800">
             <Header />
@@ -204,11 +226,14 @@ export default function Home() {
                 </div>
             </section>
 
-            <EventosSection posts={posts} />
-            <ProdutosSection posts={posts} />
-            <PlataformasSection posts={posts} />
+            {/* Secções dependentes de posts: só aparecem se tiver post */}
+            {temEventos && <EventosSection posts={posts} />}
+            {temProdutos && <ProdutosSection posts={posts} />}
+            {temPlataformas && <PlataformasSection posts={posts} />}
+
+            {/* Estas ficam sempre, não dependem de post */}
             <div id="parcerias"><ParceriasSection /></div>
-            <NoticiasSection posts={posts} />
+            {temNoticias && <NoticiasSection posts={posts} />}
             <EquipeSection />
             <CeoSection />
             <Footer />
